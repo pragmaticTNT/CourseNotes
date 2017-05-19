@@ -1,0 +1,446 @@
+%
+% This is a borrowed LaTeX template file for lecture notes for CS267,
+% Applications of Parallel Computing, UCBerkeley EECS Department.
+% Now being used for CMU's 10725 Fall 2012 Optimization course
+% taught by Geoff Gordon and Ryan Tibshirani.  When preparing 
+% LaTeX notes for this class, please use this template.
+%
+% To familiarize yourself with this template, the body contains
+% some examples of its use.  Look them over.  Then you can
+% run LaTeX on this file.  After you have LaTeXed this file then
+% you can look over the result either by printing it out with
+% dvips or using xdvi. "pdflatex template.tex" should also work.
+%
+
+\documentclass[twoside]{article}
+\setlength{\oddsidemargin}{0.25 in}
+\setlength{\evensidemargin}{-0.25 in}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textwidth}{6.5 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+
+%
+% ADD PACKAGES here:
+%
+
+\usepackage{amsmath,amsfonts,amssymb, graphicx}
+\usepackage{color}
+\usepackage{comment}
+\usepackage{mathtools}
+
+%
+% The following commands set up the lecnum (lecture number)
+% counter and make various numbering schemes work relative
+% to the lecture number.
+%
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf CMPT 407: Computational Complexity
+	\hfill Summer 2017} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill Lecture #1: #2  \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { {\it Lecturer: #3 \hfill Scribe: #4} }
+      \vspace{2mm}}
+   }
+   \end{center}
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+
+   %{\bf Note}: {\it LaTeX template courtesy of UC Berkeley EECS dept.}
+
+   %{\bf Disclaimer}: {\it These notes have not been subjected to the
+   %usual scrutiny reserved for formal publications.  They may be distributed
+   %outside this class only with the permission of the Instructor.}
+   \vspace*{4mm}
+}
+%
+% Convention for citations is authors' initials followed by the year.
+% For example, to cite a paper by Leighton and Maggs you would type
+% \cite{LM89}, and to cite a paper by Strassen you would type \cite{S69}.
+% (To avoid bibliography problems, for now we redefine the \cite command.)
+% Also commands that create a suitable format for the reference list.
+%\renewcommand{\citep{•}ite}[1]{[#1]}
+\def\beginrefs{\begin{list}%
+        {[\arabic{equation}]}{\usecounter{equation}
+         \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+         \setlength{\labelwidth}{1.6truecm}}}
+\def\endrefs{\end{list}}
+\def\bibentry#1{\item[\hbox{[#1]}]}
+
+%Use this command for a figure; it puts a figure in wherever you want it.
+%usage: \fig{NUMBER}{SPACE-IN-INCHES}{CAPTION}
+\newcommand{\fig}[3]{
+			\vspace{#2}
+			\begin{center}
+			Figure \thelecnum.#1:~#3
+			\end{center}
+	}
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+% **** IF YOU WANT TO DEFINE ADDITIONAL MACROS FOR YOURSELF, PUT THEM HERE:
+
+\newcommand\E{\mathbb{E}}
+\def\N{\mathbb{N}}
+\def\Z{\mathbb{Z}}
+\def\Q{\mathbb{Q}}
+\def\R{\mathbb{R}}
+\def\C{\mathbb{C}}
+\def\F{\mathbb{F}}
+\def\P{\mathsf{P}}
+\def\NP{\mathsf{NP}}
+\def\coNP{\mathsf{coNP}}
+\def\EXP{\mathsf{EXP}}
+\def\NEXP{\mathsf{NEXP}}
+
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+\DeclarePairedDelimiter\anglebrac{\langle}{\rangle}
+
+\begin{document}
+%\lecture{**LECTURE-NUMBER**}{**DATE**}{**LECTURER**}{**SCRIBE**}
+\lecture{1}{Introduction - W2: 8~19 May}{Valentine Kabanets}{Lily Li}
+%\footnotetext{These notes are partially based on those of Nigel Mansell.}
+
+\section{General Review}
+A \textbf{function problem} is a map $f: \Sigma^* \rightarrow \Sigma^*$ where $\Sigma^*$ is a string. These could be rather complicated, such as taking as input a start and end vertex and outputting a shortest path (these are strings under the appropriate encoding). 
+
+A \textbf{decision problem} is a function problem where the range is the boolean values $\{yes, no\}$. And \textbf{language} associated with a decision problem is the set of all strings that map to $yes$ under $f$ i.e $\{x \in \Sigma^*: f(x) = yes\}$.
+
+
+\section{Turing Machine}
+You know what these are. They are Turing's attempt to simulate human computers. Formally a Turing Machine (TM) $M$ is a tuple
+\[M = (Q, \Sigma, \Gamma, \delta, q_0, q_{acc}, q_{reg})\]
+where $Q$ is the set of states, $\Sigma$ are the alphabet, $\Gamma$ is the tape symbols (these are a superset of $\Sigma$), $q_0$ is the set of start states, $q_{acc}$ is the set of accepting states, and $q_{reg}$ is the set of rejecting states.  
+
+$t_M(x)$ is the \textbf{running time} of a TM $M$ on input $x \in \Sigma^*$. It represents the number of steps $M$ takes on $x$ before halting $t_M(x) = \infty$ if $M$ does not halt on $x$. If there exists a function $t: \N \rightarrow \N$ such that $t_M(x) \leq t(|x|)$ then $M$ is $t$-bounded. \emph{This TM only needs to be "good" asymptotically, finitely many issues can be put in a look up table and fixed in constant time.}
+
+The \textbf{space} of a TM $M$ is the total number of work tape cells touched by $M$ during the computation of $x$. Again, if there exists a function $s: \N \rightarrow \N$ with the necessary properties, then $M$ is $s$-bounded. 
+
+$k$-tape TM consists of $k$ infinite tapes. Of these, one is the input and one is the output leaving $k-2$ work tapes. 
+
+\begin{theorem}
+A $k$-tape TM can be \emph{efficiently} simulated by a one-tape TM with only a quadratic time slowdown. 
+\end{theorem}
+\begin{proof}
+Allocate $k$ parallel track on the one-tape TM. Delineate each track with the special tape symbol $*$. For each step of the $k$-tape TM first sweep the tape on the one-tape TM to find the track to read.  
+\end{proof}
+
+\emph{Remark:} this quadratic time slowdown for a one-tape TM simulation is unavoidable! Surprisingly there is only a log linear slow if we were to use a two-tape TM simulation i.e. if the $k$-tape TM $M$ is $t$-bounded then simulating $M$ using a 2-tape $TM$ takes $O(t\log t)$ time. 
+
+\begin{theorem}
+A $k$-tape TM $M$ over tape alphabet $\Gamma = \{0,1\}$ can be simulated by a $k$-tape TM $M'$ over tape alphabet $\Gamma' = \{0, 1, \#, -\}$ with at most $O(\log|\Gamma|)$ factor slowdown (both use input alphabet $\Sigma = \{0,1\}$) i.e. if $M$ is $t$-bounded then $M'$ is $t\log|\Gamma|$ bounded.  
+\end{theorem}  
+The key to proving this theorem is to note that it is possible to encode each symbol in $\Gamma$ by a number. There are $\ceil{\log |\Gamma |}$ numbers needed which results in the $\log |\Gamma |$ factor slowdown. 
+
+\subsection{Universal Turing Machines}
+A \textbf{Universal TM} (UTM) is a TM $U$ which takes as input a description of a TM $M$ as a string and another string $w \in \Sigma^*$ and simulates $M$ on $w$. The exists of UTM foretold the creation of the general purpose computer and hints at their limitations (e.g. cannot detect self replicating programs). We try to simulated a $t$-bounded TM $M$ using $U$ in $O(t\log t)$ time as follows:
+
+\begin{theorem}
+There is a 2-tape $UTM$ $U$ that given $\anglebrac{M, w}$, where $M$ is a $k$-tape TM and $w$ is an input to $M$, will simulated $M$ on $w$ with at most a log linear slowdown. 
+\end{theorem}    
+\begin{proof}
+We will mainly focus on the difficult of simulating a $k$-tape TM using a 2-tape TM (other issues involving the number of tape symbols and states of the $k$-tape TM can be solved by adding a constant factor). 
+
+The gist of the proof is to use one tape to hold the $k$ tapes as $k$ tracks. Then at some special position $0$, we will keep all $k$ symbols currently being scanned for $M$. For each transition step we will move each track so that the new tape cell to be scanned is placed at position $0$. We can't move the whole track since that would be too expensive so we will only move a portion of the tape using the second tape to help. 
+
+Partitioning the first tape proceeds as follows: divide the chunks to the right of the $0$ position into zones $R_0, R_1, ...$ (read left to right) where zone $R_i$ has $2^{i+1}$ cells. Similarly, divide the space to the left of $0$ into zones $L_0, L_1, ...$ (read right to left) where zone $L_i$ has size $2^{i+1}$. As follows, where $P_0$ is position $0$, $L_{i,j}$ is the $j$-th cell of $L_i$, similarly for $R_{i,j}$:
+\[\cdots, L_{1,3}, L_{1,2}, L_{1,1}, L_{1,0}, L_{0,1}, L_{0,0}, P_0, R_{0,0}, R_{0,1}, R_{1,0}, R_{1,1}, R_{1,2}, R_{1,3}, \cdots\]
+Next, introduce a new \emph{special blank} symbol different from the tape symbols of $M$. For zone $Z_i$, if $Z_i$ has all special blank cells then it is empty, if $Z_i$ has $2^i$ special blank symbols then it is half full, and if $Z_i$ has no special blank symbols then it is full. 
+
+In a preprocessing step for $U$, initialize each zone $i$, for $i = 0, ..., \log t$ to be half full. Through out the simulation we maintain the following invariant:
+\begin{enumerate}
+\item Position $0$ of $U$'s tape contains non-"special blank" in each track (this is the $k$-tuple of symbols currently scanned by $M$. 
+\item For each $i$, $0 \leq i \leq \log t$, either both $L_i$ and $R_i$ are half-full, or exactly one of them is full while the other one is empty.
+\end{enumerate}  
+Next we demonstrate the procedure for moving a track of the tape to the left (this is equivalent to moving one of the heads of $M$ to the right)
+\begin{enumerate}
+\item Scan the zones $R_0, R_1, ...$ until you find one which is non-empty. Suppose this zone is $R_{i_0}$. 
+\item Shift the contents of position $0$ to $L_0$, $L_0$ to $L_1$, and so on until $L_{i_0 - 1}$ to $L_{i_0}$. Since $R_0, ..., R_{i_0 - 1}$ are all empty, $L_0,..., L_{i_0 - 1}$ are all full so will now half fill $L_1, ..., L_{i_0}$. 
+\item Take the first (left-most) non-special-blank cell in $R_{i_0}$ and put it in position $0$. Move the remaining non-special-blank cell of $R_{i_0}$ down to have fill the zones $R_0, R_1, ...$.
+\item Observe that $R_0, ..., R_{i_0-1}$ and $L_0, ..., L_{i_0-1}$ are all half-full and $L_{i_0}$ is full or half full depending on if $R_{i_0}$ is empty or half full. 
+\end{enumerate}
+
+Finally we perform amortized analysis of the running time. The key observation from the above example is that after finding and shifting $R_{i_0}$, the next at least $2^{i_0} - 1$ will have to look no farther than $R_{i_0-1}$ (all $R_0, ..., R_{i_0-1}$ are half full). Thus the total amount of shifting we need to do is:
+\[\sum_{i=0}^{\log t} \frac{t}{2^i}\cdot O(2^i) \leq O(t\log t)\]
+This is only the time needed for one track, but we said that all the extra time for the tracks and the symbols can be hidden behind a constant.   
+\end{proof}
+
+
+\section{Complexity Classes}
+If $n$ is the input size with function $f: \N \rightarrow \N$
+\begin{itemize}
+\item $\mathsf{Time}(f(n)) = \{L: L \mbox{ is decided by a TM in at most } f(n) \mbox{ steps}\}$
+\item $\mathsf{Space}(f(n)) = \{L: L \mbox{ is decided by a TM by tounching at most } f(n) \mbox{ worktape cells}\}$
+\end{itemize}
+Complexity classes are typically defined as collections of languages over the binary alphabet with the tape symbols made arbitrary. Also any arbitrary (fixed) number of tapes are allowed. Examples include:
+\begin{itemize}
+\item $\mathsf{EXP} = \bigcup_{k \geq 1} \mathsf{Time}(2^{n^k})$
+\item $\mathsf{L} = \mathsf{Space}(\log n)$
+\end{itemize}
+\emph{In general, a complexity class is a collection of languages decidable within  a given amount of computational resources.}
+
+
+\section{Linear Speedup Theorem}
+\begin{theorem}
+(Linear Time Speedup) If a Language $L$ is decided by some TM $M$ in time $t(n)$, then for any $\epsilon > 0$, there is a TM $M'$ that decides $L$ in time at most $n + \epsilon n +  \epsilon t(n) + 2$.
+\end{theorem}
+\begin{proof}
+The idea is to encode $k$-tuples of symbols of the tape alphabet of $M$ as one tape symbol of $M'$. The original input of size $n$ compresses to an input to $M'$ of size $n/k$. When we simulate $M$ on $M'$, every $k$ steps of $M$ will translate to a constant number (inparticular six) of steps in $M'$. The gist of the move procedure is to move the head in $M'$: $L, R, R, L$ to read $3k$ symbols altogether. 
+\end{proof}
+
+\begin{theorem}
+(Linear Space Speedup) If a language $L$ is decided by some TM $M$ in space $s(n)$, then for any $\epsilon > 0$ there is an TM $M'$ that decides $L$ in space at most $\epsilon n + \epsilon s(n) + 2$. 
+\end{theorem}
+
+As a result all constant factors can be ignored in the discussion of space and time complexity when the the bound is greater than $n$.
+
+\section{Reduction}
+A language $L_1$ is reducible to $L_2$, denoted $L_1 \leq L_2$ if there is an \emph{efficiently} computable function $f: \Sigma^* \rightarrow \Sigma^*$ such that 
+\begin{align*}
+x \in L_1 &\implies f(x) \in L_2 \\
+x \notin L_1 &\implies f(x) \notin L_2
+\end{align*}
+You should think of $L_2$ has the harder problem. Pay close attention to the word \emph{efficiently}. For not it means polynomial time.
+
+\section{Completeness}
+In complexity class $C$, language $L$ is \emph{$C$-complete} if
+\begin{enumerate}
+\item $L \in C$
+\item Every language in $L$ is reducible to $L$. \emph{Note that reducibility is with respect to the complexity class. There is no sense in doing poly-time reductions if we are in the class $\mathsf{L}$ for example.} 
+\end{enumerate}
+A language $L$ is \emph{$C$-hard} if every language in $C$ is reducible to $L$ (though $L$ might not be in $C$). 
+
+\textbf{Extended Church-Turing Thesis:} Everything \emph{efficiently} computable on a physical computer is \emph{efficiently} computable on a Turing Machine.
+
+\begin{comment}
+\section{Diagonalization}
+Yeah, it is kind of weird to have a full chapter devoted to this, but it is an important tool for separating complexity classes. In essence one needs to exhibit a machine in one class that gives a different answer on some input from \emph{every} machine in another class. Use this tool to prove \emph{hierarchy theorems}.
+\end{comment}
+
+\section{Time Hierarchy Theorem}
+The following shows that giving a TM more time strictly increases the class of languages that it can decide. First a \textbf{time-constructible} function $f: \N \rightarrow \N$ is one where there exists a TM such that given the input $1^n$, writes down $1^{f(n)}$ in $O(f(n))$ time. Can you think of functions which satisfies this property? In the following only consider time-constructible running times. \textbf{Proper} complexity functions is a similar notion but is a bit nicer since on input of size $n$ we are allowed time $O(n + f(n))$ and $O(f(n))$ space. Thus $\log n$ is proper but not time-constructible. 
+
+\begin{theorem}
+If $f, g$ are time-constructible functions satisfying $f(n)\log f(n) = o(g(n))$, then 
+\begin{align}
+\mathbf{DTIME}(f(n)) \subsetneq \mathbf{DTIME}(g(n)) \label{DistinguishDTime}
+\end{align}
+a.k. for any proper $t(n), T(n) \geq n$ s.t. 
+\[T(n) \geq \omega(t(n) \log t(n))\]
+we have 
+\[\mathsf{Time}(t) \subsetneq \mathsf{Time}(T)\]
+\end{theorem}
+\begin{proof}
+Use a diagonalization technique. We consider the encoding $\anglebrac{M}$ of TM $M$. We also allow "padded encodings $\anglebrac{M}01^m$ for all $m \geq 0$ so that $M$ has encodings of arbitrarily large size. Put TMS $M_1, M_2, ..., M_i, ...$ that run in time at most $t(n)$ down rows of the table (consided clocked TM here only since we don't know how to tell when a TM stops on a certain input) and encodings $\anglebrac{M_1}, ..., \anglebrac{M_j}, ...$ across the columns. For cell $i, j$ run $M_i$ on input $\anglebrac{M_j}$. Add necessary timeout $t(n)$ so that $M_i$ stops on all inputs. Define diagonal language $D$ as follows: 
+\[D = \{\anglebrac{M_i}: M_i \mbox{ does not accept } \anglebrac{M_i} \mbox{ in } \leq t(n) \mbox{ steps}\}\]
+thus $D$ is not any of TM in our table. Observe that $D \notin \mathsf{Time}(t)$ by contradiction. Suppose that $D \in \mathsf{Time}(t)$ then there exists a TM $M$ which decides $D$. Since we have enumerated all TM in time $t(n)$, $M = M_j$ for some $j \geq 1$. By running $M_j$ on $\anglebrac{M_j}$ we reach a contradiction.  Next note that $D \in \mathsf{Time}(T)$ by the UTM theorem since we can simulate $D \in \mathsf{Time} O(t\log t)$ (including some constant factor lost due to the structure of the input machine). Since $T \gg \omega(t \log t)$, $D \in \mathsf{Time}(T)$.   
+\end{proof}
+
+\section{Space Hierarchy Theorem}
+Similar idea as the above. First $f: \N \rightarrow \N$ is a \textbf{space-constructible} function if there is a TM $M$ that, given any $n$-bit input, constructs $f(n)$ in space $O(f(n))$. The proof is essentially the same as the above except that we do not have a factor of $\log f(n)$ since the UTM for space-bounded computations has only a constant time overhead. 
+\begin{theorem}
+If $f, g$ are space-constructible functions satisfying $f(n) = o(g(n))$, then 
+\begin{align}
+\mathbf{SPACE}(f(n)) \subsetneq \mathbf{SPACE}(g(n)) \label{DistinguishSpace}
+\end{align}
+For any proper $s(n), S(n) \geq \log n$ s.t. $S(n) \geq \omega(s(n))$ then 
+\[\mathsf{Space}(s) \subsetneq \mathsf{Space}(S)\]
+\end{theorem}
+
+\begin{theorem}
+(Gap Theorem) There exist non-proper $t(n)$ such that 
+\[\mathsf{Time}(t) = \mathsf{Time}(2^t)\]
+(there is a special definition for this function). 
+\end{theorem}
+\emph{Remark:} if your function is weird, expect that something weird will happen. 
+
+\section{Nondeterministic Time Hierarchy Theorem}
+
+\subsection{Class $\mathsf{NP}$}
+You know this, special since they are poly-time verifiable. 
+\[\mathsf{NP} = \{L: \exists V \mbox{ verifier s.t. } \forall x, x \in L \iff \exists y, |y| \leq poly(|x|), V(x,y) \mbox{ accepts}\}\]
+
+\begin{theorem}
+If $f, g$ are time-constructible functions satisfying $f(n+1) = o(g(n))$, then 
+\begin{align}
+\mathbf{NTIME}(f(n)) \subsetneq \mathbf{NTIME}(g(n)) \label{DistinguishNTime}
+\end{align}
+\end{theorem}
+\begin{proof}
+
+\end{proof}
+
+\section{Ladner's Theorem: Existence of $\mathsf{NP}$-intermediate problems}
+
+\begin{theorem}
+Suppose $\mathsf{P} \neq \mathsf{NP}$. Then $\exists L \in \mathsf{NP}$ such that $L \notin \mathsf{P}$ and $L$ is not $\mathsf{NP}$-complete. 
+\end{theorem}
+\begin{proof}
+More diagonalization, but more special this time! Consider 
+\[\mathsf{SAT_H} = \{\phi 0 1^{n^{H(n)}}\}: \phi \in \mathsf{SAT}, |\phi| = n\]
+(read through this definition carefully each element of $\mathsf{SAT_H}$ is specifically defined by $H(n)$).
+
+First note that $\exists H(n)$ computable in $\mathsf{P}$ such that
+\begin{enumerate}
+\item $\mathsf{SAT_H} \in \mathsf{P} \implies H(n) \leq O(1)$; read $H(n)$ is basically a constant. 
+\item $\mathsf{SAT_H} \notin \mathsf{P} \implies \forall c\exists n_0 \forall n\geq n_0: H(n) > c$; read $H(n)$ is greater than every constant.
+\end{enumerate}
+
+Next we claim that $\mathsf{NP} \neq \mathsf{P} \implies \mathsf{SAT_H} \notin \mathsf{P}$.
+\begin{proof}
+By contrapositive: assume that $\mathsf{SAT_H} in \mathsf{P}$. Then we can your algorithm for $\mathsf{SAT_H}$ to solve $\mathsf{SAT}$! Input is $\phi \in \mathsf{SAT_H}$. Constructing the padded version (input to $\mathsf{SAT_H}$) take poly-time since $H(n)$ is bounded by a constant. Then run your poly-time algorithm $\mathsf{SAT_H}$ algorithm. This is a poly-time algorithm for $\mathsf{SAT}$ :(. 
+\end{proof}
+
+Finally we claim that $\mathsf{NP} \neq \mathsf{P} \implies \mathsf{SAT_H} \notin \mathsf{NPC}$. 
+\begin{proof}
+Again by contradiction: suppose that $|\phi| = m$. If you use the second then the first claim in a somewhat straight-forward way (not forgetting the definition of $\mathsf{SAT_H}$), the rest of the proof should be apparent. First suppose if $\mathsf{SAT} \leq \mathsf{SAT_H}$.
+\end{proof}
+
+The remainder of the theorem is recursive (o.O, yeah weird). After each step you can square root the input, after repeated trails you get down far enough to just brute force. So if $\mathsf{SAT_H} \in \mathsf{P}$ or $\mathsf{SAT_H} \in \mathsf{NP}$ we end up with a polynomial time algorithm for $\mathsf{SAT}$. That is the structure of the proof.
+
+It remains to define $H(n)$ (recursively) as follows:
+\[
+H(n) = \begin{cases}
+\min_{i < \log\log n} &\mbox{ such that } M_i \mbox{ decides } \mathsf{SAT_H} \\
+\log\log n &\mbox{ otherwise }
+\end{cases}
+\]
+\end{proof}
+
+\emph{The whole thing is a bit wonky, beware!}
+
+We don't know any problems which are not in $\mathsf{P}$ and not in $\mathsf{NP}$ (obviously, since that would solve the crazy problem), but we do have some candidates: such as graph isomorphism (recent result!) and integer factorization. 
+
+\begin{enumerate}
+\item Size two clauses
+\item Horn clauses
+\item Dual Horn
+\item XOR equations
+\item Trivial clauses (satisfy all zero or all one assignments)
+\end{enumerate}
+
+\begin{theorem}
+(Schaefer's Dichotomy) If $\mathsf{CSP}$s use clauses of type (i) only, for $1 \leq i \leq 5$, then $\mathsf{CSP-SAT} \in \mathsf{P}$. Otherwise $\mathsf{CSP-SAT}$ is $\mathsf{NP}$-complete (the numbering is from above). E.g. $2-\mathsf{SAT}$ is poly-time solvable.  
+\end{theorem}
+
+Here is an example of Schaefer's Dichotomy: we will mix Dual Horn clauses ($x_1 \lor x_2 \lor x_3$) and non-Dual Horn clauses of size two to get a $\mathsf{CSP}$ which is $\mathsf{NP}$-complete. To show this, we will reduce 3-Colorability ($\mathsf{3-COL}$ to this problem. Take an instance of $\mathsf{3-COL}$. 
+
+\section{Reducibility and $\mathsf{NP}$-Completeness}
+
+\begin{theorem}
+Properties of reductions:
+\begin{enumerate}
+\item (Transitivity) If $L \leq_p L$ and $L\leq_p L"$, then $L \leq_p L"$.
+\item If language $L$ is $\mathsf{NP}$-hard and $L \in P$, then $\mathsf{P} = \mathsf{NP}$.
+\item If language $L$ is $\mathsf{NP}$-complete, then $L \in P$ if and only if $\mathsf{P}= \mathsf{NP}$.
+\end{enumerate}
+\end{theorem}
+\begin{proof}
+
+\end{proof}
+
+\section{$\mathsf{SAT}$}
+\begin{theorem}
+\textbf{Cook-Levin Theorem} 
+\begin{enumerate}
+\item $\mathsf{SAT}$ is $\mathsf{NP}$-complete.
+\item $\mathsf{3SAT}$ is $\mathsf{NP}$-complete.
+\end{enumerate}
+\end{theorem}
+\begin{proof}
+
+\end{proof}
+
+\begin{lemma}
+$\mathsf{SAT}$ is $\mathsf{NP}$-hard. 
+\end{lemma}
+\begin{proof}
+
+\end{proof}
+
+\section{Decision v.s. Search}
+\begin{theorem}
+Suppose that $\mathsf{P} = \mathsf{NP}$. Then, for every $\mathsf{NP}$ language $L$ and verifier TM $M$ for $L$, there is a polynomial time TM $B$ that on input $x \in L$ outputs a certificate for $x$ (with respect to $L$ and $M$). 
+\end{theorem}
+\begin{proof}
+
+\end{proof}
+
+\section{$\mathsf{coNP}$, $\mathsf{EXP}$, and $\mathsf{NEXP}$}
+\subsection{$\mathsf{coNP}$}
+If $L$ is a language then we define $\bar{L}$ to be the complement of $L$. The language $\coNP = \{L: \bar{L} \in \NP\}$. Note that $\coNP$ is not the complement of $\NP$. In fact the two languages have $\P$ in common. An alternative definition of $\coNP$ is as follows:
+
+\begin{definition}
+For every $L \subseteq \{0,1\}^*$, $L \in \coNP$ if there exists a polynomial $p: \N \rightarrow \N$ and a polynomial-time TM $M$ such that for every $x \in \{0,1\}^*$, 
+\[x \in L \iff \forall u \in \{0,1\}^{p(|x|)}, M(x,y) = 1\]
+\end{definition}
+
+An example of a $\coNP$-complete language is the following:
+\[\mathsf{TAUTOLOGY} = \{\phi: \phi \mbox{ is a tautology }\}\]
+
+\subsection{$\EXP$ and $\NEXP$}
+
+\section{TM v.s. Circuit}
+For the TM, the algorithm $M$ is the \emph{same} for any length $|w|$. Circuits $C_n$ is a fixed algorithm which only works for a \emph{fixed} length input. For different lengths the circuits might potentially be quite different. Circuits are more "natural" than TMs.
+
+\begin{example}
+Given $w \in \{ 0,1 \} ^*$, decide if $w \neq 0^*$ (not all zero string. For a TM: input $w$ scan the tape. Circuit $C_4$: complete three of height 2 with or at each node. 
+\end{example}
+
+Generally when deciding with circuits you need to slice the language depending on the input size. To decide $L$ with circuits, you need a family of circuits $C = \{C_n\}$ where $C_n$ decides $L_n$. We \emph{want} circuits to be small i.e. use only a few number of logic gates.
+
+\textbf{Circuit Minimization Task:} 
+
+\begin{enumerate}
+\item given a truth table of $f: \{0,1\}^n \rightarrow \{0,1\}$ you want the smallest circuit for $f$ (try not encoding the entire $2^n$ look-up table.
+\item Given a circuit $C_n: \{0,1\} \rightarrow \{0,1\}$ find the smallest equivalent circuit.
+\end{enumerate}
+Unfortunately both problems can only be solved by exhaustive search (currently). We also cannot categorize these problems in our hardness classes $\NP$, $NP$-complete etc.
+
+\textbf{Efficient Algorithms:} for uniform model (TM) it is the class $P$, while for non-uniform models (circuits) we want the class of poly-size which is a family $\{C_n\}$ such that $C_n \leq O(n^d)$ for some constant $d$. 
+
+\begin{theorem}
+$\P \subseteq \mathsf{PolySize}$.
+\end{theorem}
+\begin{lemma}
+For any proper $t: \N \rightarrow \N$, $\mathsf{Time}(t) \subseteq \mathsf{Size}(t\cdot \log t)$
+\end{lemma}
+\begin{proof}
+First show the weaker inclusion $\mathsf{Time}(t) \subseteq \mathsf{Size}(t^2)$. As follows: first consider only a finite chunk of the tape of size $2t(n)$ this is where the interesting things are going to happen. Then you want to do something similar to the $\mathsf{SAT}$ proof, that is you want to specify the configurations and only look at the local changes. There is at most $t(n)$ configurations and every configuration is of length $2t(n)$ so that is how you get the $O(t^2)$. 
+
+To get $\mathsf{Size}(t\log t)$ we need to introduce \textbf{oblivious} TM. These are TM that only cares about the size of the inputs; on inputs of the same size the movement of the TM is \emph{exactly the same}! As it turns out all languages in $\mathsf{Time}(t)$ can be decided in time $O(t \log t)$ by and oblivious time TM (how do make such an oblivious machine).
+
+Using this oblivious TM we can simplify the grid to $O(t)$. 
+\end{proof}
+
+There are problems which are in $\mathsf{PolySize}$ but are not in $\P$. Consider the following: 
+\end{document}

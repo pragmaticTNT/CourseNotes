@@ -1,0 +1,442 @@
+%
+% This is a borrowed LaTeX template file for lecture notes for CS267,
+% Applications of Parallel Computing, UCBerkeley EECS Department.
+% Now being used for CMU's 10725 Fall 2012 Optimization course
+% taught by Geoff Gordon and Ryan Tibshirani.  When preparing 
+% LaTeX notes for this class, please use this template.
+%
+% To familiarize yourself with this template, the body contains
+% some examples of its use.  Look them over.  Then you can
+% run LaTeX on this file.  After you have LaTeXed this file then
+% you can look over the result either by printing it out with
+% dvips or using xdvi. "pdflatex template.tex" should also work.
+%
+
+\documentclass[twoside]{article}
+\setlength{\oddsidemargin}{0.25 in}
+\setlength{\evensidemargin}{-0.25 in}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textwidth}{6.5 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+
+%
+% ADD PACKAGES here:
+%
+
+\usepackage{amsmath,amsfonts,amssymb, graphicx}
+\usepackage{color}
+\usepackage{comment}
+\usepackage{mathtools}
+\usepackage{tabu}
+
+%
+% The following commands set up the lecnum (lecture number)
+% counter and make various numbering schemes work relative
+% to the lecture number.
+%
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf CMPT 409: Theoretical Computer Science
+	\hfill Summer 2017} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill Lecture #1: #2  \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { {\it Lecturer: #3 \hfill Scribe: #4} }
+      \vspace{2mm}}
+   }
+   \end{center}
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+
+   %{\bf Note}: {\it LaTeX template courtesy of UC Berkeley EECS dept.}
+
+   %{\bf Disclaimer}: {\it These notes have not been subjected to the
+   %usual scrutiny reserved for formal publications.  They may be distributed
+   %outside this class only with the permission of the Instructor.}
+   \vspace*{4mm}
+}
+%
+% Convention for citations is authors' initials followed by the year.
+% For example, to cite a paper by Leighton and Maggs you would type
+% \cite{LM89}, and to cite a paper by Strassen you would type \cite{S69}.
+% (To avoid bibliography problems, for now we redefine the \cite command.)
+% Also commands that create a suitable format for the reference list.
+\renewcommand{\cite}[1]{[#1]}
+\def\beginrefs{\begin{list}%
+        {[\arabic{equation}]}{\usecounter{equation}
+         \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+         \setlength{\labelwidth}{1.6truecm}}}
+\def\endrefs{\end{list}}
+\def\bibentry#1{\item[\hbox{[#1]}]}
+
+%Use this command for a figure; it puts a figure in wherever you want it.
+%usage: \fig{NUMBER}{SPACE-IN-INCHES}{CAPTION}
+\newcommand{\fig}[3]{
+			\vspace{#2}
+			\begin{center}
+			Figure \thelecnum.#1:~#3
+			\end{center}
+	}
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+% **** IF YOU WANT TO DEFINE ADDITIONAL MACROS FOR YOURSELF, PUT THEM HERE:
+
+\newcommand\E{\mathbb{E}}
+\def\N{\mathbb{N}}
+\def\Z{\mathbb{Z}}
+\def\Q{\mathbb{Q}}
+\def\R{\mathbb{R}}
+\def\C{\mathbb{C}}
+\def\F{\mathbb{F}}
+
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+\DeclarePairedDelimiter\anglebrac{\langle}{\rangle}
+
+\begin{document}
+%\lecture{**LECTURE-NUMBER**}{**DATE**}{**LECTURER**}{**SCRIBE**}
+\lecture{1}{Introduction (8 - 19 May)}{Ternovska, Eugenia}{Lily Li}
+%\footnotetext{These notes are partially based on those of Nigel Mansell.}
+
+\section{Propositional Calculus}
+Again to reiterate: \textbf{syntax} has to do with the structure of strings of symbols (e.g. formulas and formal proofs) and the rules for their manipulation. \textbf{Semantics} has to do with meaning (e.g. validity).
+
+\subsection{Syntax}
+Formulas come in different flavors. First we will discuss \textbf{propositional formulas} (i.e. atoms, negations, ands, and ors), later we will talk about \textbf{first-order formulas} (i.e. propositional formulas with universal and existential qualifiers).
+
+A \textbf{subformula} of a formula $A$ is any substring of $A$ which is also a formula (being a formula is important). We use the following notation:
+\begin{enumerate}
+\item[$\supset$] means \emph{implies} and $A \supset B$ is equivalent to $A \lor \lnot B$. 
+\item[$\leftrightarrow$] means \emph{is equivalent to} and $A \leftrightarrow B$ also stands for $(A \supset B) \land (B \supset A)$. 
+\end{enumerate}  
+
+\begin{theorem}
+\textbf{Unique Readability}: a.k.a the grammar for generating formulas is unambiguous. Suppose $A, B, A', B'$ are formulas, $c, c'$ are binary connectives, and $(AcB) =_{syn} (A'c'B')$. Then $A =_{syn} A'$, $c =_{syn} c'$, and $B =_{syn} B'$. Where $=_{syn}$ means equality as symbols (not only meaning). 
+\end{theorem}
+We will introduce a definition and prove a lemma in order to prove the theorem. The \textbf{weight} of a formula $A$ is the sum of the weights of the symbols of $A$ where the symbols are assigned weights:
+\begin{align*}
+0 &\mbox{ to } \lnot \\
+1 &\mbox{ to each binary connective } \land, \lor \\
+1 &\mbox{ to } ( \\
+-1 &\mbox{ to } ) \\
+-1 &\mbox{ to each atom } P 
+\end{align*}
+
+\begin{lemma}
+The weight of any formula is $-1$, but the weight of any proper initial segment is $\geq 0$ (where a \textbf{proper} initial segment is the initial part which is not a formula). 
+\end{lemma}
+\begin{proof}
+\textbf{Structural induction} on the length of $A$. The base case where $A$ is a single atom satisfies the claim. In the inductive step we consider the three ways of forming larger formulas: $\lnot, \land, \lor$ (only show $\land$, others are the same). If $A =_{syn} (P \land Q)$, then the weight of $A$, $w(A) = -1$ since $w(\land) = 1$, $w(() = 1$, $w()) = -1$, and $w(P) = w(Q) = -1$ by the induction hypothesis.  
+\end{proof}
+
+We prove the \textbf{Unique Readability Theorem} using the above lemma. If $A =_{syn} A'$, then we are done. Suppose not. Then either $A$ is a proper initial segment of $A'$ or $A'$ is a proper initial segment of $A$. WLOG assume the former. Then $A$ has more left than right brackets. But $(AcB)$ is well formed so $A$ has the same number of left and right brackets. This is a contradiction.
+
+The theorem basically says that if you put in all the brackets then the formula has only one interpretation, but in practice we omit most of the brackets and use left associativity.
+  
+\subsection{Semantics}
+A \textbf{truth assignment} is a map $\tau: \{\mbox{atoms}\} \rightarrow \{T, F\}$. It can be extended to map formulas to $\{T, F\}$ by defining $(\lnot A)^{\tau} = T$ if and only if $A^{\tau} = F$ and similarly for $\land$ and $\lor$. A truth assignment $\tau$ satisfies $A$ iff $A^{\tau} = T$; $\tau$ satisfies a set $\Phi$ of formulas iff $\tau$ satisfies $A$ for all $A \in \Phi$. 
+
+$\Phi$ is satisfiable if there exists some truth assignment $\tau$ such that $\tau$ satisfies $\Phi$. Otherwise $\Phi$ is unsatisfiable. Similarly for $A$.
+
+\textcolor{red}{\textbf{Logical Consequence:}} $A$ is a --- of $\Phi$, written $\Phi \vDash A$, iff for every truth assignment $\tau$, if $\tau$ satisfies $\Phi$, then $\tau$ satisfies $A$.
+
+We write $\vDash A$ to mean $\emptyset \vDash A$, $B \vDash A$ to mean $\{B\} \vDash A$, and $B, C \vDash A$ to mean $\{B, C\} \vDash A$.
+
+\begin{proposition}
+\textbf{Transitivity of Logical Consequences:} if $\Phi \vDash A$ and $\Phi \cup \{A\} \vDash B$, then $\Phi \vDash B$. 
+\end{proposition}
+\begin{proof}
+Consider any truth assignment $\tau$. If $\tau$ satisfies $\Phi$ then $\tau$ satisfies $A$ since $\Phi \vDash A$. Thus $\tau$ satisfies $\Phi \cup \{A\}$ thus $\tau$ satisfies $B$. 
+\end{proof}
+
+A formula $A$ is \textbf{valid} iff $\vDash A$ (i.e. $A^{\tau} = T$ for all $\tau$). A valid propositional formula is a \textbf{tautology}. Formulas $A, B$ are equivalent, written $A \longleftrightarrow B$ iff $A \vDash B$ and $B \vDash A$ (this is "equivalent" as you would typically understand the word that is semantic equivalence. This is different from $=_{syn}$ (explain why). Typically it is the convention that $P, Q, R$ stand for \emph{distinct} atoms and $A, B, C,...$ could stand for identical formulas. 
+
+\begin{proposition}
+$\Phi \vDash A \iff \Phi \cup \{\lnot A\}$ is unsatisfiable. Also $A$ is a tautology iff $\lnot A$ is unsatisfiable. 
+\end{proposition}
+\begin{proof}
+For any truth assignment $\tau$ which satisfies $\Phi$, $\tau$ does satisfies $A$ since $\Phi \vDash A$. Thus $\tau$ cannot satisfy $\Phi \cup \{\lnot A\}$. 
+\end{proof}
+
+An example of tautologies for formulas $A, B$:
+\[(A \land B) \vDash (A \lor B)\]
+
+\begin{theorem}
+\textbf{Duality Theorem} Let $A'$ be the result of interchanging $\land$ and $\lor$ in the formula $A$, and replacing $P$ by $\lnot P$ for each atom $P$. Then $A' \longleftrightarrow \lnot A$.
+\end{theorem}
+\begin{proof}
+Proof by structural induction on $A$. If $A$ is just one atom then the claim clearly holds. Consider each method of making a larger formula. If the outer most operation of $A$ is $\lnot$ then the claim holds. If the outer most operation is $\land$ then the claim holds by DeMorgan's Law (same with $\lor$).
+\end{proof}
+
+\begin{theorem}
+\textbf{Craig Interpolation Lemma} Given propositional formulas $A$ and $B$, let $S$ be the set of atoms which occur in both $A$ and $B$, and assume that $S$ is nonempty. If $A \supset B$ is valid, there is a formula $C$ (an \emph{interpolant}) containing only atoms from $S$ such that both $A \supset C$ and $C \supset B$ are valid. 
+\end{theorem}
+\begin{proof}
+
+\end{proof}
+
+\subsection{DNF and CNF}
+A \textbf{literal} $l$ is an atom $P$ or its negation. A \textbf{clause} $C$ for a CNF is a disjunction ($\lor$) of literals such that no literal occurs twice. A formula is in \textbf{conjunctive normal form (CNF)} if it is a conjunction ($\land$) of one or more clauses. We consider the empty conjunction $\land \emptyset$ a CNF formula, and $\land \emptyset$ \emph{is} valid. \textbf{Disjunctive normal form} is defined similarly and is the dual notion to CNF. The empty disjunction $\lor \emptyset$ is in DNF and is unsatisfiable. 
+
+\begin{theorem}
+Every formula is equivalent to a formula in CNF, and to a formula in DNF. 
+\end{theorem} 
+\begin{proof}
+To put a formula $A$ into DNF, simply take every truth assignment satisfying $A$, form a clause out of it, and $\lor$ all such clauses together. To put $A$ into CNF is quite similar, though you might also consider applying logical equivalences to your DNF.    
+\end{proof}
+
+\begin{proposition}
+Every CNF formula equivalent to 
+\[(P_1 \land Q_1) \lor (P_2 \land Q_2) \lor \cdots \lor (P_n \land Q_n)\]
+must have at least $2^n$ clauses. 
+\end{proposition}
+\begin{proof}
+Observe that every clause has $n$ literals, one of each index. Suppose that some $CNF$ formulation $A$ has few than $2^n$ clauses. Then some clause $c = R_1 \lor \cdots \lor R_n$ where $R_i \in \{P_i, Q_i \}$ is not $A$. Set $R_1 = \cdots = R_n = F$, and set all the remaining literal to be true. Since $c$ is not in $A$, each clause in $A$ must differ from $c$ in one literal and must thus be true. Thus $A$ is true. However the formula $(P_1 \land Q_1) \lor (P_2 \land Q_2) \lor \cdots \lor (P_n \land Q_n)$ is false since every $R_i$ is false. Thus $A$ can not be equal to the formula.    
+\end{proof}
+
+
+\section{Formal Proofs}
+These are ways of showing that a propositional formula is a tautology. Unlike validity, a semantic notion, formal proofs have to do with syntax.
+
+\subsection{Resolution}
+This is one well studied proof system for establishing the unsatisfiability of a set of CNF formulas. 
+
+\begin{theorem}
+There is a polynomial time procedure which transforms a given finite set $\Phi$ of propositional formulas to a finite set $S = S_{\Phi}$ of clauses, such that $\Phi$ is satisfiable iff $S$ is satisfiable. 
+\end{theorem}
+\begin{proof}
+The straight forward trick of putting every formula in CNF then smashing all the CNF's together into one large CNF does not work since there could be an exponential blowup in the number of clauses. Instead what you are suppose to do is to use the standard trick for reducing General Propositional Satisfiability to SAT. Basically you take a formula $A$ and start with a "small" subformula $B$ and create a new atom $P_B$ (if $B$ is a literal $l$ then let $P_B = l$). \emph{Think of $P_B$ as the name for $B$ even though it is a separate axiom}. Add to the set $S$ all the clauses necessary to link $P_B$ to $B$. That is the clauses (disjunctions) equivalent to $P_B \longleftrightarrow B$. Repeat, using $P_B$ in place of $B$. Once you get to the top add a new atom $P_A$ for $A$, then add the clause $P_A$ to $S$. See notes for more detail. 
+
+$A$ is not equivalent to the conjunction of the clauses in $S$, but it is satisfiable iff $S$ is satisfiable. To see this non-equivalent consider the following example: take the single formula $A = (Q \land R) \lor \lnot Q)$ as given in the Cook notes page 7. If we let $B = (Q \land R)$ with the added atoms $P_B$ and $P_A$ we get that
+\[S = \{\bar{P_B}\lor Q, \bar{P_B} \lor R, P_B \lor \bar{Q}\lor \bar{R}, P_B \lor \bar{P_A} \lor \bar{Q}, P_A \lor \bar{P_B}, P_A \lor Q, P_A\}\]
+(the first three mean $P_B \longleftrightarrow (Q \land R)$, the next three mean $P_A \longleftrightarrow (P_B \lor \lnot Q)$). Thus if we assign $Q = R = T$ but $P_B = F$ the conjunction of $S$ is false while $A$ is true.  
+\end{proof} 
+
+Now that we have reduced the problem of determining satisfiability of a set of formulas to determining the satisfiability of a set of clauses, we can apply the \textbf{resolution rule}: consider clauses $C_1 = (A \lor l)$ and $C_2 = (B \lor \bar{l})$ where $A$ and $B$ are clauses not containing $l$ or $\bar{l}$. Then the \textbf{resolvent} of $C_1$ and $C_2$ is the clause $C_3 = (A \lor B)$. Remark $(P \lor Q)$ and $(\bar{P} \lor \bar{Q})$ does NOT have a resolvent since there are two clashes.
+
+\textbf{Resolvent Soundness Principle:} If $C_3$ is the resolvent of $C_1$ and $C_2$ then
+\[C_1, C_2 \vDash C_3\] 
+This holds even if $C_3$ is the empty clause $\lor \emptyset$ (this proves that $C_1$ and $C_2$ are unsatisfiable).
+
+A \textbf{resolution refutation} of a set $S$ of clauses is a sequence $C_1, ..., C_q$ of clauses such that the final clause $C_q$ is the empty clause. Each $C_i$ is either in $S$ (these are the axioms) or the resolvent of earlier clauses in the sequence. 
+
+\begin{theorem}
+\textbf{RES Soundness Theorem:} If a set $S$ of clauses has a resolution refutation, then $S$ is unsatisfiable. 
+\end{theorem}
+\begin{proof}
+Let $C_1, ..., C_p$ be the resolution refutation of $S$. By the Resolvent Soundness Principle and the Transitivity of Logical consequence, the empty clause $\lor \emptyset$ is a logical consequence of $S$. Since $\lor \emptyset$ is unsatisfiable $S$ must be unsatisfiable as well.  
+\end{proof}
+
+\begin{theorem}
+\textbf{RES Completeness Theorem:} Every unsatisfiable set of clauses has a resolution refutation.
+\end{theorem}
+\begin{proof}
+Quite a nasty little bugger, this proof is. We will only prove it for finite set $S$, though with the Propositional Compactness theorem (shown later), the proof can be extended for infinite sets $S$. 
+
+So we will iteratively construct of resolution refutation (if it exists), otherwise we will find a satisfying assignment for $S$. During the procedure, we maintain a sequence $S' \supset S$ of clauses which forms a partial resolution refutation of $S$. We also maintain a stack of literals $l_1, l_2, ..., l_k$ and a partial truth assignment $\tau$ to the atoms of $S$. $\tau$ makes each literal on the stack true and does not falsify any clause in $S'$.
+
+\begin{enumerate}
+\item If $S$ consists of only the empty clause $\lor \emptyset$ then $S$ is unsatisfiable.
+\item Suppose that $S$ is non-empty. The iterative procedure is as follows: check if $\tau$ satisfies $S$. If so, output the t.a. $\tau$. Otherwise take a unsatisfied clause $C \in S$ and a unsatisfied literal $l \in C$. Add $l$ to the stack and let $\tau '$ be the extension of $\tau$ which assigns true to $l$. If this assignment does not falsify any clauses in $S'$, repeat.
+\item Suppose $\tau '$ falsifies $C'$ in $S'$. Replace $l$ with $\bar{l}$ on the stack. Let $\tau "$ be the extension of $\tau$ which assigns true to $\bar{l}$. If $\tau "$ does not falsify any clause in $S'$, then this assignment works. Go back to step 2.
+\item Otherwise there exists a clause $C" \in S'$ which is falsified by $\bar{l}$. Resolve $C'$ and $C"$ into clause $R$ which does not contain the $l$ or $\bar{l}$ literals. If $R$ is the empty clause, then $S' \cup \{R\}$ is a resolution refutation. Otherwise, pop literals off the stack until $R$ is not falsified. Let $S' \leftarrow S' \cup \{R\}$ and go back to step 2.      
+\end{enumerate}
+
+The procedure halts since at each step, we either increase the size of the stack or deal with a clause.  
+\end{proof}
+
+This is actually not too efficient since a large majority of unsatisfiable formulas have resolution refutations exponential in the size of the original formula.  
+
+\subsection{Gentzen's Proof System PK}
+A \textbf{PK proof of a sequent S} for a set of sequents $\Phi$ allow sequents from $\Phi$ to be leaves in the proof tree. Members of $\Phi$ are \textbf{non-logical axioms}. 
+
+Think of this as a way of reaching an answer of satisfiability or unsatisfiability. Each line in a proof is a \textbf{seqent} of the form
+\[S = A_1, ..., A_k \rightarrow B_1, ..., B_l\]
+Where $\rightarrow$ is \emph{NOT} implication but a new symbol (other texts might use the turnstile $\vdash$). The sequences $A_1, ..., A_k$ and $B_1, ..., B_l$ are \textbf{cedents} of the formula $S$, in particular $A_1, ..., A_k$ is the \textbf{antecedent} and $B_1, ..., B_l$ is the \textbf{succedent}.
+
+The semantics of sequence is that a t.a. $\tau$ satisfies the sequent $S$ iff either $\tau$ falsifies some $A_i$ or satisfies some $B_i$. So $S$ is equivalent to the formula
+\[A_S = (A_1 \land A_2 \land \cdots \land A_k) \supset (B_1 \lor B_2 \lor \cdots \lor B_l)\]
+where we use $\supset$ to mean implication. If $k = 0$ then
+\[A_S = (B_1 \lor B_2 \lor \cdots \lor B_l)\]
+and if $l = 0$ then 
+\[A_S = \lnot(A_1 \land A_2 \land \cdots \land A_k)\]    
+since what we really have is $A_1 \land A_2 \land \cdots \land A_k \supset \emptyset$ which can only be true if some $A_i$ is false. A sequent is \textbf{valid} if it is true under all t.a. i.e. the corresponding formula is a tautology. 
+
+A formal \textbf{proof} in the propositional sequent calculus PK is a finite tree rooted at the\textbf{endsequent} (the thing to be prove) with leaves labeled with axioms of the form $A \rightarrow A$.
+
+There are a set of rather long rules which drives the proof forward. Typically we denote finite sequences as $\Gamma, \Delta$ and formulas as $A, B$. Of particular importance is the cut rule
+
+\begin{tabular}{c}
+$\Gamma \rightarrow \Delta, A \quad A, \Gamma \rightarrow \Delta$ \\
+\hline
+$\Gamma \rightarrow \Delta$ \\
+\end{tabular}
+The formula $A$ is called the \textbf{cut formula}. 
+
+Generally a PK proof of formula $A$ is a PK proof of $\rightarrow A$. 
+
+\begin{proposition}
+The contraction rules can be derived from the cut rule (with weakening and exchange).
+\end{proposition}
+\begin{proof}
+
+\end{proof}
+
+\begin{proposition}
+Suppose that we allow $\supset$ (implication) as a primitive connective, rather than one introduced by definition. The left and right introduction rules for $\supset$ is as follows:
+
+\end{proposition}
+\begin{proof}
+
+\end{proof}
+
+\begin{theorem}
+\textbf{PK Soundness Theorem:} every sequent provable in PK is valid.
+\end{theorem}
+\begin{proof}
+(Intuitively true since each step is valid.) Show that the endsequent in every PK proof is valid by the number of sequents in the proof. Single line proofs are valid since they are just the axioms. To get from one line to the next we use a rule (from the list) so the next line must be valid as well. 
+\end{proof}
+
+If a PK proof does not use the cut rule then it is \textbf{cut-free}. \textbf{Subformula Property:} very formula in every sequent in a cut-free PK proof is a subformula of a formula in the endsequent. 
+
+\begin{theorem}
+\textbf{PK Completeness Theorem:} every valid propositional sequent has a cut free PK proof which does not use the contraction rule.
+\end{theorem}
+\begin{proof}
+Use the inversion rule. 
+\end{proof}
+
+\textbf{Inversion Principle:} for each PK rule except weakening, if the bottom sequent is valid then all top sequents are valid. 
+
+\begin{theorem}
+\textbf{Derivational Soundness and Completeness:} a sequent $S$ is a logical consequent of a set $\Phi$ of sequents iff $S$ has a (finite) PK- $\Phi$ proof. 
+\end{theorem}
+\begin{proof}
+Prove derivational soundness by induction on the number of sequents in the PK proof. In particular the above soundness theorem show that the validity of the antecedent implies the validity of the succedent while now we will show that the antecedent is a logical consequence of the succedent. 
+
+To prove derivational completeness consider a finite set of sequents $\Phi = \{S_1, ..., S_k\}$. Suppose that $\Gamma \rightarrow \Delta$ is a logical consequence of $\{S_1, ..., S_k\}$ Using the previous completeness theorem 
+\end{proof}
+
+\subsubsection{Derivational Completeness}
+\textit{Note:} a finite proof exists even if $\Phi$ is infinite because if $\Phi \vDash S$ then $\Phi_0 \vDash \rho$ for a finite subset $\Phi_0$ of $\Phi$ (this uses a variant of the compactness theorem) so it enough to consider a finite set $P$ of formulas.
+
+\begin{proof}
+First the proof of Derivational Soundness:
+\[Q \vDash S \implies S \mbox{ has a } PK-\Phi-\mbox{proof}\]
+where $Q$ is a set of sequents, $S$ is a sequent. We will use PK-completeness formula $A$ that gives semantics to sequents. Assume
+\end{proof} 
+
+\begin{theorem}
+\textbf{Compactness Theorem} A set $\Sigma$ of wff (well formed formula) is satisfiable iff every finite subset of it is satisfiable. 
+\end{theorem}
+\begin{proof}
+Enumerate all the wffs: $\alpha_1, \alpha_2, ...$ 
+Proof by contradiction: suppose that a finite subset $S$ of $\Delta = \cup_{n} \Delta_n$, defined above, is not satisfiable.  
+
+\textit{Goal:} construct a trust assignment $\tau$ which satisfies $\Delta$.
+
+\textit{Define:} $\tau(P) = T \iff P \in \Delta$ for each propositional atom $P$.
+
+\begin{claim}
+$\tau(\phi) = T \iff \phi \in \Delta$ for any $\phi$.
+\end{claim}
+\begin{proof}
+By structural induction on $\phi$. The base case is the proposition symbols by definition of $\tau$  assume the claim holds for wffs $\alpha$ and $\beta$. Next for the inductive step consider each of the three logical connectives in the standard way.  
+\end{proof}
+
+so for (an infinite) $\Delta$, we constructed a truth assignment which satisfies $\Delta$. Since $\Sigma \subseteq \Delta$, so this truth assignment (t.a.) satisfies $\Sigma$. 
+
+\end{proof}
+
+Does the proof of compactness in these use this axiom of choice?
+
+\subsection{Hilbert Style}
+Observe the following semantic notion:
+\[\{A, A \supset B\} \vDash \{B\}\]
+rules of inference include:
+\begin{tabular}{c}
+$A, A \supset B$ \\
+\hline
+$B$ \\
+\end{tabular}
+these are unconditional.
+
+\section{Predicate Calculus (First Order Logic)}
+\subsection{First Order Language}
+Logical Symbols include:
+\begin{enumerate}
+\item Parenthesis $(,)$
+\item Connectives $\supset, \lnot$
+\item Variables $v_1, v_2, ...$
+\item Equality Symbol $=$
+\end{enumerate}
+
+Parameters include:
+\begin{enumerate}
+\item For all $\forall$ (depends on domain)
+\item Predicate symbols: $P_1, P_2, ...$ (have arity)
+\item Constant symbols: $c_1, C_2, ...$
+\item Function symbols.
+\end{enumerate}
+Each language mush contain at least one non-logical predicate symbol or equality. Examples of parameters is:
+\[L_A = \{0, S, \cdot, +, =\}\]
+where $0$ is a constant $S, \cdot, + $ are function symbols and the equality signifies the language of arithmetics. The parameter $\forall$ is usually omitted in the definition and is implicit.
+
+For a language $L$, The $L$-term is defined as
+\begin{enumerate}
+\item Every variable is a term
+\item If $f$ is an $n$-ary ($n\geq 0$) function symbol, and $t_1, ..., t_n$ are terms then $f(t_1, ..., t_n)$ is a term. 
+\end{enumerate}
+
+A $L$-formula is defined as
+\begin{enumerate}
+\item $P(t_1, ..., t_n)$ is an \textbf{atomic formula} where $P$ is an $n$-ary predicate.
+\item If $A, B$ are $L$-formulas then are are $\lnot A$, etc.
+\item If $A$ is an $L$-formula, $x$ is a variable then $\forall x, A$ is f a formula.
+\end{enumerate}
+The set $free(\phi)$ of free variables of formula $\phi$ satisfies: if $\phi$ is atomic then $free(\phi) :=$ the set of variable occurring in $\phi$. 
+
+\begin{align*}
+free(\lnot \phi) := free(\phi) \\
+free(\phi \land \psi) := free(\phi) \cup free(\psi) \\
+free()
+\end{align*}
+
+If a formula does not have free variables (i.e. everything is quantified) then it is a \textbf{sentence}. 
+
+\subsection{Semantics of FO Logic}
+Suppose a FO language $L$ is fixed \textbf{structure} give meaning to parameters. An $L$-structure $\mathcal{M}$ consists of 
+\begin{enumerate}
+\item A non-empty set $M$ called the domain (universe) of $\mathcal{M}$
+\item Variables of $L$ range over $|\mathcal{M}|$
+\end{enumerate}
+
+\end{document}
