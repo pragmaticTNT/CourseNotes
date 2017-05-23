@@ -301,22 +301,37 @@ $\Gamma \rightarrow \Delta$ \\
 \end{tabular}
 The formula $A$ is called the \textbf{cut formula}. 
 
+\begin{theorem}
+\textbf{Sequent Soundness Principle:} for each PK rule, the sequent on the bottom is a logical consequence of the sequent(s) on the top.
+\end{theorem}
+\begin{proof}
+We will only prove the theorem for right $\land$ introduction rule (because I think it is interesting). Suppose some t.a. satisfies the sequents(s) on the top: $\Gamma \rightarrow \Delta, A$ and $\Gamma \rightarrow \Delta, B$. This means $\Gamma$ is false (in which case the t.a. satisfies the bottom), or $\Delta$ is true (again the t.a. satisfies the top), or the t.a. satisfies both $A$ and $B$. In the last case we have that the t.a. satisfies $(A \land B)$ so it satisfies the bottom sequent.  
+\end{proof}
+
 Generally a PK proof of formula $A$ is a PK proof of $\rightarrow A$. 
 
 \begin{proposition}
 The contraction rules can be derived from the cut rule (with weakening and exchange).
 \end{proposition}
 \begin{proof}
-
+Consider here only the left contraction, that is $\Gamma, A \rightarrow \Delta$ is a logical consequence of $\Gamma, A, A \rightarrow \Delta$. Start with the tautology $A \rightarrow A$ and left and right weaken to get $\Gamma, A \rightarrow \Delta, A$. Next left exchange the top sequent to get $A, \Gamma, A \rightarrow \Delta$. Putting the two together with the cut rule to get $\Gamma, A \rightarrow \Delta$ as required.  
 \end{proof}
 
 \begin{proposition}
-Suppose that we allow $\supset$ (implication) as a primitive connective, rather than one introduced by definition. The left and right introduction rules for $\supset$ is as follows:
+Suppose that we allow $\supset$ (implication) as a primitive connective, rather than one introduced by definition. The left and right introduction rules for $\supset$ is as follows (resp.):
 
+\begin{tabular}{c}
+$\Gamma \rightarrow A, \Delta \quad B, \Gamma \rightarrow \Delta$ \\
+\hline
+$(A \supset B), \Gamma \rightarrow \Delta$ \\
+\end{tabular}
+
+\begin{tabular}{c}
+$A, \Gamma \rightarrow \Delta, B$ \\
+\hline
+$\Gamma \rightarrow \Delta, (A \supset B)$ \\
+\end{tabular}
 \end{proposition}
-\begin{proof}
-
-\end{proof}
 
 \begin{theorem}
 \textbf{PK Soundness Theorem:} every sequent provable in PK is valid.
@@ -331,7 +346,7 @@ If a PK proof does not use the cut rule then it is \textbf{cut-free}. \textbf{Su
 \textbf{PK Completeness Theorem:} every valid propositional sequent has a cut free PK proof which does not use the contraction rule.
 \end{theorem}
 \begin{proof}
-Use the inversion rule. 
+Apply induction on the total number of logical connectives $\land, \lor, \lnot$ occurring in $\Gamma \rightarrow \Delta$. In the base case both sides are sets of atoms. Some atom $P$ must occur on both sides so we have the tautology $P \rightarrow P$. In the inductive step take one of the logic symbols and apply the associated introduction rule in reverse to remove it. Repeat until no logic symbols remain. 
 \end{proof}
 
 \textbf{Inversion Principle:} for each PK rule except weakening, if the bottom sequent is valid then all top sequents are valid. 
@@ -357,7 +372,7 @@ where $Q$ is a set of sequents, $S$ is a sequent. We will use PK-completeness fo
 \begin{theorem}
 \textbf{Compactness Theorem} A set $\Sigma$ of wff (well formed formula) is satisfiable iff every finite subset of it is satisfiable. 
 \end{theorem}
-\begin{proof}
+\begin{proof}	
 Enumerate all the wffs: $\alpha_1, \alpha_2, ...$ 
 Proof by contradiction: suppose that a finite subset $S$ of $\Delta = \cup_{n} \Delta_n$, defined above, is not satisfiable.  
 

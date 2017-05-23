@@ -120,6 +120,13 @@
 \def\coNP{\mathsf{coNP}}
 \def\EXP{\mathsf{EXP}}
 \def\NEXP{\mathsf{NEXP}}
+\def\Time{\mathsf{Time}}
+\def\Space{\mathsf{Space}}
+\def\NTime{\mathsf{NTime}}
+\def\NSpace{\mathsf{NSpace}}
+\def\SAT{\mathsf{SAT}}
+\def\SIZE{\mathsf{SIZE}}
+\def\CVP{\mathsf{CVP}}
 
 \DeclarePairedDelimiter\ceil{\lceil}{\rceil}
 \DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
@@ -214,7 +221,13 @@ Complexity classes are typically defined as collections of languages over the bi
 (Linear Time Speedup) If a Language $L$ is decided by some TM $M$ in time $t(n)$, then for any $\epsilon > 0$, there is a TM $M'$ that decides $L$ in time at most $n + \epsilon n +  \epsilon t(n) + 2$.
 \end{theorem}
 \begin{proof}
-The idea is to encode $k$-tuples of symbols of the tape alphabet of $M$ as one tape symbol of $M'$. The original input of size $n$ compresses to an input to $M'$ of size $n/k$. When we simulate $M$ on $M'$, every $k$ steps of $M$ will translate to a constant number (inparticular six) of steps in $M'$. The gist of the move procedure is to move the head in $M'$: $L, R, R, L$ to read $3k$ symbols altogether. 
+The idea is to encode $k$-tuples of symbols of the tape alphabet of $M$ as one tape symbol of $M'$. The original input of size $n$ compresses to an input to $M'$ of size $n/k$. When we simulate $M$ on $M'$, every $k$ steps of $M$ will translate to a six steps in $M'$. The gist of the move procedure is to move the head in $M'$: $L, R, R, L$ to read $3k$ symbols altogether (start at the initial cell; $L$ to move to the cell on the left; $R$ to get back to the initial cell; $R$ again to move to the cell on the right; $L$ to get back to the initial cell). Then we figure out what these $3k$ symbols would look like after $k$ time steps on $M$. Using two more moves we can update the initial cells with the new content. This procedure saves us a factor of $1/k$. The total time used is:
+\begin{itemize}
+\item $n$ - compress input to $M$ of size $n$ to input to $M'$ of size $m/k$. 
+\item $n/k + 2$ - moved back to the left-most symbol of the input to $M'$. 
+\item $6t(n)/k$ - simulate $M$ on $M'$.
+\end{itemize} 
+Thus we choose $k = 6/\epsilon$ to get the desired bound. 
 \end{proof}
 
 \begin{theorem}
@@ -247,22 +260,22 @@ Yeah, it is kind of weird to have a full chapter devoted to this, but it is an i
 \end{comment}
 
 \section{Time Hierarchy Theorem}
-The following shows that giving a TM more time strictly increases the class of languages that it can decide. First a \textbf{time-constructible} function $f: \N \rightarrow \N$ is one where there exists a TM such that given the input $1^n$, writes down $1^{f(n)}$ in $O(f(n))$ time. Can you think of functions which satisfies this property? In the following only consider time-constructible running times. \textbf{Proper} complexity functions is a similar notion but is a bit nicer since on input of size $n$ we are allowed time $O(n + f(n))$ and $O(f(n))$ space. Thus $\log n$ is proper but not time-constructible. 
+The following shows that giving a TM more time strictly increases the class of languages that it can decide. First a \textbf{time-constructible} function $f: \N \rightarrow \N$ is one where there exists a TM such that given the input $1^n$, writes down $1^{f(n)}$ in $O(f(n))$ time. Can you think of functions which satisfies this property? Actually most functions that you think of satisfies this property. In the following only consider time-constructible running times. \textbf{Proper} complexity functions is a similar notion but is a bit nicer since on input of size $n$ we are allowed time $O(n + f(n))$ and $O(f(n))$ space. Thus $\log n$ is proper but not time-constructible. 
 
 \begin{theorem}
 If $f, g$ are time-constructible functions satisfying $f(n)\log f(n) = o(g(n))$, then 
 \begin{align}
 \mathbf{DTIME}(f(n)) \subsetneq \mathbf{DTIME}(g(n)) \label{DistinguishDTime}
 \end{align}
-a.k. for any proper $t(n), T(n) \geq n$ s.t. 
+a.k.a for any proper $t(n), T(n) \geq n$ s.t. 
 \[T(n) \geq \omega(t(n) \log t(n))\]
 we have 
-\[\mathsf{Time}(t) \subsetneq \mathsf{Time}(T)\]
+\[\mathsf{Time}(t(n)) \subsetneq \mathsf{Time}(T(n))\]
 \end{theorem}
 \begin{proof}
-Use a diagonalization technique. We consider the encoding $\anglebrac{M}$ of TM $M$. We also allow "padded encodings $\anglebrac{M}01^m$ for all $m \geq 0$ so that $M$ has encodings of arbitrarily large size. Put TMS $M_1, M_2, ..., M_i, ...$ that run in time at most $t(n)$ down rows of the table (consided clocked TM here only since we don't know how to tell when a TM stops on a certain input) and encodings $\anglebrac{M_1}, ..., \anglebrac{M_j}, ...$ across the columns. For cell $i, j$ run $M_i$ on input $\anglebrac{M_j}$. Add necessary timeout $t(n)$ so that $M_i$ stops on all inputs. Define diagonal language $D$ as follows: 
+The gist is to find a language $D$ which is in $\Time (T(n))$ but not in $\Time (t(n))$ \emph{use diagonalization to show this second part}. We consider the encoding $\anglebrac{M}$ of TM $M$. We also allow "padded encodings $\anglebrac{M}01^m$ for all $m \geq 0$ so that $M$ has encodings of arbitrarily large size. Put all TM, $M_1, M_2, ..., M_i, ...$, that run in time at most $t(n)$ down rows of the table (consider clocked TM here only since we don't know how to tell when a TM stops on a certain input) and encodings $\anglebrac{M_1}, ..., \anglebrac{M_j}, ...$ across the columns. The contents of cell $i, j$ is the result of running $M_i$ on input $\anglebrac{M_j}$. Add necessary timeout $t(n)$ so that $M_i$ stops on all inputs. Define the diagonal language $D$ as follows: 
 \[D = \{\anglebrac{M_i}: M_i \mbox{ does not accept } \anglebrac{M_i} \mbox{ in } \leq t(n) \mbox{ steps}\}\]
-thus $D$ is not any of TM in our table. Observe that $D \notin \mathsf{Time}(t)$ by contradiction. Suppose that $D \in \mathsf{Time}(t)$ then there exists a TM $M$ which decides $D$. Since we have enumerated all TM in time $t(n)$, $M = M_j$ for some $j \geq 1$. By running $M_j$ on $\anglebrac{M_j}$ we reach a contradiction.  Next note that $D \in \mathsf{Time}(T)$ by the UTM theorem since we can simulate $D \in \mathsf{Time} O(t\log t)$ (including some constant factor lost due to the structure of the input machine). Since $T \gg \omega(t \log t)$, $D \in \mathsf{Time}(T)$.   
+Observe that $D \notin \Time (t(n))$ by contradiction. Suppose that $D \in \mathsf{Time}(t)$ then there exists a TM $M$ which decides $D$. Since we have enumerated all TM in time $t(n)$, $M = M_j$ for some $j \geq 1$. By running $M_j$ on $\anglebrac{M_j}$ we reach a contradiction (either $M_j$ accepts $\anglebrac{M_j}$ so it doesn't ($\anglebrac{M_j} \notin D$) or $M_j$ rejects $\anglebrac{M_j}$ so it doesn't ($\anglebrac{M_j} \in D$).  Next note that $D \in \Time (T(n))$ by the UTM theorem since we can simulate $D \in \Time O(t(n)\log t(n)$ (including some constant factor lost due to the structure of the input machine). Since $T \gg \omega(t \log t)$, $D \in \Time(T(n))$.   
 \end{proof}
 
 \section{Space Hierarchy Theorem}
@@ -289,6 +302,13 @@ For any proper $s(n), S(n) \geq \log n$ s.t. $S(n) \geq \omega(s(n))$ then
 You know this, special since they are poly-time verifiable. 
 \[\mathsf{NP} = \{L: \exists V \mbox{ verifier s.t. } \forall x, x \in L \iff \exists y, |y| \leq poly(|x|), V(x,y) \mbox{ accepts}\}\]
 
+Much like $\Time$ and $\Space$ defined previously, we define $\NTime$ and $\NSpace$ as follows:
+
+\begin{align*}
+\NTime (f(n)) &= \{L: \mbox{ some multi-tape NTM decides } L \mbox{ in time at most }f(n)\} \\
+\NSpace(f(n)) &= \{L: \mbox{ some multi-tape NTM decides } L \mbox{ in space at most }f(n)\}
+\end{align*}
+
 \begin{theorem}
 If $f, g$ are time-constructible functions satisfying $f(n+1) = o(g(n))$, then 
 \begin{align}
@@ -305,7 +325,7 @@ If $f, g$ are time-constructible functions satisfying $f(n+1) = o(g(n))$, then
 Suppose $\mathsf{P} \neq \mathsf{NP}$. Then $\exists L \in \mathsf{NP}$ such that $L \notin \mathsf{P}$ and $L$ is not $\mathsf{NP}$-complete. 
 \end{theorem}
 \begin{proof}
-More diagonalization, but more special this time! Consider 
+More diagonalization, but more special this time! Suppose that $\P \ neq \NP$ then $\SAT \notin \P$. Consider a padded variant of $\SAT$ called:
 \[\mathsf{SAT_H} = \{\phi 0 1^{n^{H(n)}}\}: \phi \in \mathsf{SAT}, |\phi| = n\]
 (read through this definition carefully each element of $\mathsf{SAT_H}$ is specifically defined by $H(n)$).
 
@@ -314,15 +334,18 @@ First note that $\exists H(n)$ computable in $\mathsf{P}$ such that
 \item $\mathsf{SAT_H} \in \mathsf{P} \implies H(n) \leq O(1)$; read $H(n)$ is basically a constant. 
 \item $\mathsf{SAT_H} \notin \mathsf{P} \implies \forall c\exists n_0 \forall n\geq n_0: H(n) > c$; read $H(n)$ is greater than every constant.
 \end{enumerate}
+In particular we will refer to the following $H(n)$. for $n \in \N$ let $H(n)$ be the least $i < \log\log n$ such that TM $M_i$ decides $\SAT_H$ on all inputs lengths $m \leq \log n$, in time $O(m^i)$; if no such TM $M_i$ exists, then define $H(n) = \log\log n$. Observe that $H(n)$ is defined recursively. Try coming up with a $O(n^3)$ algorithm for $H(n)$. Why does this algorithm show that $\SAT_H \in \NP$?
 
 Next we claim that $\mathsf{NP} \neq \mathsf{P} \implies \mathsf{SAT_H} \notin \mathsf{P}$.
 \begin{proof}
-By contrapositive: assume that $\mathsf{SAT_H} in \mathsf{P}$. Then we can your algorithm for $\mathsf{SAT_H}$ to solve $\mathsf{SAT}$! Input is $\phi \in \mathsf{SAT_H}$. Constructing the padded version (input to $\mathsf{SAT_H}$) take poly-time since $H(n)$ is bounded by a constant. Then run your poly-time algorithm $\mathsf{SAT_H}$ algorithm. This is a poly-time algorithm for $\mathsf{SAT}$ :(. 
+By contrapositive: assume that $\mathsf{SAT_H} in \mathsf{P}$. Then we can use your algorithm for $\mathsf{SAT_H}$ to solve $\mathsf{SAT}$! Take input $\phi$ for $\SAT$. Constructing the padded version (input to $\mathsf{SAT_H}$) takes poly-time since $H(n)$ is bounded by a constant (see above). Then run your poly-time $\mathsf{SAT_H}$ algorithm. This is a poly-time algorithm for $\SAT$! 
 \end{proof}
 
 Finally we claim that $\mathsf{NP} \neq \mathsf{P} \implies \mathsf{SAT_H} \notin \mathsf{NPC}$. 
 \begin{proof}
-Again by contradiction: suppose that $|\phi| = m$. If you use the second then the first claim in a somewhat straight-forward way (not forgetting the definition of $\mathsf{SAT_H}$), the rest of the proof should be apparent. First suppose if $\mathsf{SAT} \leq \mathsf{SAT_H}$.
+Again by contradiction: suppose that $|\phi| = n$. If you use the second then the first claim in a somewhat straight-forward way (not forgetting the definition of $\mathsf{SAT_H}$), the rest of the proof should be apparent. First suppose that $\mathsf{SAT} \leq \mathsf{SAT_H}$. Then there exists a polynomial reduction function $f$ bounded above by $n^d$ for a constant $d > 0$. Thus $f$ maps a $\SAT$-instance $\phi$ of size $n$ to a $\SAT_H$-instance $\psi 01^{m^{H(m)}}$ where $|\psi | = m$. Since $|f(\phi)| \leq n^d$, we get that $m^{H(m)} \leq n^d$, so 
+\[m \leq n^{d/H(m)}\]
+We have assumed that $\SAT_H \notin \P$. Further by the second item in the previous claim we have that $H(n) > 2d$ for large enough $n$. Thus for all large enough $m$ we have $m \leq n^{1/2}$. Recall $|\psi| = m$ and $|\phi| = n$ so deciding $\phi \in \SAT$ is the same as deciding if $\psi \in \SAT$ but $\psi$ is square-root the size of $\phi$. By building a recursive algorithm, we can exploit this trait to obtain a poly-time algorithm to solve $\SAT$.   
 \end{proof}
 
 The remainder of the theorem is recursive (o.O, yeah weird). After each step you can square root the input, after repeated trails you get down far enough to just brute force. So if $\mathsf{SAT_H} \in \mathsf{P}$ or $\mathsf{SAT_H} \in \mathsf{NP}$ we end up with a polynomial time algorithm for $\mathsf{SAT}$. That is the structure of the proof.
@@ -338,7 +361,7 @@ H(n) = \begin{cases}
 
 \emph{The whole thing is a bit wonky, beware!}
 
-We don't know any problems which are not in $\mathsf{P}$ and not in $\mathsf{NP}$ (obviously, since that would solve the crazy problem), but we do have some candidates: such as graph isomorphism (recent result!) and integer factorization. 
+We don't know any problems which are not in $\mathsf{P}$ and not in $\mathsf{NP}$ (obviously, since that would solve the crazy problem), but we do have some candidates: such as graph isomorphism (recent result!) and integer factorization. Schaefer showed that for a set of special CPS problems the dichotomy exists. Consider:
 
 \begin{enumerate}
 \item Size two clauses
@@ -355,18 +378,6 @@ We don't know any problems which are not in $\mathsf{P}$ and not in $\mathsf{NP}
 Here is an example of Schaefer's Dichotomy: we will mix Dual Horn clauses ($x_1 \lor x_2 \lor x_3$) and non-Dual Horn clauses of size two to get a $\mathsf{CSP}$ which is $\mathsf{NP}$-complete. To show this, we will reduce 3-Colorability ($\mathsf{3-COL}$ to this problem. Take an instance of $\mathsf{3-COL}$. 
 
 \section{Reducibility and $\mathsf{NP}$-Completeness}
-
-\begin{theorem}
-Properties of reductions:
-\begin{enumerate}
-\item (Transitivity) If $L \leq_p L$ and $L\leq_p L"$, then $L \leq_p L"$.
-\item If language $L$ is $\mathsf{NP}$-hard and $L \in P$, then $\mathsf{P} = \mathsf{NP}$.
-\item If language $L$ is $\mathsf{NP}$-complete, then $L \in P$ if and only if $\mathsf{P}= \mathsf{NP}$.
-\end{enumerate}
-\end{theorem}
-\begin{proof}
-
-\end{proof}
 
 \section{$\mathsf{SAT}$}
 \begin{theorem}
@@ -387,34 +398,14 @@ $\mathsf{SAT}$ is $\mathsf{NP}$-hard.
 
 \end{proof}
 
-\section{Decision v.s. Search}
-\begin{theorem}
-Suppose that $\mathsf{P} = \mathsf{NP}$. Then, for every $\mathsf{NP}$ language $L$ and verifier TM $M$ for $L$, there is a polynomial time TM $B$ that on input $x \in L$ outputs a certificate for $x$ (with respect to $L$ and $M$). 
-\end{theorem}
-\begin{proof}
-
-\end{proof}
-
-\section{$\mathsf{coNP}$, $\mathsf{EXP}$, and $\mathsf{NEXP}$}
-\subsection{$\mathsf{coNP}$}
-If $L$ is a language then we define $\bar{L}$ to be the complement of $L$. The language $\coNP = \{L: \bar{L} \in \NP\}$. Note that $\coNP$ is not the complement of $\NP$. In fact the two languages have $\P$ in common. An alternative definition of $\coNP$ is as follows:
-
-\begin{definition}
-For every $L \subseteq \{0,1\}^*$, $L \in \coNP$ if there exists a polynomial $p: \N \rightarrow \N$ and a polynomial-time TM $M$ such that for every $x \in \{0,1\}^*$, 
-\[x \in L \iff \forall u \in \{0,1\}^{p(|x|)}, M(x,y) = 1\]
-\end{definition}
-
-An example of a $\coNP$-complete language is the following:
-\[\mathsf{TAUTOLOGY} = \{\phi: \phi \mbox{ is a tautology }\}\]
-
-\subsection{$\EXP$ and $\NEXP$}
-
 \section{TM v.s. Circuit}
 For the TM, the algorithm $M$ is the \emph{same} for any length $|w|$. Circuits $C_n$ is a fixed algorithm which only works for a \emph{fixed} length input. For different lengths the circuits might potentially be quite different. Circuits are more "natural" than TMs.
 
 \begin{example}
 Given $w \in \{ 0,1 \} ^*$, decide if $w \neq 0^*$ (not all zero string. For a TM: input $w$ scan the tape. Circuit $C_4$: complete three of height 2 with or at each node. 
 \end{example}
+
+Define the complexity class $\SIZE (s)$ for a function $s: \N \rightarrow \N$ to be the set of all Boolean function families $f = \{f_n\}_{n\geq 0}$ for which there exists a circuit family $\{C_n\}_{n\geq 0}$ such that $C_n$ computes $f_n$, and for all sufficiently large $n$, $|C_n| \leq s(n)$.
 
 Generally when deciding with circuits you need to slice the language depending on the input size. To decide $L$ with circuits, you need a family of circuits $C = \{C_n\}$ where $C_n$ decides $L_n$. We \emph{want} circuits to be small i.e. use only a few number of logic gates.
 
@@ -435,12 +426,27 @@ $\P \subseteq \mathsf{PolySize}$.
 For any proper $t: \N \rightarrow \N$, $\mathsf{Time}(t) \subseteq \mathsf{Size}(t\cdot \log t)$
 \end{lemma}
 \begin{proof}
-First show the weaker inclusion $\mathsf{Time}(t) \subseteq \mathsf{Size}(t^2)$. As follows: first consider only a finite chunk of the tape of size $2t(n)$ this is where the interesting things are going to happen. Then you want to do something similar to the $\mathsf{SAT}$ proof, that is you want to specify the configurations and only look at the local changes. There is at most $t(n)$ configurations and every configuration is of length $2t(n)$ so that is how you get the $O(t^2)$. 
+First show the weaker inclusion $\mathsf{Time}(t) \subseteq \mathsf{Size}(t^2)$. As follows: first consider only a finite chunk of the tape of size $2t(n)$ this is where the interesting things are going to happen. Then you want to do something similar to the $\mathsf{SAT}$ proof, that is you want to specify the configurations and only look at the local changes. There is at most $t(n)$ configurations and every configuration is of length $2t(n)$. You only need to connect a constant number of cells in one configure to a cell of the next so you get the $O(t^2)$ running time. 
 
-To get $\mathsf{Size}(t\log t)$ we need to introduce \textbf{oblivious} TM. These are TM that only cares about the size of the inputs; on inputs of the same size the movement of the TM is \emph{exactly the same}! As it turns out all languages in $\mathsf{Time}(t)$ can be decided in time $O(t \log t)$ by and oblivious time TM (how do make such an oblivious machine).
+To get $\mathsf{Size}(t\log t)$ we need to introduce \textbf{oblivious} TM. These are TM that only cares about the size of the inputs; on inputs of the same size the movement of the TM is \emph{exactly the same}! Thus, instead of putting a gadget for each cell of every configuration, you only need to put them where the TM head is scanning. As it turns out all languages in $\mathsf{Time}(t)$ can be decided in time $O(t \log t)$ by and oblivious time TM (how do we make such an oblivious machine? That's for you to find out!).
 
 Using this oblivious TM we can simplify the grid to $O(t)$. 
 \end{proof}
 
-There are problems which are in $\mathsf{PolySize}$ but are not in $\P$. Consider the following: 
+There are problems which are in $\SIZE (poly)$ (that is each circuit runs in poly-time with respect to the input size) but are not in $\P$. Consider the following: consider the language $\mathsf{Halt}$. This language consists of all TM descriptions which halt on the empty tape input. The associated boolean function $f_n(x_1, ..., x_n) = 1$ iff TM $M_n$ halts on the empty tape. Since $f_n$ is a constant function (range is $0$ or $1$), the family of $f_n$ is computable by linear-size Boolean circuits. However this family is \emph{not} computable by any algorithm since the Halting problem is undecidable. Note: even though this linear-size Boolean circuit exists, we \emph{cannot} find it. 
+
+However, it is not know the relationship between $\NP$ and $\SIZE (poly)$. It is believed that $\NP > \SIZE (poly)$ since the converse would be a startling result due to the following claim:
+
+\begin{claim}
+If $\NP = \P$, then $\NP \subseteq \SIZE (poly)$.
+\end{claim}   
+
+Here is a potentially useful instance of a $P-complete$ problem. Consider the \textbf{Circuit Value Problem ($\CVP$)}: given (the encoding of) a boolean circuit $C$ and a binary string $x$, decide if the value of $C(x) = 1$ i.e. evaluate the circuit.
+
+\begin{theorem}
+$\CVP$ is $\P$-complete under logspace reductions. 
+\end{theorem}
+\begin{proof}
+We need to show that $\CVP \in \P$ and that $\CVP$ is $\P$-hard.
+\end{proof}
 \end{document}
