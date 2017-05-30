@@ -357,17 +357,10 @@ Apply induction on the total number of logical connectives $\land, \lor, \lnot$ 
 \begin{proof}
 Prove derivational soundness by induction on the number of sequents in the PK proof. In particular the above soundness theorem show that the validity of the antecedent implies the validity of the succedent while now we will show that the antecedent is a logical consequence of the succedent. 
 
-To prove derivational completeness consider a finite set of sequents $\Phi = \{S_1, ..., S_k\}$. Suppose that $\Gamma \rightarrow \Delta$ is a logical consequence of $\{S_1, ..., S_k\}$ Using the previous completeness theorem 
+To prove derivational completeness consider a finite set of sequents $\Phi = \{S_1, ..., S_k\}$. Suppose that $\Gamma \rightarrow \Delta$ is a logical consequence of $\{S_1, ..., S_k\}$. The sequent $\Gamma, A_{S_1}, ..., A_{S_k} \rightarrow \Delta$ follows somehow... Using the previous completeness theorem we have a PK Completeness Theorem... yeah no matter how many times I read this, it still does not make any sense.   
 \end{proof}
 
-\subsubsection{Derivational Completeness}
 \textit{Note:} a finite proof exists even if $\Phi$ is infinite because if $\Phi \vDash S$ then $\Phi_0 \vDash \rho$ for a finite subset $\Phi_0$ of $\Phi$ (this uses a variant of the compactness theorem) so it enough to consider a finite set $P$ of formulas.
-
-\begin{proof}
-First the proof of Derivational Soundness:
-\[Q \vDash S \implies S \mbox{ has a } PK-\Phi-\mbox{proof}\]
-where $Q$ is a set of sequents, $S$ is a sequent. We will use PK-completeness formula $A$ that gives semantics to sequents. Assume
-\end{proof} 
 
 \begin{theorem}
 \textbf{Compactness Theorem} A set $\Sigma$ of wff (well formed formula) is satisfiable iff every finite subset of it is satisfiable. 
@@ -403,55 +396,5 @@ $A, A \supset B$ \\
 $B$ \\
 \end{tabular}
 these are unconditional.
-
-\section{Predicate Calculus (First Order Logic)}
-\subsection{First Order Language}
-Logical Symbols include:
-\begin{enumerate}
-\item Parenthesis $(,)$
-\item Connectives $\supset, \lnot$
-\item Variables $v_1, v_2, ...$
-\item Equality Symbol $=$
-\end{enumerate}
-
-Parameters include:
-\begin{enumerate}
-\item For all $\forall$ (depends on domain)
-\item Predicate symbols: $P_1, P_2, ...$ (have arity)
-\item Constant symbols: $c_1, C_2, ...$
-\item Function symbols.
-\end{enumerate}
-Each language mush contain at least one non-logical predicate symbol or equality. Examples of parameters is:
-\[L_A = \{0, S, \cdot, +, =\}\]
-where $0$ is a constant $S, \cdot, + $ are function symbols and the equality signifies the language of arithmetics. The parameter $\forall$ is usually omitted in the definition and is implicit.
-
-For a language $L$, The $L$-term is defined as
-\begin{enumerate}
-\item Every variable is a term
-\item If $f$ is an $n$-ary ($n\geq 0$) function symbol, and $t_1, ..., t_n$ are terms then $f(t_1, ..., t_n)$ is a term. 
-\end{enumerate}
-
-A $L$-formula is defined as
-\begin{enumerate}
-\item $P(t_1, ..., t_n)$ is an \textbf{atomic formula} where $P$ is an $n$-ary predicate.
-\item If $A, B$ are $L$-formulas then are are $\lnot A$, etc.
-\item If $A$ is an $L$-formula, $x$ is a variable then $\forall x, A$ is f a formula.
-\end{enumerate}
-The set $free(\phi)$ of free variables of formula $\phi$ satisfies: if $\phi$ is atomic then $free(\phi) :=$ the set of variable occurring in $\phi$. 
-
-\begin{align*}
-free(\lnot \phi) := free(\phi) \\
-free(\phi \land \psi) := free(\phi) \cup free(\psi) \\
-free()
-\end{align*}
-
-If a formula does not have free variables (i.e. everything is quantified) then it is a \textbf{sentence}. 
-
-\subsection{Semantics of FO Logic}
-Suppose a FO language $L$ is fixed \textbf{structure} give meaning to parameters. An $L$-structure $\mathcal{M}$ consists of 
-\begin{enumerate}
-\item A non-empty set $M$ called the domain (universe) of $\mathcal{M}$
-\item Variables of $L$ range over $|\mathcal{M}|$
-\end{enumerate}
 
 \end{document}

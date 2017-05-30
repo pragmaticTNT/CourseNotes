@@ -423,7 +423,7 @@ Unfortunately both problems can only be solved by exhaustive search (currently).
 $\P \subseteq \mathsf{PolySize}$.
 \end{theorem}
 \begin{lemma}
-For any proper $t: \N \rightarrow \N$, $\mathsf{Time}(t) \subseteq \mathsf{Size}(t\cdot \log t)$
+For any proper $t: \N \rightarrow \N$, $\mathsf{Time}(t) \subseteq \mathsf{Size}(t\cdot \log t) \subset \mathsf{PolySize}$
 \end{lemma}
 \begin{proof}
 First show the weaker inclusion $\mathsf{Time}(t) \subseteq \mathsf{Size}(t^2)$. As follows: first consider only a finite chunk of the tape of size $2t(n)$ this is where the interesting things are going to happen. Then you want to do something similar to the $\mathsf{SAT}$ proof, that is you want to specify the configurations and only look at the local changes. There is at most $t(n)$ configurations and every configuration is of length $2t(n)$. You only need to connect a constant number of cells in one configure to a cell of the next so you get the $O(t^2)$ running time. 
@@ -444,9 +444,27 @@ If $\NP = \P$, then $\NP \subseteq \SIZE (poly)$.
 Here is a potentially useful instance of a $P-complete$ problem. Consider the \textbf{Circuit Value Problem ($\CVP$)}: given (the encoding of) a boolean circuit $C$ and a binary string $x$, decide if the value of $C(x) = 1$ i.e. evaluate the circuit.
 
 \begin{theorem}
-$\CVP$ is $\P$-complete under logspace reductions. 
+$\CVP$ is $\P$-complete under log-space reductions (observe that the reduction needs to be weaker than the class itself). 
 \end{theorem}
 \begin{proof}
-We need to show that $\CVP \in \P$ and that $\CVP$ is $\P$-hard.
+We need to show that $\CVP \in \P$ and that $\CVP$ is $\P$-hard i.e. $\forall L \in P, L \leq_{logspace} \CVP$. Remark that an element of $\CVP$ is $\anglebrac{C, w}$ which is a circuit $C$ and an input $w$. $\CVP \in P$ is simple so a topological sort on the associated digraph (number nodes so the arrow satisfies the index order) an evaluate. To show that $\CVP$ is $\P$-hard, we first construct the circuit $C$ associated with $L \in \P$; this can be done in log-space as shown in the $\P \subset \SIZE(poly)$ proof. $L$ has a poly-time decider. Take the input $x$ of the decider and form the input $\anglebrac{C, x}$ to $\CVP$.  
 \end{proof}
+
+\begin{theorem}
+$\mathsf{Circuit-SAT}$ is $\NP$-Complete.
+\end{theorem}
+\begin{proof}
+We will be using the verifier definition. Recall $\P \subseteq \SIZE(poly)$, that is poly-time TM can be simulated on poly-size circuits. Take a verifier $V(x, y)$ and make an associated poly-size circuit $C(x_1, ..., x_n, y_1, ..., y_{n^d})$. For each input $x$ form circuit $C_x(y) = C(x, y_1, ..., y_{n^d})$ by fixing $x_1, ..., x_n$ to be $x$. Then let the reduction take $x \mapsto C_x$.                            
+\end{proof}
+
+The two facts are necessary to get the circuit space bounds. We are not using diagonalization since the model (circuit complexity) is non-uniform. Here mostly combinatorial arguments work. 
+
+Two related problems in $\EXP$ and $\NEXP$ have to do with \textbf{succinct-Circuits}. Let $C(x_1, ..., x_n)$ be a boolean circuit with size exponential in $n$. $C$ can be described \textbf{succinctly} if every bit $i$ of the encoding of $C$ can be obtained by evaluating some small circuit (polynomial size) $D$ on input $i$. Think of $D(y_1, ..., y_m)$ is a polynomial sized compression of $C$. To use the circuit $C$, you would still need to uncompress it by running every string of length $m$ and concatenating the results, taking exponential time. \emph{Not all exponential-sized circuits can be compressed. In fact most exponential-sized circuits on $n$ inputs do not have associated circuits $D$ of size $poly(n)$.}
+
+\begin{theorem}
+Succinct-CVP is $\EXP$-complete under logspace reductions. Where succinct-CVP is defined as: given a circuit $D(y_1, ..., y_n)$ that is a succinct description of a circuit $C(x_1, ..., x_n)$ of size at most $2^n$, and an input $a \in \{0,1\}^n$, compute the value $C(a)$. 
+\end{theorem} 
+
+
+
 \end{document}

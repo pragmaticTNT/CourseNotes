@@ -1,0 +1,275 @@
+%
+% This is a borrowed LaTeX template file for lecture notes for CS267,
+% Applications of Parallel Computing, UCBerkeley EECS Department.
+% Now being used for CMU's 10725 Fall 2012 Optimization course
+% taught by Geoff Gordon and Ryan Tibshirani.  When preparing 
+% LaTeX notes for this class, please use this template.
+%
+% To familiarize yourself with this template, the body contains
+% some examples of its use.  Look them over.  Then you can
+% run LaTeX on this file.  After you have LaTeXed this file then
+% you can look over the result either by printing it out with
+% dvips or using xdvi. "pdflatex template.tex" should also work.
+%
+
+\documentclass[twoside]{article}
+\setlength{\oddsidemargin}{0.25 in}
+\setlength{\evensidemargin}{-0.25 in}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textwidth}{6.5 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+
+%
+% ADD PACKAGES here:
+%
+
+\usepackage{amsmath,amsfonts,amssymb, graphicx}
+\usepackage{color}
+\usepackage{comment}
+\usepackage{mathtools}
+\usepackage{tabu}
+
+%
+% The following commands set up the lecnum (lecture number)
+% counter and make various numbering schemes work relative
+% to the lecture number.
+%
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf CMPT 409: Theoretical Computer Science
+	\hfill Summer 2017} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill Lecture #1: #2  \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { {\it Lecturer: #3 \hfill Scribe: #4} }
+      \vspace{2mm}}
+   }
+   \end{center}
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+
+   %{\bf Note}: {\it LaTeX template courtesy of UC Berkeley EECS dept.}
+
+   %{\bf Disclaimer}: {\it These notes have not been subjected to the
+   %usual scrutiny reserved for formal publications.  They may be distributed
+   %outside this class only with the permission of the Instructor.}
+   \vspace*{4mm}
+}
+%
+% Convention for citations is authors' initials followed by the year.
+% For example, to cite a paper by Leighton and Maggs you would type
+% \cite{LM89}, and to cite a paper by Strassen you would type \cite{S69}.
+% (To avoid bibliography problems, for now we redefine the \cite command.)
+% Also commands that create a suitable format for the reference list.
+\renewcommand{\cite}[1]{[#1]}
+\def\beginrefs{\begin{list}%
+        {[\arabic{equation}]}{\usecounter{equation}
+         \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+         \setlength{\labelwidth}{1.6truecm}}}
+\def\endrefs{\end{list}}
+\def\bibentry#1{\item[\hbox{[#1]}]}
+
+%Use this command for a figure; it puts a figure in wherever you want it.
+%usage: \fig{NUMBER}{SPACE-IN-INCHES}{CAPTION}
+\newcommand{\fig}[3]{
+			\vspace{#2}
+			\begin{center}
+			Figure \thelecnum.#1:~#3
+			\end{center}
+	}
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+% **** IF YOU WANT TO DEFINE ADDITIONAL MACROS FOR YOURSELF, PUT THEM HERE:
+
+\newcommand\E{\mathbb{E}}
+\def\N{\mathbb{N}}
+\def\Z{\mathbb{Z}}
+\def\Q{\mathbb{Q}}
+\def\R{\mathbb{R}}
+\def\C{\mathbb{C}}
+\def\F{\mathbb{F}}
+\def\L{\mathcal{L}}
+\def\M{\mathcal{M}}
+
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+\DeclarePairedDelimiter\anglebrac{\langle}{\rangle}
+
+\begin{document}
+%\lecture{**LECTURE-NUMBER**}{**DATE**}{**LECTURER**}{**SCRIBE**}
+\lecture{2}{Predicate Logic (23 - 26 May)}{Ternovska, Eugenia}{Lily Li}
+%\footnotetext{These notes are partially based on those of Nigel Mansell.}
+
+\section{Predicate Calculus (First Order Logic)}
+A \textbf{first-order} vocabulary $\L$ is specified by:
+\begin{enumerate}
+\item For each $n \in \N$ a set of $n$-ary function symbols (possibly empty). $f,g,h, ..., +, \cdot, s$ are used as meta symbols for function symbols. A zero-ary function symbol is called a \textbf{constant symbol}.
+\item For each $n \geq 0$, a set of $n$-ary predicate symbols (must be non-empty for some $n$). $P, Q, R, ..., <, \leq, =$ are used as meta symbols for predicate symbos. A zero-ary predicate symbol is the same as a propositional atom. 
+\end{enumerate}  
+
+\subsection{First Order Language}
+Logical Symbols for formula building include:
+\begin{enumerate}
+\item Parenthesis $(,)$
+\item Connectives $\supset, \lnot$
+\item Variables $v_1, v_2, ...$
+\item Equality Symbol $=$
+\end{enumerate}
+
+Parameters include:
+\begin{enumerate}
+\item For all $\forall$ (depends on domain)
+\item Predicate symbols: $P_1, P_2, ...$ (have arity)
+\item Constant symbols: $c_1, C_2, ...$
+\item Function symbols.
+\end{enumerate}
+
+Each language mush contain at least one non-logical predicate symbol or equality. Examples of parameters is:
+\[L_A = \{0, s, \cdot, +, =\}\]
+where $0$ is a constant $s, \cdot, + $ are function symbols (first is unary, second and third are binary) and the equality signifies the language of arithmetics. The parameter $\forall$ is usually omitted in the definition and is implicit.
+
+For a language $L$, The \textbf{$L$-term} is defined as
+\begin{enumerate}
+\item Every variable is a term
+\item If $f$ is an $n$-ary ($n \geq 0$) function symbol, and $t_1, ..., t_n$ are terms then $f(t_1, ..., t_n)$ is a term. 
+\end{enumerate}
+
+We will just say \textbf{term} if the $\L$ is clear from context. Use $e, 0, 1$ as metasymbol for constants. All constants in $\L$ are $\L$-terms.
+
+\begin{theorem}
+\textbf{Unique Readability Theorem for Terms:} if terms $ft_1\cdots t_k$ and $fu_1\cdots u_l$ are syntactically equal, then $k = l$ and $t_i =_{syn} u_i, 1 \leq i \leq k$. This also hold for first-order formulas.
+\end{theorem}
+\begin{proof}
+Much like the Unique Readability Theorem in propositional logic, we will assign a weight to each symbol ($f$ gets $n-1$ and each variable gets $-1$) and claim that the total weight is $-1$. This is quite easy to see by a simple induction proof. Also, for $n \geq 1$, the initial part of the term has positive weight. Suppose $i$ is the first index where $t_i \neq_{syn} u_i$. Observe that either $t_i$ is the initial part of $u_i$ or $u_i$ is the initial part of $t_i$ (since $t_j = u_j$ for all $1 \leq j \leq i-1$). Neither is possible so we must have $t_i =_{syn} u_i$.  
+\end{proof}
+
+\textbf{On Notation:} use $r,s,t, ...$ to denote terms. 
+
+A \textbf{$L$-formula}, also vocabulary $\L$ or just formula, is defined as
+\begin{enumerate}
+\item $P(t_1, ..., t_n)$ is an \textbf{atomic formula} where $P$ is an $n$-ary predicate.
+\item If $A, B$ are $L$-formulas then are are $\lnot A$, $A \land B$, and $A \lor B$.
+\item If $A$ is an $L$-formula, $x$ is a variable then $\forall x, A$ and $\exists x A$ are formulas.
+\end{enumerate}
+
+The set $free(\phi)$ of \textbf{free variables} of formula $\phi$ satisfies: if $\phi$ is atomic then $free(\phi) :=$ the set of variable occurring in $\phi$. An occurrence of $x$ in $A$ is \textbf{bound} iff it is in a subformula of $A$ of the form $\forall x B$ or $\exists x B$. \emph{Note: a variable can have both free and bound occurrences in one formula.} E.g. $Px \land \forall x Q x$. 
+
+\begin{align*}
+free(\lnot \phi) := free(\phi) \\
+free(\phi \land \psi) := free(\phi) \cup free(\psi) \\
+free(\forall )
+\end{align*}
+
+If a formula $A$ or a term $t$ which does not have free variables (i.e. everything is quantified) is \textbf{closed}. A closed formula is a \textbf{sentence}. 
+
+\subsection{Semantics of FO Logic}
+Suppose a FO language $L$ is fixed \textbf{structure} give meaning to parameters. An $L$-structure $\M$ consists of 
+\begin{enumerate}
+\item A non-empty set $M$ called the domain (universe) of $\mathcal{M}$
+\item Variables of $\L$ range over $M$.
+\item For each $n$-ary function symbol $f \in \L$, there is an associated function $f^{\M}: M^n \mapsto M$. If $n = 0$, then $f$ is a constant symbol and $f^{\M}$ is simply an element of $M$.
+\item For each $n$-ary predicate symbol in $\L$, there is an associated relation $P^{\M} \subset M^n$. If $\L$ contains $=$, then $=^{\M}$ must be the true equality relation on $M$.
+\end{enumerate}
+Generally, predicate symbols can be interpreted as arbitrary relations of the appropriate arity, but not $=$. $=$ must be the equality relation.
+
+Every $\L$-sentence becomes either true or false when interpreted by an $\L$-structure $\M$ as follows: if a sentence $A$ becomes true under $\M$, then $\M$ \textbf{satisfies} $A$ or $\M$ is a model for $A$ (written $M \vDash A$). 
+
+A $\M$ is \textbf{finite} if the universe $M$ of $\M$ is finite. If a formula $A$ has free variables, then these variables must be interpreted as specific elements in the universe $M$ before $AA$ gets a truth value under $\M$. An \textbf{object assignment (o.a.)} $\sigma$ for struct. $\M$ is a mapping from variables to the universe $M$. Denote $\M \vdash A[\sigma]$ to mean struct. $\M$ satisfies formula $A$ when the free variables of $A$ are interpreted using o.a. $\sigma$. First we need to define the notion of  
+
+
+E.g. define the normal understanding of natural numbers as our structure $\M$. The short hand for this is: $(\N ; \leq, s, 0)$ where $s$ is the successor. Let $\sigma$ be $P^{ \M } = \{\anglebrac{u_1, u_2}: u_1 \leq u_2, u_1, u_2 \in M\}$, $c^{\M} = 0$, and $v_i \mapsto i-1$. Remark that the structure is the semantics (meaning) while languages provide the syntax (symbols). 
+
+Here is an idea: if you have to deal with binary relations it may useful to think about graphs and graphs structures. For example consider 
+\[\exists x \forall y: Pxy \vDash \forall y \exists x: Pxy\]
+how would one show that this is a valid logical implication? Let $x$ be a vertex, $y$ be an edge, and $P$ be $x$ is incident to edge $y$. The true of the logical implication is clear.   
+
+Next lets axiomatize first order logic. Consider Pagan's theorem: . It axiomatizes $\mathsf{NP}$ using second-order existential quantifiers (field of discrete complexity?)
+
+\begin{definition}
+A set of sentences is \textbf{consistence} if there exists a structure which satisfies every sentence in the set. 
+\end{definition}  
+
+Consider the set of sentences: $\forall x, \lnot S(x,x)$, $\exists x, P(x)$, $\forall x, \exists y S(x,y)$ (again use the graph interpretation...). You should see that this set $\Phi$ is consistent. To prove it, you need to present a model. Some are more detailed than others. The most general model is the best.
+
+\begin{theorem}
+(Compactness Theorem)
+\begin{enumerate}
+\item If $\Gamma \vDash \phi$ then $\Gamma_0 \vDash \phi$ for some finite $\Gamma_0 \subset \Gamma$.
+\item If every finite subset $\Gamma_0$ of $\Gamma$ is satisfiable, then $\Gamma$ is satisfiable.
+\end{enumerate} 
+Observe that this is quite similar to the compactness statement in propositional logic. However compactness does not hold for second order logic. It also fails when restricted to finite models.  
+\end{theorem}
+
+\textbf{Notation:} let $\Sigma$ be a set of sentences. $mod \Sigma$ are all the models of $\Sigma$. A class $k$ of structures for language $\L$ is an \textbf{elementary class (EC)} iff $K = mod \phi$ for some F.O. sentence $\phi$. $K$ is \textbf{elementary class in the wider sense (EC$\Delta$)} if $K = mod \Sigma$ for a set of sentences $\Sigma$.
+
+Consider the set of graphs with self loops. You can to axiomatize this structure and you will find that this in EC. However, if you only wanted finite such graphs, you are out of luck! You cannot axiomatize these graph using first order logic. This is not in EC and not even in EC$\Delta$.
+
+\begin{theorem}
+(Lowenheim-Skolem) If a set of sentences $\Sigma$ has an arbitrary large finite model then it has an infinite model.
+\end{theorem}
+\begin{proof}
+Here is what we are going to do: for each natural number $k \geq 2$ we are going to construct a sentence $\lambda_k$ such $\lambda_k$ has at least $k$ elements. Let $\lambda_2 := \exists x_1, \exists x_2 \lnot (x_1 = x_2)$. 
+\end{proof}
+
+\begin{corollary}
+The class of all finite structures (for a fixed language) is not EC$\Delta$.
+
+The class of all infinite structures is not EC.
+\end{corollary}
+
+\section{Substitution}
+\textbf{Syntactic Definition:} where $t, u$ are terms
+\begin{align*}
+t(u/x) &\mbox{ is } t \mbox{ after replacing } x \mbox{ with } u \\
+A(u/x) &\mbox{ is } A \mbox{ after replacing all \emph{free} occurances of } x \mbox{ with } u \\
+\end{align*}
+
+\textbf{Semantic Definition:} 
+\begin{lemma}
+For each struct. $\M$ and object assignment $\sigma$, for $m = u^{\M}[\sigma]$
+\[(t(u/x))^{\M}[\sigma] = t^{\M}[\sigma(m/x)]\]
+\end{lemma}
+\begin{proof}
+By structural induction on $t$.
+\end{proof}
+
+\begin{definition}
+Term $t$ is \textbf{freely substitutable} for $x \in A$ iff no free occurrence of $x \in A$ is in a subformula of $A$ that looks like $\forall yB$ or $\exists yB$ where $y$ occurs in $t$. 
+\end{definition}
+
+\begin{theorem}
+If $t$ is freely substitutable for $x \in A$ then for all structures $\M$ and all object assignments $\sigma$, $\M \vDash A(t/x)[\sigma] \iff \M \vDash A[\sigma (m/ x)]$, where $m = t^{\M}[\sigma]$.
+\end{theorem}
+\begin{proof}
+Wouldn't you believe it, it is \emph{more} structural induction on $A$.
+\end{proof}
+
+\end{document}
