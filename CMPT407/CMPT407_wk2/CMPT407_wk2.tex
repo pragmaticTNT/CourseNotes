@@ -415,9 +415,9 @@ Generally when deciding with circuits you need to slice the language depending o
 \item given a truth table of $f: \{0,1\}^n \rightarrow \{0,1\}$ you want the smallest circuit for $f$ (try not encoding the entire $2^n$ look-up table.
 \item Given a circuit $C_n: \{0,1\} \rightarrow \{0,1\}$ find the smallest equivalent circuit.
 \end{enumerate}
-Unfortunately both problems can only be solved by exhaustive search (currently). We also cannot categorize these problems in our hardness classes $\NP$, $NP$-complete etc.
+Unfortunately both problems can only be solved by exhaustive search (currently). We also cannot categorize these problems in our hardness classes $\NP$, $\NP$-complete etc.
 
-\textbf{Efficient Algorithms:} for uniform model (TM) it is the class $P$, while for non-uniform models (circuits) we want the class of poly-size which is a family $\{C_n\}$ such that $C_n \leq O(n^d)$ for some constant $d$. 
+\textbf{Efficient Algorithms:} for uniform model (TM - different size input same machine) it is the class $P$, while for non-uniform models (circuits - different size inputs different machine) we want the class of poly-size which is a family $\{C_n\}$ such that $C_n \leq O(n^d)$ for some constant $d$. 
 
 \begin{theorem}
 $\P \subseteq \mathsf{PolySize}$.

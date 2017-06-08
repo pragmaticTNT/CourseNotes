@@ -131,19 +131,74 @@
 \section{Review}
 Recall consistency means that there exists a structure which satisfies all sentences in the set. Recall the compactness theorem for f.o. logic. It does not hold for finite models and second order logic. Then we talked about elementary classes (and elementary in the wider sense). We concluded with the L\"{o}wenheim-Skolem Theorem. Induction and reachability (in graphs) are \emph{NOT} first order axiomatizable!
 
+Consider some notable classes of sentences:
+\begin{enumerate}
+\item Satisfiable sentence without a finite model: $\phi = \{\forall x\exists y: x < y, \forall x \lnot(x < x), \forall x\forall y\forall z, (x < z \land z < y \rightarrow x < y\}$. 
+\item Sentences with only finite models: all models of $\{\exists x\forall y, x = y\}$ have one element, all models of $\{\exists x\exists y \forall
+	z, z = y \lor z = y\}$ have at most two elements, etc. It turns out that this enumeration is the only way to exclude possible infinite models.
+\end{enumerate}
+
 \section{Definability in a Structure}
 Let $\M$ be a structure, $\phi$ a formula s.t. all free vars are among $v_1, ..., v_k$. Construct a relation:
 \[\{\anglebrac{a_1, ..., a_k} : \M  \vDash \phi[a_1, ..., a_k]\}\]
 where $\M$ satisfies $\phi$ with an assignment $\sigma$ such that $\sigma(v) = a_i$, $1 \leq i \leq k$. Then $\phi$ \textbf{defines} this relation $R$. A $k$-ary relation on $|\M|$ is definable in $\M$ iff there is a formula which defines it there. So relations can be defined in-terms of formulas with free variables. Consider $\mathcal{L}_A$ with the $\N$ structure. If we want the $<$ relations then $\phi(x,y) := \exists k, x + s(k) = y$. Consider also language $L$ with $=, f$ and structure $\M = \{\Z; \cdot\}$. Then what relation does the following relation define:$(\exists u, fxu = y) \land (\exists v, fxv = z)$?
 
 With structure $\mathcal{L}_A$, you can define a formula for the primes! So we need some formula with one free variable $\phi(x)$ as follows: 
+\[\forall y\forall z, x = y\cdot z \rightarrow y = 1 \lor z = y\]
 
-
+Let $C$ be a class of structures (such as the structure of all the graphs). Then $\phi$ defines $R$ in the class $C$ if $\phi$ defines that relation for every structure $\M$ in $C$. So we need to enforce in-degree and out-degree are both one in formulas: $\phi_1 = (\forall x \exists y, Exy) \land (\forall x \forall y \forall z, Exy \land Exz \rightarrow y = z$ and $\phi_2 = (\forall x \exists y, Eyx) \land (\forall x \forall y \forall z, Eyx \land Ezx \rightarrow y = z$ where $E$ is the relation $xy$ is an edge. 
 \begin{proposition}
 There is no FO formula with free variables $x, y$ which defines the relation:
 \emph{$x$ is reachable from $y$} in the class of a directed graphs.
 \end{proposition}
 \begin{proof}
-By contradiction. Suppose there is a formula $\Phi(x,y)$ which defines the relation above. 
+by contradiction. Suppose there is a formula $\phi(x,y)$ which defines the relation above. Then $\phi_0 := \forall x\forall y: \phi(x,y)$ means that the graph $G$ is strongly connected. Together with $phi_1$ and $phi_2$ (above), $\phi_3: \phi_0 \land \phi_1 \land \phi_2$ means that $G$ is a cycle. There are cycles of any length so $\phi_3$ has arbitrarily large finite models. By the L\"{o}w-Sk theorem $\phi_3$ has an infinite model. However, observe that all cycles are finite by the property of $\N$. Pick any node in the cycle. Label this node $0$. Since there is exactly one node $y$ such that $0y$ 
 \end{proof}
+
+\section{FO Gentzen System LK}
+(This is an extension of the Gentzen System PK.) For convention: $a,b,c$ are free variables and $x,y,z$ are bounded variables.
+
+A \textbf{formula} if proper if it follows the above convention (no free occurrences of bound variables). A \textbf{proper term} has no bound variable. Note that subformula of a proper formula might not be proper.
+
+Now we need some new rules to handle existential and universal quantifiers. They are:
+\begin{enumerate}
+\item $\forall$ introduction:
+\[\mbox{\textbf{left} } \frac{A(t), \Gamma \rightarrow \Delta}{\forall x A(x), \Gamma \rightarrow \Delta} \qquad \mbox{\textbf{right} } 
+\frac{\Gamma \rightarrow \Delta, A(t)}{\Gamma \rightarrow \Delta, \forall x A(x)} \]  
+\item $\exists$ introduction:
+\[\mbox{\textbf{left} } \frac{A(b), \Gamma \rightarrow \Delta}{\exists x A(x), \Gamma \rightarrow \Delta} \qquad \mbox{\textbf{right} } 
+\frac{\Gamma \rightarrow \Delta, A(b)}{\Gamma \rightarrow \Delta, \exists x A(x)} \]  
+\end{enumerate}   
+
+Next we are going to show general soundness and completeness, general validity. Later we will show derivational soundness and completeness, the validity of a set of logical axioms. Consider the \textbf{left} $\forall$ introduction rule. To check that it is sound we must ensure that every provable sequent is valid. 
+
+\begin{theorem}
+LK-Soundness: every sequent provable in LK is valid. LK-completeness: every valid sequent is provable in LK.
+\end{theorem}
+
+Instead of proving LK Soundness and Completeness directly, we will instead proved the stronger notions of Derivational Soundness and Completeness. Recall again in LK we talk about validity and provability. In the Derivational case we talk about satisfiability of non-logical axioms. G\"{o}del proved this, for but a different proof system (these are like Hilbert style, Gentzen LK, and Resolution). Note also that Derivational soundness does not hold in general. Consider the left and right $\forall$ rule. The bottom is \emph{not} a logical consequence of the top! Sentences are fine, but we want to be able to do a bit more so we use \textbf{Universal Closure} of formulas. If $A$ is a formula then its universal closure is $\forall A$ which is $A$ with all free variables of $A$ bounded by $\forall$. 
+
+\begin{theorem}
+Assume $=$ is not in the language $L$. There is an LK-$\Phi$ proof of $\Gamma\rightarrow\Delta$ if and only if $\forall \Phi \vDash \Gamma \rightarrow \Delta$. 
+\end{theorem}   
+\begin{proof}
+For soundness ($\implies$) we proceed by induction on the number of sequents in $\Phi$. If 
+
+For completeness ($\impliedby$) we need to first establish a lemma:
+\begin{lemma}
+If $\Phi \vDash \Gamma \rightarrow \Delta$ then there is a finite subset $\{C_1, ..., C_n\}$ of $\Phi$ such that $C_1, ..., C_n, \Gamma \rightarrow \Delta$ has an LK-proof without cut. 
+\end{lemma}
+
+Now consider why $=$ is not allowed in $L$... 
+\end{proof}
+
+Somethings to consider in light of G\"{o}del's proof:
+\begin{enumerate}
+\item Validity (universal truth) of a formula in any domain (finite, infinite, uncountable, countable, etc) universe can be proven by exhibiting a finite object i.e. \emph{proof}.
+\item The above property holds for any proof system.
+\item The Compactness theorem holds if and only if soundness and completeness holds. 
+\end{enumerate}
+
+\section{Herbrand Models}
+$L$-Ground instances (means for each quantified variables are quantified and the whole FO formula is turned into a propositional formula).
 \end{document}

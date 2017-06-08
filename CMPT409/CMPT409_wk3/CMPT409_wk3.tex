@@ -236,14 +236,21 @@ Consider the set of graphs with self loops. You can to axiomatize this structure
 (Lowenheim-Skolem) If a set of sentences $\Sigma$ has an arbitrary large finite model then it has an infinite model.
 \end{theorem}
 \begin{proof}
-Here is what we are going to do: for each natural number $k \geq 2$ we are going to construct a sentence $\lambda_k$ such $\lambda_k$ has at least $k$ elements. Let $\lambda_2 := \exists x_1, \exists x_2 \lnot (x_1 = x_2)$. 
+Here is what we are going to do: for each natural number $k \geq 2$ we are going to construct a sentence $\lambda_k$ such $\lambda_k$ has at least $k$ elements. Let $\lambda_2 := \exists x_1, \exists x_2 \lnot (x_1 = x_2)$, 
+\[\lambda_3 = \exists x_1\exists x_2\exists x_3: \lnot (x_1 = x_1) \land lnot (x_1 = x_3) \land \lnot (x_2 = x_3) \]
+and so on for all $k \in \N$. Consider $\Phi = \Sigma \cup \{\lambda_2, \lambda_3, ... \}$. Every finite subset of $\Phi$ has a model so by compactness theorem $\Phi$, and by extension $\Sigma$ has a model. Since the model of $\Phi$ is larger than any natural number it must be infinite, so $\Sigma$ has an infinite model.
 \end{proof}
 
 \begin{corollary}
-The class of all finite structures (for a fixed language) is not EC$\Delta$.
-
-The class of all infinite structures is not EC.
+From the above theorem we can conclude that:
+\begin{enumerate}
+\item The class of all finite structures (for a fixed language) is not EC$\Delta$.
+\item The class of all infinite structures is not EC.
+\end{enumerate}
 \end{corollary}
+\begin{proof}
+
+\end{proof}
 
 \section{Substitution}
 \textbf{Syntactic Definition:} where $t, u$ are terms
@@ -271,5 +278,4 @@ If $t$ is freely substitutable for $x \in A$ then for all structures $\M$ and al
 \begin{proof}
 Wouldn't you believe it, it is \emph{more} structural induction on $A$.
 \end{proof}
-
 \end{document}

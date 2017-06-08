@@ -127,10 +127,10 @@
 %\footnotetext{These notes are partially based on those of Nigel Mansell.}
 
 \section{Propositional Calculus}
-Again to reiterate: \textbf{syntax} has to do with the structure of strings of symbols (e.g. formulas and formal proofs) and the rules for their manipulation. \textbf{Semantics} has to do with meaning (e.g. validity).
+Again to reiterate: \textbf{syntax} has to do with the structure of strings of symbols (e.g. formulas and formal proofs) and the rules for their manipulation while \textbf{semantics} has to do with meaning (e.g. validity).
 
 \subsection{Syntax}
-Formulas come in different flavors. First we will discuss \textbf{propositional formulas} (i.e. atoms, negations, ands, and ors), later we will talk about \textbf{first-order formulas} (i.e. propositional formulas with universal and existential qualifiers).
+Formulas come in different flavors. First we will discuss \textbf{propositional formulas} (i.e. atoms, $\lnot$,$\lor$, and $\land$), later we will talk about \textbf{first-order formulas} (i.e. propositional formulas with universal and existential qualifiers).
 
 A \textbf{subformula} of a formula $A$ is any substring of $A$ which is also a formula (being a formula is important). We use the following notation:
 \begin{enumerate}
@@ -141,7 +141,7 @@ A \textbf{subformula} of a formula $A$ is any substring of $A$ which is also a f
 \begin{theorem}
 \textbf{Unique Readability}: a.k.a the grammar for generating formulas is unambiguous. Suppose $A, B, A', B'$ are formulas, $c, c'$ are binary connectives, and $(AcB) =_{syn} (A'c'B')$. Then $A =_{syn} A'$, $c =_{syn} c'$, and $B =_{syn} B'$. Where $=_{syn}$ means equality as symbols (not only meaning). 
 \end{theorem}
-We will introduce a definition and prove a lemma in order to prove the theorem. The \textbf{weight} of a formula $A$ is the sum of the weights of the symbols of $A$ where the symbols are assigned weights:
+We will introduce a new notion and prove a lemma in order to prove the theorem. The \textbf{weight} of a formula $A$ is the sum of the weights of the symbols of $A$ where the symbols are assigned weights:
 \begin{align*}
 0 &\mbox{ to } \lnot \\
 1 &\mbox{ to each binary connective } \land, \lor \\
@@ -177,7 +177,7 @@ We write $\vDash A$ to mean $\emptyset \vDash A$, $B \vDash A$ to mean $\{B\} \v
 Consider any truth assignment $\tau$. If $\tau$ satisfies $\Phi$ then $\tau$ satisfies $A$ since $\Phi \vDash A$. Thus $\tau$ satisfies $\Phi \cup \{A\}$ thus $\tau$ satisfies $B$. 
 \end{proof}
 
-A formula $A$ is \textbf{valid} iff $\vDash A$ (i.e. $A^{\tau} = T$ for all $\tau$). A valid propositional formula is a \textbf{tautology}. Formulas $A, B$ are equivalent, written $A \longleftrightarrow B$ iff $A \vDash B$ and $B \vDash A$ (this is "equivalent" as you would typically understand the word that is semantic equivalence. This is different from $=_{syn}$ (explain why). Typically it is the convention that $P, Q, R$ stand for \emph{distinct} atoms and $A, B, C,...$ could stand for identical formulas. 
+A formula $A$ is \textbf{valid} iff $\vDash A$ (i.e. $A^{\tau} = T$ for all $\tau$). A valid propositional formula is a \textbf{tautology}. Formulas $A, B$ are equivalent, written $A \longleftrightarrow B$ iff $A \vDash B$ and $B \vDash A$. This is "equivalent" as you would typically understand the word, that is semantic equivalence. This is different from $=_{syn}$ (explain why). Typically it is the convention that $P, Q, R$ stand for \emph{distinct} atoms and $A, B, C,...$ could stand for identical formulas. 
 
 \begin{proposition}
 $\Phi \vDash A \iff \Phi \cup \{\lnot A\}$ is unsatisfiable. Also $A$ is a tautology iff $\lnot A$ is unsatisfiable. 
@@ -197,10 +197,10 @@ Proof by structural induction on $A$. If $A$ is just one atom then the claim cle
 \end{proof}
 
 \begin{theorem}
-\textbf{Craig Interpolation Lemma} Given propositional formulas $A$ and $B$, let $S$ be the set of atoms which occur in both $A$ and $B$, and assume that $S$ is nonempty. If $A \supset B$ is valid, there is a formula $C$ (an \emph{interpolant}) containing only atoms from $S$ such that both $A \supset C$ and $C \supset B$ are valid. 
+\textbf{Craig Interpolation Lemma} Given propositional formulas $A$ and $B$, let $S$ be the set of atoms which occur in both $A$ and $B$, and assume that $S$ is nonempty. If $A \supset B$ is valid, there is a formula $C$ (an \emph{interpolant}) containing only atoms from $S$ such that both $A \supset C$ and $C \supset B$ are valid. (There is an equivalent notion in predicate logic)
 \end{theorem}
 \begin{proof}
-
+by induction on the number of atoms which are in $A$ but not in $B$. Let $atm(A)$ denote the atoms of $A$. If $|atm(A) - atm(B)| = 0$ then let $C = A$ and observe that $A \subset A$ and $A \subset B$ as required. Next suppose that $|atm(A) - atm(B)| = n$ for $n > 0$. Choose some atom $p \in atm(A) \backslash atm(B)$. Construct the new formula $A' = A[0/p] \lor A[1/p]$ where $A[0/p]$ is the formula $A$ with all instances of $p$ replaced with $0$. In this way we can try both assignments of $p$. By the induction hypothesis we can find an interpolant $C$ given $A' \subset B$. $C$ is also an interpolant of $A \subset B$ since $A \subset A'$.   
 \end{proof}
 
 \subsection{DNF and CNF}
@@ -294,11 +294,7 @@ A formal \textbf{proof} in the propositional sequent calculus PK is a finite tre
 
 There are a set of rather long rules which drives the proof forward. Typically we denote finite sequences as $\Gamma, \Delta$ and formulas as $A, B$. Of particular importance is the cut rule
 
-\begin{tabular}{c}
-$\Gamma \rightarrow \Delta, A \quad A, \Gamma \rightarrow \Delta$ \\
-\hline
-$\Gamma \rightarrow \Delta$ \\
-\end{tabular}
+\[\frac{\Gamma \rightarrow \Delta, A \quad A, \Gamma \rightarrow \Delta}{\Gamma \rightarrow \Delta}\]
 The formula $A$ is called the \textbf{cut formula}. 
 
 \begin{theorem}
@@ -319,18 +315,7 @@ Consider here only the left contraction, that is $\Gamma, A \rightarrow \Delta$ 
 
 \begin{proposition}
 Suppose that we allow $\supset$ (implication) as a primitive connective, rather than one introduced by definition. The left and right introduction rules for $\supset$ is as follows (resp.):
-
-\begin{tabular}{c}
-$\Gamma \rightarrow A, \Delta \quad B, \Gamma \rightarrow \Delta$ \\
-\hline
-$(A \supset B), \Gamma \rightarrow \Delta$ \\
-\end{tabular}
-
-\begin{tabular}{c}
-$A, \Gamma \rightarrow \Delta, B$ \\
-\hline
-$\Gamma \rightarrow \Delta, (A \supset B)$ \\
-\end{tabular}
+\[\frac{\Gamma \rightarrow A, \Delta \quad B, \Gamma \rightarrow \Delta}{(A \supset B), \Gamma \rightarrow \Delta}\quad (\mbox{\textbf{Left} }\subset )\qquad\frac{A, \Gamma \rightarrow \Delta, B}{\Gamma \rightarrow \Delta, (A \supset B)}\quad (\mbox{\textbf{Right} }\subset )\]
 \end{proposition}
 
 \begin{theorem}
@@ -366,10 +351,12 @@ To prove derivational completeness consider a finite set of sequents $\Phi = \{S
 \textbf{Compactness Theorem} A set $\Sigma$ of wff (well formed formula) is satisfiable iff every finite subset of it is satisfiable. 
 \end{theorem}
 \begin{proof}	
-Enumerate all the wffs: $\alpha_1, \alpha_2, ...$ 
-Proof by contradiction: suppose that a finite subset $S$ of $\Delta = \cup_{n} \Delta_n$, defined above, is not satisfiable.  
+There is two directions to prove. If a set of wff is satisfiable then clearly any finite subset is satisfiable (use the same assignment). Suppose every finite subset of $\Sigma$ is satisfiable. Enumerate all the wffs: $\alpha_1, \alpha_2, ...$ (consider why the wffs are countable). We first extend $\Sigma$ to a maximal satisfying set $\Delta$. Then we show that $\Delta$ is finitely satisfiable. Define $\Delta = \cup_n \Delta_n$ where $\Delta_i$ is defined inductively. Let $\Delta_0 = \Sigma$. For $i > 0$, $\Delta_{i+1} = \Delta_{i} \cup \{a_{i+1}\}$ if $\Delta_n \cup \{a_{n+1}\}$ is satisfiable and $\Delta_{i+1} = \Delta_{i} \cup \lnot \{a_{i+1}\}$ otherwise. Lets see why this definition works:
 
-\textit{Goal:} construct a trust assignment $\tau$ which satisfies $\Delta$.
+\begin{enumerate}
+\item $\Delta_n$ is finitely satisfiable for every $n$: suppose for a contradiction that $\Delta_n$ is finitely satisfiable, but neither $\Delta_{n}\cap \{a_{n+1}\}$ nor $\Delta_{n} \cap \lnot\{a_{n+1}\}$ are. Then some finite subsets $\Sigma_1$ and $\Sigma_2$ of $\Delta_n$ such that $\Sigma_1 \cap \{a_{n+1}\}$ and $\Sigma_2 \cap \not\{a_{n+1}\}$ are unsatisfiable. This means that $\lnot a_{n+1}$ is a logical consequence of $\Sigma_1$ and $a_{n+1}$ is a logical consequence of $\Sigma_2$. Observe that $\lnot a_{n+1} \land a_{n+1}$ is a logical consequence of $\Sigma_1 \cup \Sigma_2$ which is not satisfiable. Thus $\Delta_n$ which contains $\Sigma_1 \cup \Sigma_2$ is also not satisfiable, a contradiction.
+\item $\Delta$ is finitely satisfiable: I have the feeling that you could use Zorn's lemma to show that this is true. Our partial order is by inclusion. Our set elements are finitely satisfiable sets containing $\Sigma$. Then there must be a maximal finitely satisfiable set, namely $\Delta$. Alternatively you could again proceed by induction. Some finite subset $S \subset \Delta$ is not finitely satisfiable. We hope to show that $S \subset \Delta_n$ for some $n$ to obtain our contradiction. $S$ contains a finite number of wffs from our enumeration. Let $i$ be the largest index of all the wff. Observing that $S \subset \Delta_i$ concludes the proof.    
+\end{enumerate}  
 
 \textit{Define:} $\tau(P) = T \iff P \in \Delta$ for each propositional atom $P$.
 
@@ -384,17 +371,12 @@ so for (an infinite) $\Delta$, we constructed a truth assignment which satisfies
 
 \end{proof}
 
-Does the proof of compactness in these use this axiom of choice?
+Does the proof of compactness in these use this axiom of choice? Well, yes since Zorn's lemma is equivalent to the axiom of choice. Recall that the axiom of choice states that: for any set $X$ of non-empty sets, there exists a choice function $f$ defined on $X$. \emph{Think of $f$ as choosing a ball from an urn and $X$ is a collection of urns.} Observe that the above only works when the set of atoms is countable. To extend to an uncountable set of atoms we can use mathematical concepts such as compactness.s
 
 \subsection{Hilbert Style}
 Observe the following semantic notion:
 \[\{A, A \supset B\} \vDash \{B\}\]
-rules of inference include:
-\begin{tabular}{c}
-$A, A \supset B$ \\
-\hline
-$B$ \\
-\end{tabular}
-these are unconditional.
+rules of inference, including the following, are unconditional:
+\[\frac{A, A \subset B}{B}\]
 
 \end{document}

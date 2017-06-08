@@ -190,24 +190,6 @@ $\TAUT$ is $\coNP$-complete
 \end{proposition}
 \begin{proof}
 
-\end{proof}
-
-\section{Introduction to Polynomial Hierarchy}
-
-Polynomial hierarchy $\PH$ is the generalization of the classes $\P, \NP$, and $\coNP$. There are an infinite number of subclasses in $\PH$ which are conjectured to be distinct (stronger version of $\P \neq \NP$. Three definitions of $\PH$ are as follows:
-\begin{enumerate}
-\item defined as the set of languages defined via polynomial-time predicates combined with a constant number of alternating for all and exists quantifiers, generalizing the definitions of $\NP$ and $\coNP$. 
-\item defined interms \textbf{alternating TM} which generalize NTM.
-\item defined using \textbf{oracle TM}.
-\end{enumerate}
-
-\begin{theorem}
-(Fortnow) $\SAT \notin \mathsf{TimeSpace} (n^{1.1}, n^{0.1})$. This means you have $O(n^{1.1})$ time and $O(n^{0.1})$ space, then you definitely cannot solve $\SAT$.
-\end{theorem}
-\begin{proof}
-We will use the following two ideas: (1) $\NTime$-Hierarchy and (2) Poly Hierarchy (alternation). 
-
-First (2) denoted by $\PH$. Note $\NP, \coNP \subset \PH$, where $\NP = \exists \bar{x}: \phi(x_1, ..., x_n)$ and $\coNP = \forall \bar{x}: \phi (x_1, ..., x_n)$, since $\PH$ is the set of first order logical statements with any number alternating $\forall$ and $\exists$. 
 \end{proof} 
 
 \section{Nondeterministic Time Hierarchy}
@@ -218,8 +200,12 @@ Much like deterministic time hierarchy and space hierarchy, we need some way to 
 \[\NTime (f(n)) \subsetneq \NTime (g(n))\]
 \end{theorem} 
 \begin{proof}
-This is requires a different tool than diagonalization. The difficulty is due to the lack of closure for complementation in $\NP$ (not known if $\coNP = \NP$). Enumerate all NTM $M_1, M_2, ...$ which are clocked to run in less than $f(n)$ steps over the unary alphabet (this strengthens the theorem). Let $L(M_i)$ be the language of machine $M_i$. Let $t(n)$ be a fast growing function split the natural numbers into intervals $[1, ..., t(n)], [t(n) + 1, ..., t^{(2)}(n)], ...$ indexed $I_1, I_2, ...$ where interval $I_i = [t^{i-1}(n), ..., t^{i}(n)]$ where $t^{k}(n)$ is the composition of $t(n)$, $k$ times. Define NTM $D$ which diagonalizes all $M_i$.  
+This is requires a different tool than diagonalization. The difficulty is due to the lack of closure for complementation in $\NP$ (not known if $\coNP = \NP$). Enumerate all NTM $M_1, M_2, ...$ which are clocked to run in less than $f(n)$ steps over the unary alphabet (this strengthens the theorem). Let $L(M_i)$ be the language of machine $M_i$. Let $t(n)$ be a fast growing function and split the natural numbers into intervals $[1, ..., t(n)], [t(n) + 1, ..., t^{(2)}(n)], ...$ indexed $I_1, I_2, ...$ where interval $I_i = [t^{i-1}(n) + 1, ..., t^{i}(n)]$ and $t^{k}(n)$ is the composition of $t(n)$, $k$ times. Define NTM $D$ which diagonalizes all $M_i$ as follows: give machine $M_i$ interval $i$ to work with for simplicity label this interval $[u_0, ..., u_m]$. The values of $D$ for $I_i$ is defined as: on input $1^{u_i}$ for $0 \leq i < m$, $D$ accepts if $M_i$ accepts $1^{u_{i+1}}$. On input $1^{u_m}$, $D$ accepts if $M_i$ rejects $1^{u_0}$.     
 \end{proof}
+
+\begin{proposition}
+There exists a universal NTM $U$ which simulates a given NTM $M$ on input $x$ so that, if $M$ takes time $t$ on $x$, the the simulation by $U$ takes at most $c_M\cdot t$ time for some constant $c_M$. 
+\end{proposition}
 
 \section{Decision to Search}
 Consider the difference between $\SAT$ (a decision problem) and the corresponding search problem $\SAT$-search which asks for an assignment. 
@@ -228,33 +214,75 @@ Consider the difference between $\SAT$ (a decision problem) and the correspondin
 $\SAT \in \P \implies \mathsf{SAT-SEARCH}$ is poly-time.
 \end{theorem}
 \begin{proof}
-Surprisingly intuitive! Image a $\SAT$ instance $\phi(x_1, ..., x_n)$ that you want to find an assignment for. Randomly assign $x_1 = 1$ and ask the polynomial $\SAT$ for the decidability of $\phi(1, ..., x_n)$.
+Surprisingly intuitive! Image a $\SAT$ instance $\phi(x_1, ..., x_n)$ that you want to find an assignment for. Randomly assign $x_1 = 1$ and ask the polynomial $\SAT$ for the decidability of $\phi(1, ..., x_n)$. If it says yes, then proceed on and randomly assign $x_2$. Otherwise assign $x_1 = 0$ and randomly assign $x_2$.
 \end{proof}
 
 Suppose that we are given that $\SAT \in \Time (n^c)$ then we can actually find an explicit $\SAT$ algorithm that runs in $O(n^{2+c})$.
 
-\section{Polynomial Hierarchy}
-\begin{definition}
-For $i \geq 1$, a language $L$ is in $\sup^P_2$ if there exists a polynomial-time TM $M$ and a polynomial $q$ such that
-\[x \in L \iff \exists u_1\in \{0,1\}^{q(|x|)} \forall u_2 \in 
-\{0, 1\}^{q(|x|)} \cdots Q_i u_i \in \{0,1\}^{q(|x|)} M(x, u_1, ..., u_i) = 1\]
-where $Q_i$ is a $\forall$ or a $\exists$ depending if $i$ is even or odd. \textbf{Polynomial hierarchy (PH)} is $\PH = \cup_{i} \sum^P_2$.
-\end{definition}
+\begin{theorem}
+(Levin's Universal Search) Suppose $\SAT \in \Time(n^c)$ for a known constant $c > 0$ for some black box algorithm. Then there exists an explicit polytime algorithm that solves $\SAT$ in time $O(n^{c+2}\cdot \log^2 n + t_0(n)\cdot n)$, where $t_0(n) \in \mathsf{poly}(n)$ is the time needed to check if a given assignment satisfies a specified $\SAT$ instance of size $n$.   
+\end{theorem}
+\begin{proof}
+$\SAT$-search is solved in $O(n^{c+1})$ by the above algorithm and using the black-box. The explicit algorithm to solve $\SAT$ takes input $\phi$ of size $n$ and loops from $1$ to $n$ as follows: simulate TM $M_i$ on $\phi$ for $O(n^{c+1}\cdot \log^2 n)$ steps. If $M_i$ produces a satisfying assignment for $\phi$ except and halt. If the loop terminates and no satisfying assignment was found, reject. Why does this work? \textcolor{red}{Think about it!}
+\end{proof}
 
-\emph{The polynomial hierarchy does not collapse.}
+\section{Introduction to Polynomial Hierarchy}
+
+Polynomial hierarchy $\PH$ is the generalization of the classes $\P, \NP$, and $\coNP$. There are an infinite number of subclasses in $\PH$ which are conjectured to be distinct (stronger version of $\P \neq \NP$. Three definitions of $\PH$ are as follows:
+\begin{enumerate}
+\item defined as the set of languages defined via polynomial-time predicates combined with a constant number of alternating for all and exists quantifiers, generalizing the definitions of $\NP$ and $\coNP$. 
+\item defined in-terms \textbf{alternating TM} which generalize NTM.
+\item defined using \textbf{oracle TM}.
+\end{enumerate}
 
 \begin{theorem}
-The following hold:
-\begin{enumerate}
-\item For every $i \geq 1$, if $\sum^P_i = \prod^P_i$ then $\PH = \sum^P_i$ i.e. the hierarchy collapses to the $i$th level.
-\item If $\P = \NP$ then $PH = P$ i.e. the hierarchy collapses to $\P$. 
-\end{enumerate}
+(Fortnow) $\SAT \notin \mathsf{TimeSpace} (n^{1.1}, n^{0.1})$. This means you have $O(n^{1.1})$ time and $O(n^{0.1})$ space, then you definitely cannot solve $\SAT$.
 \end{theorem}
 
-\begin{proposition}
-$\PH \subseteq \PSPACE$.
-\end{proposition}
+We will use the following two ideas: (1) $\NTime$-Hierarchy and (2) Poly Hierarchy (alternation). Before we begin the proof we need some tools. 
+
+First (2) denoted by $\PH$. Note $\NP, \coNP \subset \PH$, where $\NP = \exists \bar{x}: \phi(x_1, ..., x_n)$ and $\coNP = \forall \bar{x}: \phi (x_1, ..., x_n)$, since $\PH$ is the set of first order logical statements with any number alternating $\forall$ and $\exists$. 
+
+Let a $k$-ary relation $R$ be \textbf{polynomially balanced} if, for every tuple $(a_1, ..., a_k) \in R$, the lengths of all $a_i$'s are polynomially related to each other.
+
+\begin{definition}
+For any $i\geq 1$, a language $L \in \sum_{i}^{p}$ iff there is a polynomially balanced $(i+1)$-ary relation $R$ such that 
+\[L = \{x: \exists y_1\forall y_2 \exists y_3 \cdots Q_iy_iR(x, y_1, ..., y_i)\}\]
+where $Q_i \in \{\forall, \exists\}$ depending on the parity of $i$. 
+\end{definition}
+
+\begin{definition}
+For any $i\geq 1$, a language $L \in \prod_{i}^{p}$ iff there is a polynomially balanced $(i+1)$-ary relation $R$ such that 
+\[L = \{x: \forall y_1\exists y_2 \forall y_3 \cdots Q_iy_iR(x, y_1, ..., y_i)\}\]
+where $Q_i \in \{\forall, \exists\}$ depending on the parity of $i$. 
+\end{definition}
+
+Remark that $\NP \in \sum_{1}^{p}$ and $\coNP \in \prod_{1}^{p}$. In general $\prod_{i}^{p} =\mathsf{co}\sum_{i}^{p}$. $\PH = \cup_{i\geq 0}\sum_{i}^{p}$. Examples of $\PH$ include: $\mathsf{UNIQUE-SAT} \in \sum_{2}^{p}$, $\mathsf{MIN-CIRCUIT} \in \prod_{2}^{p}$. 
+\begin{theorem}
+$\PH \subseteq \PSPACE$
+\end{theorem}
 \begin{proof}
 
+\end{proof}
+
+Another definition of $\PH$ does things recursively: $\sum_{0}^{p} = \prod_{0}^{p} = \P$. For all $i \geq 0$ define $\sum_{i}^{p} = \NP^{\prod_{i-1}^{p}}$ and $\prod_{i}^{p} = \coNP^{\sum_{i-1}^{p}}$.
+
+\begin{theorem}
+This alternate definition is same as the previous one. 
+\end{theorem}
+\begin{proof}
+By induction on $i$. 
+\end{proof}
+
+Another definition is in-terms of Oracle TM. This TM has a special \emph{oracle tape}. By entering a special state $q?$. In one time step you will end up in $q_{yes}$ or $q_{no}$ depending on what you put on the oracle tape as input. Consider the following: clearly $\SAT \in \P^{\SAT}$. Can you see why $\mathsf{UNIQUE-SAT} \in \NP^{\SAT}$? How about $\mathsf{UNIQUE-SAT} \in \P^{\SAT}$? \emph{Here is the hint for the second question: you need to use the idea from $\mathsf{SEARCH-SAT}$ and the idea from the previous question.}
+
+The definition of $\PH$ in-terms the Oracle TM is then:
+
+\begin{theorem}
+Again, this alternate definition is equivalent to the original definition.
+\end{theorem} 
+
+\begin{proof}
+(Fortnow).
 \end{proof}
 \end{document}

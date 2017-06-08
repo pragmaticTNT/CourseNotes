@@ -124,6 +124,11 @@
 \def\Time{\mathsf{Time}}
 \def\SAT{\mathsf{SAT}}
 \def\SIZE{\mathsf{SIZE}}
+\def\PSPACE{\mathsf{PSPACE}}
+\def\NTime{\mathsf{NTime}}
+\def\TiSp{\mathsf{TiSp}}
+\def\poly{\mathsf{poly}}
+\def\PolySize{\mathsf{PolySize}}
 
 \DeclarePairedDelimiter\ceil{\lceil}{\rceil}
 \DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
@@ -131,8 +136,84 @@
 
 \begin{document}
 %\lecture{**LECTURE-NUMBER**}{**DATE**}{**LECTURER**}{**SCRIBE**}
-\lecture{3}{Poly-Time Hierarchy (29 May - 2 June)}{Valentine Kabanets}{Lily Li}
+\lecture{3}{Polynomial Hierarchy (29 May - 2 June)}{Valentine Kabanets}{Lily Li}
 %\footnotetext{These notes are partially based on those of Nigel Mansell.}
 
+\section{Polynomial Hierarchy}
+\begin{definition}
+For $i \geq 1$, a language $L$ is in $\sup^P_2$ if there exists a polynomial-time TM $M$ and a polynomial $q$ such that
+\[x \in L \iff \exists u_1\in \{0,1\}^{q(|x|)} \forall u_2 \in 
+\{0, 1\}^{q(|x|)} \cdots Q_i u_i \in \{0,1\}^{q(|x|)} M(x, u_1, ..., u_i) = 1\]
+where $Q_i$ is a $\forall$ or a $\exists$ depending if $i$ is even or odd. \textbf{Polynomial hierarchy (PH)} is $\PH = \cup_{i} \sum^P_i$.
+\end{definition}
 
+\emph{The polynomial hierarchy does not collapse.}
+
+\begin{theorem}
+The following hold:
+\begin{enumerate}
+\item For every $i \geq 1$, if $\sum^P_i = \prod^P_i$ then $\PH = \sum^P_i$ i.e. the hierarchy collapses to the $i$th level.
+\item If $\P = \NP$ then $\PH = \P$ i.e. the hierarchy collapses to $\P$.
+\item If $\NP = \coNP$, then $\PH = \NP$ e.e. the hierarchy collapses to $\NP$.  
+\end{enumerate}
+\end{theorem}
+\begin{proof}
+(We will be doing the third one.) Proof by induction on $i$. Consider $L \in \Sigma_{2}^{p}$. Interpret every element $x \in L$ as $\exists y \forall z: R(x,y,z)$. Think of a special language $L' = \phi(x,y)$ such that $R'(\phi (x,y), z) = R(x,y,z)$. Then we have $\forall z: R'(\phi(x,y), z)$ which is an instance of $\Pi_{1}^{p}$. Since we assumed that $\Pi_{1}^{p} = \Sigma_{1}^{p}$, it follows that $\exists w: R"(\phi(x,y), w) = \forall z: R'(\phi(x,y), z)$. Thus we have collapsed $\Sigma_{2}^{p}$ to $\Sigma_{1}^{p}$. In general, if you want to collapse $\Sigma_{i}^{p}$ to $\Sigma_{1}^{p}$ you can do it by induction. Item two is a corollary of item three (\emph{what we just showed}). The proof of item one is very similar to the proof of item three. In the base case we have that $\sum^P_i = \prod^P_i$. Suppose for $n > i$, $\sum^P_i = \sum^P_n$. Show that the same holds for $n+1$. Consider $L \in \sum^P_{n+1}$. Then there exists a polytime polybalanced relation $R$ such that $x$ is in $L$ if and only if  $\exists y_1\forall y_2\exists y_3 \cdots \exists y_{n+1} R(x, y_1, y_2, ..., y_{n+1}$. Consider the language $L' = \{(x,y): \forall y_2\exists y_3 \cdots \exists y_{n+1} R(x,y,y_2, ..., y_{n+1}\}$. The key is to think of $(x,y)$ as a single variable and observe that $L' \in \Pi^P_{n}$. Since $\Pi^P_{n} = \Sigma^P_{n}$, it must also be the case that $L' \in \Sigma^P_{n} = \Sigma^P_i$. Thus $L'$ consists of all $(x,y)$ such that $\exists y_1\forall y_2\exists y_3 \cdots R'((x,y), y_1, y_2, ..., y_{i})$. Thus $x \in L$ if and only if $\exists (y, y_1)\forall y_2\exists y_3 \cdots R'(x, (y, y_1), y_2, ..., y_{i})$ and $L \in \Sigma^P_{i}$.   
+\end{proof}
+
+In addition to number 3, we can show the following:
+\begin{theorem}
+If $\PH = \Sigma^p_i$ for some $i \geq 1$, then $\Sigma^p_i = \Pi^p_i$. 
+\end{theorem}
+\begin{proof}
+To see this, observe that $\Pi^p_i \subset \Sigma^p_i$. Taking the complement of this inclusion, we get that $\Sigma^p_i \subset \Pi^p_i$.
+\end{proof}
+
+Together we have that for $i \geq 1$, $\PH = \Sigma^p_i$ if and only if $\Sigma^p_i = \Pi^p_i$.
+
+\emph{An interesting result:} Graph Isomorphism is \emph{not} $\NP$-complete, \textcolor{red}{unless} $\PH$ collapses $\PH = \Sigma_{2}^{p}$. This is proved by interactive proofs. 
+
+Now we are ready to prove the Time-Space trade-off for $\SAT$. 
+\begin{theorem}
+(Fortnow) $\SAT \notin \TiSp (n^{1.1}, n^{0.1})$. This means you have $O(n^{1.1})$ time and $O(n^{0.1})$ space, then you definitely cannot solve $\SAT$.
+\end{theorem}
+\begin{proof}
+We will first prove the following lemma. 
+\begin{lemma}
+$\NTime (n) \not\subseteq \TiSp (n^{1.2}, n^{0.2})$.
+\end{lemma}
+\begin{proof}
+This lemma is quite difficult to prove and it requires a good handle on a large number of moving parts. Pay attention! First we define $\Sigma_2$-computation with running time $t$: these are the languages with formulas
+\[\phi(x) = \exists y \in \{0,1\}^{O(t(n))}\forall z \in \{0,1\}^{O(t(n))}\psi(x,y,z)\]
+where $\psi$ is a predicate computable in deterministic time. Lets begin. Suppose for a contradiction that $\NTime(n) \subseteq \TiSp(n^{1.2}, n^{0.2})$. By padding the inputs to all languages in $\NTime(n)$ we have that $\NTime(n^{10}) \subseteq \TiSp(n^{12}, n^{2})$. We will now show that $\TiSp(n^{12}, n^{2}) \subset \Sigma_2 \Time(n^8)$. That is, by introducing some alternation we can remove the space bound. 
+
+Choose any language $L \subset \TiSp(n^{12}, n^{2})$ and let TM $M$ decide $L$. Let $x$ be an input to $L$ of length $n$. $x$ can be computed in $O(n^{12})$ and $O(n^2)$ time and space simultaneously. Equivalently, $x \in L$ if and only if $\exists c_1, \exists c_2 \cdots \exists c_{n^{12}} R(x, c_1, ..., c_{n^{12}})$. Were each $c_i$ is a configuration on the work tape so $|c_i| \leq O(n^2)$. Divide the configurations into $n^6$ blocks of $n^6$. We will only consider the first and last configurations as well as configurations between two blocks. These $n+1$ configurations are: $c_0, c_{n^6}, c_{2n^6}, ..., c_{n^{12}}$. We forms a $\Sigma_2 \Time (n^8)$ as follows: 
+\[\exists (c_0, c_{n^6}, c_{2n^6}, ..., c_{n^{12}}) \forall i \in {1, ..., n^{6}}: c_{in^6} \mbox{ can be reached from } c_{(i-1)n^6} \mbox{ in } O(n^6) \mbox{ steps.} \]
+here $(c_0, c_{n^6}, ..., c_{n^{12}})$ is consider one large input. Checking that $c_{in^6}$ can be reached from $c_{(i-1)n^6}$ can be done in $O(n^{8})$ time since you simply need to keep track of the $n^2$ bit configuration tape over $n^6$ time steps. 
+
+Next we need to see that $\NTime (n) \subseteq \Time (n^{1.2})$ then $\Sigma_2 \Time (n^8) \subset \NTime (n^{9.6})$. What we are not going to do is trade alternation for non-determinism. First note that $\Sigma_2 \Time (n^8)$ is of the form $\exists y \in \{0,1\}^{O(|x|^8)}\forall z \in \{0,1\}^{O(|x|^8)}: \psi (x,y,z)$. Just like in the collapsing Polynomial Hierarchy proof we can rewrite this as: all inputs $(x,y)$, $\forall z, \psi (x,y,z)$. If you squint a little this should look a $\coNP$ instance. If $\NTime (n) \subset \Time (n^{1.2})$ then $\mathsf{coNTime} (n) \subseteq \Time (n^{1.2})$ as well (why?). Look carefully and you will notice that $1.2 \times 8 = 9.6$. This is not a coincidence. With padding, we have that $\mathsf{coNTime} (n^8) \subseteq \Time (n^{9.6})$.  
+
+Since we have $\NTime (n) \subset \TiSp (n^{1.2}, n^{0.2})$ by assumption, $\NTime (n) \subset \Time (n^{1.2})$ (just ignore the space constraint), so indeed we can make the above conversion. Through this chain of inclusions we have reached $\NTime (n^{10}) \subset \NTime (n^{9.6})$, but this contradicts non-deterministic time hierarchy so our assumption $\NTime (n) \subset \TiSp (n^{1.2}, n^{0.2})$ is false.   
+\end{proof}
+
+Why is this sufficient? Well, for any language in time $\NTime (t(n))$ can be reduced to a $\SAT$-instance of size $O(t \log t)$. Where the reduction itself takes $\poly (\log n)$ space and time (how?). Thus if $\SAT \in \TiSp(n^{1.1}, n^{0.1})$ then $\NTime (n) \subseteq \TiSp (n^{1.1}\poly (\log n), n^{0.1} \poly (\log n))$.
+\end{proof}
+
+Using the above techniques we can improve the above time and space bounds but we cannot get to quadratic space unfortunately. There are also a lot of other weird statements in complexity of the form 
+\[\mbox{unlikely statement } \implies \mbox{superunlikely statement}\]
+here are a sampling: 
+
+\begin{proposition}
+(Karp-Lipton) If $\NP \subseteq \PolySize \implies \PH = \Sigma_2^p$.
+\end{proposition}
+\begin{proof}
+
+\end{proof}
+
+\begin{proposition}
+(A. Meyer). $\EXP \subseteq \PolySize \implies \EXP = \Sigma_2^p$. 
+\end{proposition}
+\begin{proof}
+
+\end{proof}
 \end{document}
