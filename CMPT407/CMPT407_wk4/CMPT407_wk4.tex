@@ -4,13 +4,6 @@
 % Now being used for CMU's 10725 Fall 2012 Optimization course
 % taught by Geoff Gordon and Ryan Tibshirani.  When preparing 
 % LaTeX notes for this class, please use this template.
-%
-% To familiarize yourself with this template, the body contains
-% some examples of its use.  Look them over.  Then you can
-% run LaTeX on this file.  After you have LaTeXed this file then
-% you can look over the result either by printing it out with
-% dvips or using xdvi. "pdflatex template.tex" should also work.
-%
 
 \documentclass[twoside]{article}
 \setlength{\oddsidemargin}{0.25 in}
@@ -207,13 +200,10 @@ here are a sampling:
 (Karp-Lipton) If $\NP \subseteq \PolySize \implies \PH = \Sigma_2^p$.
 \end{proposition}
 \begin{proof}
+Recall from the above, that showing $\Sigma_2^p = \Pi_2^p$ is enough to prove that $\PH = \Sigma_2^p$. But it is actually enough to show that $\Pi_2^p \subseteq \Sigma_2^p$ to show that $\Sigma_2^p = \Pi_2^p$ (because $\exists y\forall z R(x,y,z)$ logically implies $\forall z\exists y R(x,y,z)$ ). By our assumption that $\NP \subseteq \PolySize$, we can find a polynomial size circuit for $\SAT$. Further we have seen that when we have a reasonably fast decider for $\SAT$ we can also solve $\mathsf{Search-SAT}$ on the same complexity order. Namely, there exists a polynomial family of circuits $C_n$ such that on an propositional formal $\psi$ of size $n$, $C_n(\psi)$ finds a satisfying assignment for $\psi$ or outputs a string of zeros if $\psi$ is not satisfiable. 
 
-\end{proof}
-
-\begin{proposition}
-(A. Meyer). $\EXP \subseteq \PolySize \implies \EXP = \Sigma_2^p$. 
-\end{proposition}
-\begin{proof}
-
+Now consider a language $L \in \Pi_2^p$. An input $x \in L$ if and only if $\forall y \exists z: R(x,y,z)$ for some polytime polybalanced relation $R$ (by definition). For the language $L'$ as
+\[L' = \{(x,y): \exists z R(x,y,z) \}\]
+Recognize that $L' \in \NP$ so by assumption there exists polysize circuit family $C_m(x,y)$ with $m = |x| + |y|$ such that $C_m(x,y)$ outputs a satisfying assignment of $R(x,y,z)$ if one exists. View in a different manner,  $L$ accepts $x$ if and only if $\exists C_m \forall y: R(x,y, C_m(x,y))$. Thus $L \in \Sigma_2^p$ as required.  
 \end{proof}
 \end{document}

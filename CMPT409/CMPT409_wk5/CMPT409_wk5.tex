@@ -1,0 +1,215 @@
+%
+% This is a borrowed LaTeX template file for lecture notes for CS267,
+% Applications of Parallel Computing, UCBerkeley EECS Department.
+% Now being used for CMU's 10725 Fall 2012 Optimization course
+% taught by Geoff Gordon and Ryan Tibshirani.  When preparing 
+% LaTeX notes for this class, please use this template.
+%
+% To familiarize yourself with this template, the body contains
+% some examples of its use.  Look them over.  Then you can
+% run LaTeX on this file.  After you have LaTeXed this file then
+% you can look over the result either by printing it out with
+% dvips or using xdvi. "pdflatex template.tex" should also work.
+%
+
+\documentclass[twoside]{article}
+\setlength{\oddsidemargin}{0.25 in}
+\setlength{\evensidemargin}{-0.25 in}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textwidth}{6.5 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+
+%
+% ADD PACKAGES here:
+%
+
+\usepackage{amsmath,amsfonts,amssymb, graphicx}
+\usepackage{color}
+\usepackage{comment}
+\usepackage{mathtools}
+\usepackage{tabu}
+
+%
+% The following commands set up the lecnum (lecture number)
+% counter and make various numbering schemes work relative
+% to the lecture number.
+%
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf CMPT 409: Theoretical Computer Science
+	\hfill Summer 2017} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill Lecture #1: #2  \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { {\it Lecturer: #3 \hfill Scribe: #4} }
+      \vspace{2mm}}
+   }
+   \end{center}
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+
+   %{\bf Note}: {\it LaTeX template courtesy of UC Berkeley EECS dept.}
+
+   %{\bf Disclaimer}: {\it These notes have not been subjected to the
+   %usual scrutiny reserved for formal publications.  They may be distributed
+   %outside this class only with the permission of the Instructor.}
+   \vspace*{4mm}
+}
+%
+% Convention for citations is authors' initials followed by the year.
+% For example, to cite a paper by Leighton and Maggs you would type
+% \cite{LM89}, and to cite a paper by Strassen you would type \cite{S69}.
+% (To avoid bibliography problems, for now we redefine the \cite command.)
+% Also commands that create a suitable format for the reference list.
+\renewcommand{\cite}[1]{[#1]}
+\def\beginrefs{\begin{list}%
+        {[\arabic{equation}]}{\usecounter{equation}
+         \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+         \setlength{\labelwidth}{1.6truecm}}}
+\def\endrefs{\end{list}}
+\def\bibentry#1{\item[\hbox{[#1]}]}
+
+%Use this command for a figure; it puts a figure in wherever you want it.
+%usage: \fig{NUMBER}{SPACE-IN-INCHES}{CAPTION}
+\newcommand{\fig}[3]{
+			\vspace{#2}
+			\begin{center}
+			Figure \thelecnum.#1:~#3
+			\end{center}
+	}
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+% **** IF YOU WANT TO DEFINE ADDITIONAL MACROS FOR YOURSELF, PUT THEM HERE:
+
+\newcommand\E{\mathbb{E}}
+\def\N{\mathbb{N}}
+\def\Z{\mathbb{Z}}
+\def\Q{\mathbb{Q}}
+\def\R{\mathbb{R}}
+\def\C{\mathbb{C}}
+\def\F{\mathbb{F}}
+\def\L{\mathcal{L}}
+\def\M{\mathcal{M}}
+\def\Next{\mathsf{Next}}
+\def\Dom{\mbox{Dom}}
+
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+\DeclarePairedDelimiter\anglebrac{\langle}{\rangle}
+
+\begin{document}
+%\lecture{**LECTURE-NUMBER**}{**DATE**}{**LECTURER**}{**SCRIBE**}
+\lecture{4}{Computability (12 - 16 June)}{Ternovska, Eugenia}{Lily Li}
+%\footnotetext{These notes are partially based on those of Nigel Mansell.}
+
+\section{Functions}
+Let $\infty$ denote \emph{undefined}. 
+\begin{definition}
+A \textbf{partial function} is a funtion $f: (\N \cup \{\infty\} )^n 
+\rightarrow \N \{\infty\}$ such that $f(c_1, ..., c_n) = \infty$ if some $c_i = \infty$. 
+
+The \textbf{domain} of function $f$ is $\Dom(f) = \{\bar{x} \in \N^n: f(\bar{x}) \neq \infty\}$ where $\bar{x} = (x_1, ..., x_n)$. If $\Dom(f) = \N^n$ then $f$ is \textbf{total}. 
+\end{definition}
+
+\section{Register Machines}
+A register machine RM is a finite set of registers, $R_1, ..., R_m$, each storing some natural number. Program $P = \anglebrac{c_0, ...., c_{h-1}}$ where each $c_i$ is a command. The list of allowed commands are:
+\begin{enumerate}
+\item $z_i$: zero register $R_i$.
+\item $S_i$: increment register $R_i$.
+\item $J_{i,j,k}$: jump to command $c_k$ if $R_i = R_j$.
+\end{enumerate} 
+
+The \textbf{state} of a RM is $\anglebrac{k, R_1, ..., R_m}$ where $k$ is the index of the next command to execute and $R_i$ the content of register $i$.
+
+The map $\Next_{P}(s)$ returns the state resulting from the execution of one step of the program $P$ in state $s$. State $s_i$ is \textbf{halting} if $k = h$. Then $\Next_{P}(s) = s$. For current state $s = \anglebrac{k, R_1, ..., R_m}$, $\Next_{P}(s)$ is defined as:
+\begin{enumerate}
+\item If $k < h$ and $c_k = s_i$ then the new state is $\anglebrac{k+1, R_1, ..., R_i + 1, ..., R_m}$.
+\item If $k < h$ and $c_k = z_i$ then the new state is $\anglebrac{k+1, R_1, ..., R_{i-1}, 0, ..., R_m}$.
+\item If $k < h$ and $c_k = J_{i,j,k'}$ then the new state is $\anglebrac{k', R_1, ..., R_m}$ if $R_i = R_j$ and $\anglebrac{k+1, R_1, ..., R_m}$ if $R_i \neq R_j$ and $k < h$.
+\end{enumerate} 
+
+The computation of $P$ is a sequence (finite or infinite) of states $s_0, s_1, ...$ such that $s_{i+1} = \Next_P(s_i)$ when $i \geq h$ --- ending with the halting state. A program computes a function $f(a_1, ..., a_n)$ if $s_0 = \anglebrac{0, a_1, ..., a_n, 0,...,0}$ and when started from $s_0$, $P$ halts with $R_1 = f(a_1, ..., a_n)$. If $P$ fails to halt, then $f(a_1, ..., a_n) = \infty$.
+
+Conversely, for each $P$ and $n \geq 0$, there is an $n$-ary function $f_P$ computable by $P$. We say that such an $f$ is \emph{computable} if some RM computes it.
+
+\begin{example}
+Consider how we would implement the function $f(x) = x-1$ using a RM. First observe that we are dealing with natural numbers we need to assume that $x-1 \geq 0$. We begin with $s_0 = \anglebrac{0, x, 0}$. At a high level, the program should set $R_3$ (currently zero) to 1, then simultaneously increment $R_1$ and $R_3$ until the latter is equal to $x$. Formally the computation can be preformed using the following sequence --- with $s_i$ the halting state:
+\[c_0 = s_3, c_1 = J_{2,3,5}, c_2 = s_1, c_3 = s_3, c_4 = J_{1,1,1}\]       
+\end{example}
+
+It is a good exercise to consider how you would implement $f(x,y) = x\cdot y$ as a RM.
+
+
+\begin{definition}
+A function $f$ defined from $g$ and $h$ by \textbf{primitive recursion} if and only if
+\begin{align*}
+f(\bar{x}, 0) &= g(\bar{x}) \\
+f(\bar{x}, y+1) &= h(\bar{x}, y, f(\bar{x}, y))
+\end{align*}
+where $\bar{x} = x_1, ..., x_n$. $n = 0$ is allowed. Here you want to think of $g$ as the base case and $h$ as the recursive step.
+\end{definition}
+
+\begin{example}
+Lets consider how to define addition using primitive recursion: we define  $f_{+}(x,y)$ as follows: let $f_{+}(x,0) = g(x) = x$ and $f_{+}(x, y+1) = h(x, y, f_{+}(x,y)) = f(x,y) + 1$. Notice that $g$ is essentially the identity and $h$ is the successor function on the third argument.
+
+Next we use $f_{+}(x,y)$ to define $f_{\cdot}(x,y)$. The base case is $f_{\cdot}(x,0) = g(x) = 0$ (see below). Let $f_{\cdot}(x,y+1) = h(x,y,f_{\cdot}(x,y)) = x + f_{\cdot}(x,y)$. In particular $h(x,y,z) = f_{+}(I_{3,1}, I_{3,3})$ where $z = f_{\cdot}(x,y)$. 
+
+Finally we define exponentiation using $f_{\cdot}(x,y)$. Let
+\end{example}
+
+You should think of primitive recursion as those functions are bounded by construct. This is not true of functions in general, so RM is  a strict subset of TM.
+
+\begin{definition}
+$f$ is defined from $g$ and $h_1, ..., h_m$ by \textbf{composition} if an only if 
+\[f(\bar{x}) = g\left( h_1(\bar{x}), ..., h_m(\bar{x})\right)\]
+where $f, h_1, ..., h_m$ are $h$-ary and $g$ is $m$-ary.
+\end{definition}
+
+\begin{definition}
+$f$ is \textbf{primitive recursive} if and only $f$ can be obtained from the initial functions: $Z: 0, S: s(x) = x+1, I_{n,i}(x_1, ..., x_n) = x_i$ where $i\leq i\leq n$ (projection).
+\end{definition}
+
+\begin{example}
+Consider using the above definition of primitive recursion to define the constant function $z_1(x) = 0$. Let $z_1(0) = Z = g$ ($Z$ as in the definition). $z_1(y+1) = z_1(y) = h(y, z_1(y))$ where $h = I_{1,1}$.
+
+Generally for the constant function $k_{n,i}$, 
+\[k_{n,i}(x_1, ..., x_n) = i \]
+We can also define $k_{n,i}$ using recursion! In particular our base case is $z_1(x)$. $k_{n,i} = s(s(\cdots s(z_1(I_{i,1})) \cdot )$ where the successor function $s$ (again defined above) is applied $i$ times. 
+\end{example}
+
+\begin{theorem}
+Ackerman's function is not primitive recursive.
+\end{theorem}
+\begin{proof}
+
+\end{proof}
+
+\end{document}

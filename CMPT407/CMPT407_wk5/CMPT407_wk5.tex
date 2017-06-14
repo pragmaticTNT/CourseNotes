@@ -128,9 +128,10 @@
 \def\NTime{\mathsf{NTime}}
 \def\TiSp{\mathsf{TiSp}}
 \def\PolySize{\mathsf{PolySize}}
-\def\NC_1{\mathsf{NC}_1}
-\def\TC_0{\mathsf{TC}_0}
-\def\AC_0{\mathsf{AC}_0}
+\def\NC{\mathsf{NC}}
+\def\TC{\mathsf{TC}}
+\def\AC{\mathsf{AC}}
+\def\Parity{\mathsf{Parity}}
 
 \DeclarePairedDelimiter\ceil{\lceil}{\rceil}
 \DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
@@ -146,37 +147,60 @@
 $\EXP \subset \PolySize \implies \EXP = \Sigma^p_2$. 
 \end{theorem}
 \begin{proof}
-For all $L$ in $\EXP$ there exists a TM $M$, which runs in time $2^{n^c} = t$ for an input $x$ of size $n$. Imagine a $t x t$ grid which describes the operation of $M$. Where each row is a configuration of $M$. This transcript is valid if and only if all windows (three consecutive cells in row $i$ and the associated cell in row $i+1$) are consistent. Consider the function $T: [t] \times [t] \rightarrow \Sigma^*$ where $T(i, j) = \mbox{ cell } j \mbox{ at time } i$. Since we assumed $\EXP \subset \PolySize$ all we need to do is show that $T \in \EXP$. Well, that's pretty obvious, simply execute the TM $M$. Now show that $T \in \Sigma_2$ as follows: $\exists C \forall i,j:$ window $(i, j)$ (in the tableau) is consistent and the tableau ends in an accepting state. 
+For all $L$ in $\EXP$ there exists a TM $M$, which runs in time $2^{n^c} = t$ for an input $x$ of size $n$. Imagine a $t \times t$ grid which describes the operation of $M$, where each row is a configuration of $M$. This transcript is valid if and only if all windows (three consecutive cells in row $i$ and the associated cell in row $i+1$) are consistent. Consider the function $T: [t] \times [t] \rightarrow \Sigma^*$ where $T(i, j) = \mbox{ cell } j \mbox{ at time } i$. Since we assumed $\EXP \subset \PolySize$ all we need to do is show that $T \in \EXP$ (due to the Church-Turing thesis). Well, that's pretty obvious, simply execute the TM $M$. Now show that $T \in \Sigma_2$ as follows: $\exists C, \forall i,j:$ window $(i, j)$ (in the tableau) is consistent and the tableau ends in an accepting state. 
 \end{proof}
 
 \emph{Note: } (by IKW) it is possible to generalize this implication for $\NEXP$, namely $\NEXP \subset \PolySize \implies \NEXP = \Sigma_2$. Proving this is quite a bit more difficult and requires more tool. 
 
 \section{Circuits} 
-Let us consider the set of inclusion of circuit complexity: $\mathsf{AC}_0 \subset \mathsf{TC}_0 \subset \mathsf{NC}_1 \subset \PolySize$
+Let us consider the set of inclusion of circuit complexity: 
+\[\AC_0 \subset \TC_0 \subset \NC_1 \subset \PolySize\]
+Where
+\[\NC^{i} = \{L: L \mbox{ is decidable by a family of } \PolySize \mbox{ circuits of depth } O(\log^i n) \mbox{ with gates } \land, \lor, \lnot \}\]
+\[\TC^{i} = \{L: L \mbox{ is decidable by a family of depth $O(\log^i n)$ circuits of using unbound fan-in } Maj, \lnot \mbox{ gates} \}\]
+\[\AC^{i} = \{L: L \mbox{ is decidable by a family of depth $O(\log^i n)$ circuits using unbounded fan-in } \land, \lor, \lnot \mbox{ gates}\}\]
+
+\subsection{$\NC_1$}
+Here we will consider mainly the class of $\NC_1$, that is all languages with logarithmic depths boolean circuits. As it turns out polysize circuits of $\log$-depth are the same as formulas of $\log$-depth. The reasoning is not trivial but quite simple nonetheless. A boolean formula is almost the same as a binary tree except for loops where one node is the input of several nodes below it in the graph. This does not cause a problem, because even if you duplicate the lower nodes to remove loops you will get at worst a complete $\log$-depth binary tree, which is polynomial in size. 
+
+Another equivalence of note is: languages computable by polysize formulas is the same as languages computable by logdepth circuits. 
 
 \begin{claim}
 $\NC_1 = \PolySize$ formula.
 \end{claim}
 \begin{proof}
-$\NC_1 \subseteq \PolySize$ formula is the easy direction. Now lets attempt to show th other direction, $\PolySize \mbox{ formula } \subseteq \NEXP$. Now a normal expansion of a formula $F$ in $x_1, ..., x_n$ might be of depth $O(n)$. But if you think about it you realize that there are not a lot of "stuff" so a long path can be restructured to be made shorter and wider. In particular cut $F$ into two pieces $F_1$ and $F_2$ each of depth approximately half. Let $f(F)$ be the formula associated the the circuit of $F$. Then  
+$\NC_1 \subseteq \PolySize$ formula is trivial. Now lets attempt to show th other direction, $\PolySize \mbox{ formula } \subseteq \NEXP$. Now a normal expansion of a formula $F$ in $x_1, ..., x_n$ might be of depth $O(n)$. But if you think about it you realize that there are not a lot of "stuff" so a long path can be restructured to be made shorter and wider. In particular cut $F$ into two pieces $F_1$ and $F_2$ each of depth approximately half. Let $F_2$ be a subformula of $F_1$. If we substitute $F_2$ with a variable $z$ in $F_1$ as $F_1(x_1, ..., x_n, z)$ then there is a logical equivalent between:
+\[F = (F_1(x_1, ..., x_n, 0) \land F_2(x_1, ..., x_n)) \lor (F_1(x_1, ..., x_n, 0) \land \lnot F_2(1, x_2, ..., x_n))\]
+(this should remind you of the way of polytime conversion from CNF to DNF). By repeated applications you can turn the originally $\PolySize$ formula into a logdepth circuit.  
 \end{proof}
 
 \subsection{Valiant's Challenge}
-Find an explicit function $f: \{0,1\}^{n} \rightarrow \{0,1\}$ that cannot be computed by a circuit of size $O(n)$ and depth $O(\log n)$.
+Find an explicit function $f: \{0,1\}^{n} \rightarrow \{0,1\}$ that cannot be computed by a circuit of size $O(n)$ and depth $O(\log n)$. That is, it is still an open problem to find a problem in $\PH$ with super linear circuit complexity.  
 
-\begin{definition}
-A majority gate is defined as follows: $\mbox{maj}_n: \{\}$
-\end{definition}
+Consider some examples of problems in $\NC_1$.
 
 \begin{example}
-Let $a_1, a_2, ..., a_n$ be $n$, $n$ digit numbers. We want to show that this problem in the domain of Valiant's Challenge. So we need to demonstrate a $O(\log n)$ circuit of $O(n)$ size to solve this problem. The algorithm here requires a trick as follows:   
+Consider boolean matrix multiplication where we are given two $n \times n$ matrices $A$ and $B$ and told to compute their product $AB = C$. Each entry $C[i,j] = \bigvee_{k = 1}^{n} A[i,k] \land B[k,j]$. Since we are or-ing together $n$ ands, we can construct a $\log n$ circuit for each cell. 
 \end{example}
+
+\begin{example}
+Let $a_1, a_2, ..., a_n$ be $n$, $n$ digit numbers. We want to show that this problem in the domain of Valiant's Challenge. So we need to demonstrate a $O(\log n)$ circuit of $O(n)$ size to solve this problem. The algorithm here requires a trick (actually it is the same trick as was used in prune and search). 
+
+If you as two numbers as usual, each addition requires $\log n$ depth circuitry so in aggregate adding $n$ numbers takes $\log^2 n$ depth. Instead we will do the \emph{3 for 2} trick. That is instead of adding two numbers to get one number, we will add three numbers to get two numbers. In particular the two outputs will be the usual addition ignoring carries and the carry as a number. Each layer will only need constant layers. And each layer has only a fraction, namely $\frac{2}{3}$rd, of the numbers in the layer before. At most $O(\log n)$ layers required.       
+\end{example}
+
+\subsection{$\TC_0$}
+
+\begin{definition}
+A majority gate is defined as follows: $Maj_n: \{0,1\}^n \rightarrow \{0,1\}$ where 
+\[Maj_n(x_1, ..., x_n) = \sum x_i \geq \frac{n}{2}\]
+\end{definition}
 
 \begin{theorem}
 Finding the parity of $n$ numbers is in $\TC_0$. 
 \end{theorem}
 \begin{proof}
-First we need to construct a threshold function. 
+First we need to construct a threshold function. Given $n$ input bits we want to know if the sum is greater than or equal to a specified $k$. Formally define $Thr_{n,k}(x_1, ..., x_n) = 1$ if and only if $\sum_{i=1}^{n} x_i \geq k$. We can do this using dummy variables as follows: for example if we wanted a $Thr_{3,1}$ we would use $Maj_4(1, x_1, x_2, x_3)$. This way if any $x_i = 1$ then the sum, including the dummy variable $x_0 = 1$ adds to $2$. Using two threshold gates, we can specify the "exactly $k$ gate" as: $Exc_{n,k}(x_1, ..., x_n) = 1$ if and only if $\sum_{i=1}^{n} x_i = k$. Thus, using constant depth we can check if $n = 1, 3, 5, ...$ to see if $n$ is odd or even.
 \end{proof}
 
 \section{$\AC_0$}
@@ -184,7 +208,45 @@ First we need to construct a threshold function.
 The addition of two $n$ bit numbers is in $\AC_0$.
 \end{theorem}
 \begin{proof}
+Let the input to the circuit be $a = a_{n-1}\cdots a_0$ and $b = b_{n-1}\cdots b_0$ and the output be $c = c_{n}\cdots c_0$. Note that $c_i = a_i + b_i + carry_i$ where $carry_i$ is the carry from position $i-1$ into position $i$. $carry_i = 1$ if there exists some $j < i$ such that $a_i = b_i = 1$ and for all $j \leq k < i$ either $a_k = 1$ or $b_k = 1$. The constant dept circuit is constructed from the formula $c_i = \exists j, 0 \leq j < i, \forall k, i > k > j: (a_j \land b_j) \land (a_k \lor b_k)$. Since we have unbounded fan-in $\land$ and $\lor$ gates, we can use these for $\forall$ and $\exists$ respectively.
+\end{proof}
+
+\emph{Note: } as it turns out the class $\AC_0$ is exactly the set of all first order formulas! 
+
+\begin{theorem}
+$\Parity_n \notin \AC_0$.
+\end{theorem}
+\begin{proof}
+We want to find a distinguishing property which separates problems in $\AC_0$ and $\Parity$. The property we want is: given $f(x_1, ..., x_n)$, $f$ can be make constant by fixing $k$ variables where $k < n$. Note that $\Parity$ does not have this property. We will show that every problem in $\AC_0$ have this property. But in order to do this we need the probabilistic method. 
+
+Define a probability distribution over partial assignments. Argue that there exists a random partial assignment will make the $\AC_0$ function constant.
+
+Consider function $f(x_1, x_2, ..., x_n)$ and take a parameter $p \in [0,1]$. The random $p$-restriction $\rho$ is as follows: $\forall 1 \leq i \leq n$, assigned independently at random, 
+\[
+x_i = \begin{cases}
+\star &\mbox{ with probability } p\\
+0 &\mbox{ with probability } \frac{1-p}{2} \\
+1 &\mbox{ with probability } \frac{1-p}{2} 
+\end{cases}
+\]
+
+\begin{lemma}
+(Hastad's Switching Lemma) Let $f$ be any $k$-CNF on $x_1, ..., x_n$. For any $k, s, p$ and with $\rho$ a random $p$ restriction:
+\[\mathsf{Pr}_{\rho}[f|\rho \mbox{ is not a } s-DNF] \leq (5pk)^s\]
+\end{lemma} 
+\begin{proof}
 
 \end{proof}
-\emph{Note: } as it turns out the class $\AC_0$ is exactly the set of all first order formulas! 
+
+Basically, this lemma says that for most $k$-CNF under $p$ restriction they have an equivalent $s$-DNF. The same is true if you switch CNF and DNF as you would just have to take the dual. Observe also that the probability is independent of the size of $f$. Here is how we will use the lemma:
+\begin{enumerate}
+\item For the bottom two levels we will use 
+\item
+\item
+\item
+\item
+\end{enumerate}  
+
+The analysis of our
+\end{proof}
 \end{document}

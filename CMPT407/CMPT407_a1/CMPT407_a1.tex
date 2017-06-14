@@ -1,0 +1,134 @@
+\documentclass[11pt]{article}
+
+% ===> PACKAGES
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{color}
+\usepackage{comment}
+\usepackage{fancyhdr}
+\usepackage{mathtools}
+\usepackage[margin=1in]{geometry} 
+
+% ===> PARAMETERS
+\pagestyle{fancy}
+
+% ===> MACROS
+\setlength{\parindent}{0pt}
+
+%	\def\macrosName{Fill in the content of the macros and use \textit{\\macrosName} whenever necessary}
+\def\N{\mathbb{N}}
+\def\Z{\mathbb{Z}}
+\def\Q{\mathbb{Q}}
+\def\R{\mathbb{R}}
+\def\C{\mathbb{C}}
+\def\PAL{\mathsf{PAL}}
+\def\P{\mathsf{P}}
+\def\NP{\mathsf{NP}}
+\def\EXP{\mathsf{EXP}}
+\def\NEXP{\mathsf{NEXP}}
+
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{problem}{Problem}
+
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+\DeclarePairedDelimiter\anglebrac{\langle}{\rangle}
+
+\begin{document}
+
+\lhead{CMPT 407}
+\chead{Lily Li: 301235765}
+\rhead{\today}
+
+\section*{Assignment 1}
+% ===> START ASSIGNMENT
+
+\begin{problem}
+In the following we will prove that any one-tape TM deciding the language $\PAL$ where $\PAL = \{w \in \{0,1\}^*: w \mbox{ is a palindrome }\}$ requires time $\Omega(n^2)$.
+\end{problem}
+The proof will take place over several steps. First we define the notion of a \textbf{crossing sequence} $S_w(i)$ for input $w$ denoting the behavior of the tape head as it crosses between tape cells $i$ and $i+1$. Such a sequence has the form $(q_{k_1}, D_1), (q_{k_2}, D_2), ...$ where $q_{k_i}$ is a state and $D_i \in \{R, L\}$.
+\begin{enumerate}
+\item Show that for any two strings $x = x_1x_2$ and $y=y_1y_2$ such that $|x_1|=|y_1| = i$ and $S_x(i-1) = S_y(i-1)$, if a TM $M$ accepts $x$ and $y$, the it also accepts the strings $x_1y_2$ and $x_2y_1$.  
+\begin{proof}
+Consider the execution of the TM $M$ on the input $x_1y_2$. It runs just as it would on input $x$ until the first element of $S_x(i-1)$. Since $S_x(i-1) = S_y(i-1)$, if $M$ crosses over to the cell of $y_2$, $M$ runs just as it would on input $y$. Every time the tape head crosses between cells $i$ and $i+1$, since the crossing sequences are identical, it is as if $M$ was running on input $x$ or $y$. Eventually $M$ will ending in the terminating state of $x$ or $y$ so $M$ will accept. The same is true for input $y_1x_2$. 
+\end{proof}
+\item Let $M$ be any one-tape TM deciding $\PAL$ and $x, y$ be two distinct strings of length $n$ each. If $X = x0^nx^R$ and $Y = y0^ny^R$ where $x^R$ is the reverse of $x$. Show that for every $n < i < 2n$, it must be the case that $S_X(i) \neq S_Y(i)$.
+\begin{proof}
+Suppose for a contradiction that for some $i \in (n, 2n)$, $S_X(i) \neq S_Y(i)$. Since $X$ is a palindrome, $X$ is accepted by $M$. Let $X = x_1x_2$ and $Y = y_1y_2$ where $|x_1| = |y_1| = i$. By the previous part we know that $x_1y_2$ is also accepted by $M$. However, since $x$ and $y$ is distinct, $x_1y_2$ is not a palindrome. This contradicts the fact that $M$ decides $\PAL$.  
+\end{proof}
+\item Show that there exists a constant $\epsilon > 0$ such that for every $n < i < 2n$, the number of strings of the form $x0^nx^R$ with $|x| = n$ that have $|S_X(i)| < \epsilon n$ is less than $2^{n/2}$.
+\begin{proof}
+To choose $\epsilon$ we first need a handle on the moving parts of $S_X(i)$. Let there be $k$ states in $M$ and let $p = \log k$. $q$ represents the number of bits used to represent each state. The maximum number of bits needed to express a crossing sequences of length less than $\epsilon n$ is $(p+1)$. Thus the total number of such crossing sequences is $2^{\epsilon (p+1)n}$ (each bit can be 0 or 1). By choosing $\epsilon = \frac{1}{3(p+1)}$, for sufficiently large $n$, $2^{\epsilon (p+1)n} < 2^{n/2}$.
+\end{proof}
+\item Argue that there will always exists a string $X = x0^nx^R$ for large enough $n$ such that $|S_X(i)| \geq \epsilon n$ for every $n < i < 2n$. 
+\begin{proof}
+From the previous part we know that the number of palindromes $X$ which have $|S_X(i)| < \epsilon n$ is less than $2^{n/2}$. 
+\end{proof}
+\end{enumerate}
+
+
+
+\begin{problem}
+Show that the language $L = \{0\}$ is complete for $\P$, under polytime reduction.
+\end{problem}
+\begin{proof}
+$L$ is certainly in $P$. Consider any language $L' \in \P$. Then there exists a TM $M$ which solves $L'$ in polynomial time. For your reduction simply simulate the input $x$ to $L'$ on $M$. If $M$ accepts, output $0$; otherwise if $M$ rejects, output $1$. Thus $w \in L'$ if and only if the the reduction is in $L$. 
+\end{proof}
+
+
+
+\begin{problem}
+Show that if $P = \NP$, then $\EXP = \NEXP$.
+\end{problem}
+\begin{proof}
+The trick here is to pad liberally. 
+\end{proof}
+
+
+
+\begin{problem}
+
+\end{problem}
+
+\begin{proof}
+
+\end{proof}
+
+\begin{problem}
+
+\end{problem}
+\begin{proof}
+
+\end{proof}
+
+
+
+\begin{problem}
+
+\end{problem}
+\begin{enumerate}
+\item 
+\begin{proof}
+
+\end{proof}
+\item
+\begin{proof}
+
+\end{proof}
+\end{enumerate}
+
+
+
+\begin{problem}
+
+\end{problem}
+\begin{proof}
+
+\end{proof}
+% ===> END ASSIGNMENT
+\end{document}
