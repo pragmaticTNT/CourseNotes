@@ -180,12 +180,12 @@ where $\bar{x} = x_1, ..., x_n$. $n = 0$ is allowed. Here you want to think of $
 \begin{example}
 Lets consider how to define addition using primitive recursion: we define  $f_{+}(x,y)$ as follows: let $f_{+}(x,0) = g(x) = x$ and $f_{+}(x, y+1) = h(x, y, f_{+}(x,y)) = f(x,y) + 1$. Notice that $g$ is essentially the identity and $h$ is the successor function on the third argument.
 
-Next we use $f_{+}(x,y)$ to define $f_{\cdot}(x,y)$. The base case is $f_{\cdot}(x,0) = g(x) = 0$ (see below). Let $f_{\cdot}(x,y+1) = h(x,y,f_{\cdot}(x,y)) = x + f_{\cdot}(x,y)$. In particular $h(x,y,z) = f_{+}(I_{3,1}, I_{3,3})$ where $z = f_{\cdot}(x,y)$. 
+Next we use $f_{+}(x,y)$ to define $f_{\cdot}(x,y)$. The base case is $f_{\cdot}(x,0) = g(x) = 0$ (see below). Let $f_{\cdot}(x,y+1) = h(x,y,f_{\cdot}(x,y)) = x + f_{\cdot}(x,y)$. In particular $h(x,y,z) = f_{+}(I_{3,1}(x,y,z), I_{3,3}(x,y,z)$ where $z = f_{\cdot}(x,y)$. 
 
-Finally we define exponentiation using $f_{\cdot}(x,y)$. Let
+Finally we define exponentiation $f_{\uparrow}(x,y)$ using $f_{\cdot}(x,y)$. For our base case $f_{\uparrow}(x, 0) = g(x) = s(z_1(x))$ where $z_1(0)$ is the constant function which evaluates to zero (see below). Next $f_{\uparrow}(x,y+1) = g(x,y,f_{\uparrow}(x,y)) = x \cdot f_{\uparrow}(x,y)$ in particular $g(x,y,z) = f_{\cdot}(I_{3,1}(x,y,z), I_{3,3}(x,y,z)$.  
 \end{example}
 
-You should think of primitive recursion as those functions are bounded by construct. This is not true of functions in general, so RM is  a strict subset of TM.
+You should think of primitive recursion as those functions which are bounded by construct. This is not true of functions in general, so RM is a strict subset of all TM.
 
 \begin{definition}
 $f$ is defined from $g$ and $h_1, ..., h_m$ by \textbf{composition} if an only if 
@@ -194,7 +194,7 @@ where $f, h_1, ..., h_m$ are $h$-ary and $g$ is $m$-ary.
 \end{definition}
 
 \begin{definition}
-$f$ is \textbf{primitive recursive} if and only $f$ can be obtained from the initial functions: $Z: 0, S: s(x) = x+1, I_{n,i}(x_1, ..., x_n) = x_i$ where $i\leq i\leq n$ (projection).
+$f$ is \textbf{primitive recursive} if and only if $f$ can be obtained from the initial functions: $Z: 0, S: s(x) = x+1, I_{n,i}(x_1, ..., x_n) = x_i$ where $i\leq i\leq n$ (projection) by finitely many applications of primitive recursion and composition.
 \end{definition}
 
 \begin{example}
@@ -202,14 +202,65 @@ Consider using the above definition of primitive recursion to define the constan
 
 Generally for the constant function $k_{n,i}$, 
 \[k_{n,i}(x_1, ..., x_n) = i \]
-We can also define $k_{n,i}$ using recursion! In particular our base case is $z_1(x)$. $k_{n,i} = s(s(\cdots s(z_1(I_{i,1})) \cdot )$ where the successor function $s$ (again defined above) is applied $i$ times. 
+We can also define $k_{n,i}$ using recursion! In particular our base case is $z_1(x)$. $k_{n,i} = s\left(\cdots s\left(z_1\left(I_{i,1}\right)\right) \cdots \right)$ where the successor function $s$ (again defined above) is applied $i$ times. 
 \end{example}
 
-\begin{theorem}
-Ackerman's function is not primitive recursive.
-\end{theorem}
+\begin{proposition}
+All primitive recursive functions are \emph{total}. Recall a function is \emph{total} if $f(\bar{x}) \neq \infty$ for every $\bar{x}$ in the domain.
+\end{proposition}
 \begin{proof}
-
+By structural induction. Note that the three initial functions are total and primitive recursion and composition preserve totality.
 \end{proof}
 
+\begin{theorem}
+All primitive recursive functions are computable (on a RM).
+\end{theorem}
+\begin{proof}
+By induction on the number of compositions and primitive recursions of $f$. In the base case we must compute the initial functions using register machines. This is simple. Recall the three primitive recursions of $f$ are: zero, successor of $x$ and projection onto variable $x_i$. These correspond to zeroing, successor function on cell $i$ and a repeated successor function followed by a jump instruction to the end.  
+
+First we show that composition is computable. Assume functions $g, h_1, ..., h_m$ are computable by programs $P_g, P_1, ..., P_m$ respectively by the induction hypothesis. We will show that $f(\bar{x}) = g(h_1(\bar{x}), ..., h_k(\bar{x}))$. 
+
+Suppose the initial input $(x_1, ..., x_n)$ at registers $R_1, ..., R_n$. We will copy $x_1, ..., x_n$ into registers $R_{1+k}, ..., R_{n+k}$ where $k$ is greater than any register used by $P_1, ..., P_m$. Execute each $P_i$ after modifying the jump instructions to point to something sensible. Put the result $h_i$ of $P_i$ in cell $R_{n+k+i}$. Upon starting a new $P_j$ copy $x_1,... x_n$ back into registers $R_1, ..., R_n$. When all $P_i$ have been executed, copy $h_1,..., h_n$ into registers $R_1, ..., R_n$ and zero all other registers. Run $P_g$ on input $h_1, ..., h_n$. 
+
+To show that primitive recursion is computable on an RM, remark that it is defined using a base and an inductive function. These can be simulated on an RM in the usual fashion.   
+\end{proof}
+
+From the previous theorem we see that primitive recursive functions are a subset of all functions computable by a register machine. In particular, this inclusion is strict since there exists function which are not total but are computable by RM (recall all primitive recursive functions \emph{must} be total). Here are two other ways to show that the subset is strict.
+
+\begin{theorem}
+There exists total and computable functions that are not primitive recursive.
+\end{theorem}
+\begin{proof}
+Use Cantor's diagonalization argument. First we specify a natural number to each primitive recursive function. This is possible since each P.R. function can be uniquely defined by its application of primitive recursion and composition. Turn these description strings into numbers in the standard fashion. 
+
+Let function $f_e$ be specified by $e \in \N$. Since we are only interested in unary functions, define the sequence $\mathcal{G} = g_1, g_2, ...$ where $g_i = f_i$ if $f_i$ is unary and $g_i$ be the constant zero function otherwise. $\mathcal{G}$ is an "effective" enumeration of all unary P.R. functions --- that is, the universal function $U(x,y) = g_x(y)$ is computable.
+
+We show that $U$ is not P.R. Suppose for a contradiction that $U$ is P.R. Then the diagonal function $D(x) = g_x(x) + 1$ is also primitive recursive and there exists an $e$ such that $D = g_e$. This is a contradiction since $D \neq g_e$ for all $e \in \N$.
+\end{proof}
+
+\begin{theorem}
+Ackermann's function is total but not primitive recursive. (It is also clearly computable and therefore RM computable by Church Thesis.)
+\end{theorem}
+\begin{proof}
+Define Ackermann's function as follows: 
+\[A_0(x) = \begin{cases} 
+x + 1 &\mbox{ If $x = 0$ or $x=1$ } \\
+x + 2 &\mbox{ Otherwise }
+\end{cases}\]
+And for each $i > 0$, $A_i$ is defined recursively as:
+\begin{align*}
+A_{n+1}(0) &= 1 \\
+A_{n+1}(0) &= A_n(A_{n+1}(x))
+\end{align*}
+
+In general we can define $A(n,x) = A_{n}(x)$. Further we will define $F(x) = A(x, x)$ and we will show the following lemma:
+\begin{lemma} 
+$F(x)$ is not primitive recursive.
+\end{lemma}
+\begin{proof}
+(This is only a sketch of the proof. There is one induction step missing.) For any P.R. function $h(\vec{x})$ is \emph{dominated} $A(n,x)$. That is there exists some $B \in \N$ such that if $x_1, ..., x_n > B$ then $h(x_1, ..., x_n) < A(n, \max (x_1, ..., x_n))$ --- this can be proven induction. This proves to be an issue since if $F(x)$ is a primitive recursive function then there must be constants $n, B$ such that $A(n, x) > A(x, x) = F(x)$ given $x > B$ which is impossible (since $A(x,y)$ is a monotone increasing function in both $x$ and $y$).  
+\end{proof}
+
+Since $F(x)$, a restricted form, is not primitive recursive, neither is $A(n,x)$ in general.
+\end{proof}
 \end{document}

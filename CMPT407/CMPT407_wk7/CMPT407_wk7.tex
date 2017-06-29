@@ -1,0 +1,210 @@
+%
+% This is a borrowed LaTeX template file for lecture notes for CS267,
+% Applications of Parallel Computing, UCBerkeley EECS Department.
+% Now being used for CMU's 10725 Fall 2012 Optimization course
+% taught by Geoff Gordon and Ryan Tibshirani.  When preparing 
+% LaTeX notes for this class, please use this template.
+%
+% To familiarize yourself with this template, the body contains
+% some examples of its use.  Look them over.  Then you can
+% run LaTeX on this file.  After you have LaTeXed this file then
+% you can look over the result either by printing it out with
+% dvips or using xdvi. "pdflatex template.tex" should also work.
+%
+
+\documentclass[twoside]{article}
+\setlength{\oddsidemargin}{0.25 in}
+\setlength{\evensidemargin}{-0.25 in}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textwidth}{6.5 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+
+%
+% ADD PACKAGES here:
+%
+
+\usepackage{amsmath,amsfonts,amssymb, graphicx}
+\usepackage{color}
+\usepackage{comment}
+\usepackage{mathtools}
+
+%
+% The following commands set up the lecnum (lecture number)
+% counter and make various numbering schemes work relative
+% to the lecture number.
+%
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf CMPT 407: Computational Complexity
+	\hfill Summer 2017} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill Lecture #1: #2  \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { {\it Lecturer: #3 \hfill Scribe: #4} }
+      \vspace{2mm}}
+   }
+   \end{center}
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+
+   %{\bf Note}: {\it LaTeX template courtesy of UC Berkeley EECS dept.}
+
+   %{\bf Disclaimer}: {\it These notes have not been subjected to the
+   %usual scrutiny reserved for formal publications.  They may be distributed
+   %outside this class only with the permission of the Instructor.}
+   \vspace*{4mm}
+}
+%
+% Convention for citations is authors' initials followed by the year.
+% For example, to cite a paper by Leighton and Maggs you would type
+% \cite{LM89}, and to cite a paper by Strassen you would type \cite{S69}.
+% (To avoid bibliography problems, for now we redefine the \cite command.)
+% Also commands that create a suitable format for the reference list.
+%\renewcommand{\citep{•}ite}[1]{[#1]}
+\def\beginrefs{\begin{list}%
+        {[\arabic{equation}]}{\usecounter{equation}
+         \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+         \setlength{\labelwidth}{1.6truecm}}}
+\def\endrefs{\end{list}}
+\def\bibentry#1{\item[\hbox{[#1]}]}
+
+%Use this command for a figure; it puts a figure in wherever you want it.
+%usage: \fig{NUMBER}{SPACE-IN-INCHES}{CAPTION}
+\newcommand{\fig}[3]{
+			\vspace{#2}
+			\begin{center}
+			Figure \thelecnum.#1:~#3
+			\end{center}
+	}
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+% **** IF YOU WANT TO DEFINE ADDITIONAL MACROS FOR YOURSELF, PUT THEM HERE:
+
+\newcommand\E{\mathbb{E}}
+\def\N{\mathbb{N}}
+\def\R{\mathbb{R}}
+\def\Pr{\mathbf{Pr}}
+\def\P{\mathsf{P}}
+\def\NP{\mathsf{NP}}
+\def\BPP{\mathsf{BPP}}
+\def\BQP{\mathsf{BQP}}
+\def\RP{\mathsf{RP}}
+\def\ZPP{\mathsf{ZPP}}
+\def\coRP{\mathsf{coRP}}
+\def\SAT{\mathsf{SAT} then }
+\def\PolySize{\mathsf{PolySize}}
+\def\EXP{\mathsf{EXP}}
+
+\def\MA{\mathsf{MA}}
+\def\AM{\mathsf{AM}}
+
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+\DeclarePairedDelimiter\anglebrac{\langle}{\rangle}
+
+\begin{document}
+%\lecture{**LECTURE-NUMBER**}{**DATE**}{**LECTURER**}{**SCRIBE**}
+\lecture{7}{Randomized Computation (26 June - 2 July)}{Valentine Kabanets}{Lily Li}
+%\footnotetext{These notes are partially based on those of Nigel Mansell.}
+
+\section{Randomness and Interaction}
+Today we will show that $\BPP \subseteq \MA \subseteq \AM \subseteq \prod_2^p$. Remark that the first $\subseteq$ is actually quite straight forward. Please consider what $\BPP$ and $\MA$ and explain why. Remark the verifier Arthur check $R(x,y,z)$ where $x$ is the input, $y$ is the value the Merlin sends over, and $z$ is the random string.
+
+As before, we can decrease the error probability by trying $k$ times and taking the majority. Let us do the analysis (use Chernoff bound):
+\begin{enumerate}
+\item $x \in L$: Let the indicator random variable be $X_1, ..., X_k$ where $X_i = 1 $ if A accepts $R(x,y,z)$ and $X_i = 0$ otherwise. Let us calculate the probability that fewer than $k/n$ variables accept:
+
+Thus this probability is quite low, proportional to exponential decay in $k$.
+\item $x \notin L$: $\forall y \forall 1 \leq i \leq k, \Pr_{z_i}[R(x,y,z_i) = 1]$ 
+\end{enumerate}
+\emph{Note: } what does the Chernoff bound actually say? 
+ 
+In our original protocol, Arthur uses $m$ bits of randomness and gets reasonable error. However, if we use the above then we can reduced the error to $\porp 2^}-k
+ $ by using $k\cdot m$ bits of randomness. 
+
+\begin{theorem}
+$\MA \subseteq \AM$.
+\end{theorem} 
+\begin{proof}
+Let us think about this intuitively: in $\AM$, Merlin is allowed more opportunities to cheat since Merlin sees Arthur's random string.
+
+So let us think about a language $L \in \MA$ and reduce this to a language in $AM$. So we are given some Arthur and Merlin 
+\end{proof}
+
+\subsection{Logic of $\MA$ and $\AM$}
+Consider the quantifiers
+\begin{align*}
+\exists 	&\qquad \exists \circ \P = \NP \\
+\forall 	&\qquad \forall \circ \P = \coNP \\
+\Maj_{2/3}	&\qquad \BP \circ \P = \BPP
+\end{align*}
+
+Let us use these as follows. Consider $AM$: here the majority machine goes first then a non-deterministic machine goes. This can be translated into $\BP \circ \exists \circ \P$. Similarly for $MA$, we can write 
+
+
+Using the above conversions and the above laws we can make quick work of the following theorems.
+\begin{theorem}
+$\AM \subseteq \prod_2^p$
+\end{theorem}
+\begin{proof}
+
+\end{proof}
+
+\begin{theorem}
+$MA \subseteq \prod_2^p \cap \sigma_2^p$
+\end{theorem}
+\begin{proof}
+
+\end{proof}
+
+\subsection{Graph Non-isomorphism $\in \AM$}
+Recall the Graph Non-isomorphism. First it is important to remark that the Graph Non-isomorphism problem is a private key protocol, that is the randomness chosen by Arthur is not reveal to Merlin. However we will show that this can be made into a public key protocol ($\in \AM$).
+
+\emph{Note:} (in terms of graphs) remark that there is a difference between an automorphism and an isomorphism.
+
+\emph{Note:} (regarding hash functions) $H = \{h\}$ where $h: U \rightarrow M$, for universe $U$ and $M \subset U$, is a random function family if 
+\begin{enumerate}
+\item[Uniform:] $\forall u \in U, \forall a \in M, \Pr_h[h(u) = a] = 1/|M|$.
+\item[2-wise Independent:] $\forall u, u' \in U, u \neq u', \Pr_h[h(u) = h(u') = a] = 1/|M|^2$.
+\end{enumerate}   
+
+Lets consider an example hash function. 
+\begin{example}
+
+\end{example}
+
+\begin{theorem}
+$\NISO \in \AM$.
+\end{theorem}
+\begin{proof}
+We will first solve this problem with certain assumption (not true). Suppose that we have two graphs $G_1$ and $G_2$ which do not have nontrivial automorphisms. Construct the set $W = \{\}$
+\end{proof}
+\end{document}

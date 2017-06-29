@@ -1,0 +1,357 @@
+%
+% This is a borrowed LaTeX template file for lecture notes for CS267,
+% Applications of Parallel Computing, UCBerkeley EECS Department.
+% Now being used for CMU's 10725 Fall 2012 Optimization course
+% taught by Geoff Gordon and Ryan Tibshirani.  When preparing 
+% LaTeX notes for this class, please use this template.
+%
+% To familiarize yourself with this template, the body contains
+% some examples of its use.  Look them over.  Then you can
+% run LaTeX on this file.  After you have LaTeXed this file then
+% you can look over the result either by printing it out with
+% dvips or using xdvi. "pdflatex template.tex" should also work.
+%
+
+\documentclass[twoside]{article}
+\setlength{\oddsidemargin}{0.25 in}
+\setlength{\evensidemargin}{-0.25 in}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textwidth}{6.5 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+
+%
+% ADD PACKAGES here:
+%
+
+\usepackage{amsmath,amsfonts,amssymb, graphicx}
+\usepackage{color}
+\usepackage{comment}
+\usepackage{mathtools}
+
+%
+% The following commands set up the lecnum (lecture number)
+% counter and make various numbering schemes work relative
+% to the lecture number.
+%
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf CMPT 409: Theoretical Computer Science
+	\hfill Summer 2017} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill Lecture #1: #2  \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { {\it Lecturer: #3 \hfill Scribe: #4} }
+      \vspace{2mm}}
+   }
+   \end{center}
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+
+   %{\bf Note}: {\it LaTeX template courtesy of UC Berkeley EECS dept.}
+
+   %{\bf Disclaimer}: {\it These notes have not been subjected to the
+   %usual scrutiny reserved for formal publications.  They may be distributed
+   %outside this class only with the permission of the Instructor.}
+   \vspace*{4mm}
+}
+%
+% Convention for citations is authors' initials followed by the year.
+% For example, to cite a paper by Leighton and Maggs you would type
+% \cite{LM89}, and to cite a paper by Strassen you would type \cite{S69}.
+% (To avoid bibliography problems, for now we redefine the \cite command.)
+% Also commands that create a suitable format for the reference list.
+\renewcommand{\cite}[1]{[#1]}
+\def\beginrefs{\begin{list}%
+        {[\arabic{equation}]}{\usecounter{equation}
+         \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+         \setlength{\labelwidth}{1.6truecm}}}
+\def\endrefs{\end{list}}
+\def\bibentry#1{\item[\hbox{[#1]}]}
+
+%Use this command for a figure; it puts a figure in wherever you want it.
+%usage: \fig{NUMBER}{SPACE-IN-INCHES}{CAPTION}
+\newcommand{\fig}[3]{
+			\vspace{#2}
+			\begin{center}
+			Figure \thelecnum.#1:~#3
+			\end{center}
+	}
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+% **** IF YOU WANT TO DEFINE ADDITIONAL MACROS FOR YOURSELF, PUT THEM HERE:
+
+\newcommand\E{\mathbb{E}}
+\def\N{\mathbb{N}}
+\def\Z{\mathbb{Z}}
+\def\Q{\mathbb{Q}}
+\def\R{\mathbb{R}}
+\def\C{\mathbb{C}}
+\def\F{\mathbb{F}}
+\def\L{\mathcal{L}}
+\def\M{\mathcal{M}}
+\def\Next{\mathsf{Next}}
+\def\Dom{\mbox{Dom}}
+\def\Nex{\mathsf{Nex}}
+\def\Succ{\mathsf{Succ}}
+\def\Zero{\mathsf{Zero}}
+\def\Jump{\mathsf{Jump}}
+\def\Command{\mathsf{Command}}
+\def\Prog{\mathsf{Prog}}
+
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+\DeclarePairedDelimiter\anglebrac{\langle}{\rangle}
+
+\begin{document}
+%\lecture{**LECTURE-NUMBER**}{**DATE**}{**LECTURER**}{**SCRIBE**}
+\lecture{5}{Computability (26 - 30 June)}{Ternovska, Eugenia}{Lily Li}
+%\footnotetext{These notes are partially based on those of Nigel Mansell.}
+
+\section{Recursive Functions}
+\begin{definition}
+Minimization is another operations we need for recursion (not primitive recursion).
+\[f(\bar{x}) = \mu y[g(\bar{x}, y) = 0] \iff \mbox{$f(\bar{x})$ is the least $b$ s.t. $g(\bar{x}, b) = 0$ and $g(\bar{x}, i) \neq \infty$ for $i < b$} \]
+$f(\bar{x}) = \infty$ if no such $b$ exists.
+
+\emph{Note:} here $0$ represents true, while $1$ represents false. 
+
+If $g$ is computable then so is $f$ since we can calculate $g(\bar{x}, i)$ for increasingly large $i$ starting from $0$. 
+\end{definition}
+
+\begin{definition}
+$f$ is recursive if and only $f$ can be obtained from the initial functions from finitely many applications of primitive recursion, composition, and minimization.
+\end{definition}
+Observe that P.R. function is recursive, and all recursive function are computable (since we can apply induction on the number of primitive recursion, composition and minimizations used).
+
+We want to show the converse (below), but first we need some background.
+\begin{theorem}
+All computable functions (those computable by a RM) are recursive.
+\end{theorem}
+
+In fact, any function computable in exponential time is P.R. More generally if $f$ can be computed in time $T(x) = O(A_m(x))$ for some fixed $m$, where $A_m$ is the Ackermann's function, then $f$ is P.R.
+
+Let us see some examples of how we define function using our basic tools of primitive recursion, complementation, and minimization (mostly just p.r.).
+\begin{example}
+First we define the predecessor function $\rho$, taking care that the range is within $\N$. 
+\[\rho(x) = \begin{cases}
+x - 1 &\qquad \mbox{ if } x > 0 \\
+0 &\qquad \mbox{ if } x = 0
+\end{cases}\]
+We can define $\rho$ by P.R. as $\rho (0) = 0 = g$ and $\rho(x+1) = x = h(x, \rho(x))$ where $g = Z$ and $h = I_{2,1}$. 
+
+Next we define the limited subtraction function $\Delta$:
+\[f_{\Delta}(x,y) = x \Delta y = \begin{cases}
+x - y &\qquad \mbox{ if } y \leq x \\
+0 &\qquad \mbox{ otherwise } 
+\end{cases}\]
+Define $f_{\Delta}(x, 0) = x = g(x)$ where $g(x) = I_{1,1}(x)$. Further define $f_{\Delta}(x, y+1) = h(x,y,x \Delta y) = \rho(x \Delta y)$ where $\rho$ is the predecessor function from before and $h = \rho(I_{3,3})$. 
+
+Finally we define the maximum function using our limited subtraction in $\N \times \N \rightarrow \N$. Define
+\[\max (x,y) = (x \Delta y) + y\]
+Observe that if $x > y$ then $\max (x,y) = x$ and if $x \leq y$ then $\max (x,y) = y$ as one would expect. Since both the subtraction and addition functions are P.R., their composition is P.R. as well.
+\end{example}
+
+\section{Relations and 0-1 Functions}
+For $R \subseteq \N^n$, $n$-ary relation.
+Define the characteristic function of $R$ as:
+\[R(\bar{x}) = \begin{cases}
+0 &\qquad \mbox{ if } \bar{x} \in R \\
+1 &\qquad \mbox{ if } \bar{x} \notin R
+\end{cases} \]
+Again note $0$ is true and $1$ is false for this part of the course. We consider $R$ computable (resp. P.R.) if and only if the characteristic function is computable (resp. P.R.).
+
+Next we will try to obtain logic using primitive recursive functions. But before we do that lets define a useful P.R. function sign, $\bar{sg} = 1\Delta x$ i.e.
+\[\bar{sg}(x) = \begin{cases}
+0 &\mbox{ if } x > 0 \\
+1 &\mbox{ if } x = 0
+\end{cases}\]
+
+\begin{proposition}
+If $R$ and $S$ are P.R. (resp. computable) then so are
+\begin{enumerate}
+\item $\lnot R$: $(\lnot R)(\bar{x}) = \bar{sg}(R(x))$.
+\item $R \lor S$: $(R \lor S)(\bar{x}) = R(\bar{x}) \cdot S(\bar{x})$.
+\item $R \land S$: $(R \land S)(\bar{x}) = \lnot(\lnot R \lor \lnot S)(\bar{x})$.
+\end{enumerate}
+\end{proposition}
+
+MOAR operations which preserves recursive functions and relations (as well as preserving computable relations and computable functions).
+
+\begin{example}
+\textbf{Relations:}
+\begin{align*}
+(x < y) &= \bar{sg}\left(y \Delta x\right) = \begin{cases} 
+			0 &\mbox{ if } x < y \\
+			1 &\mbox{ if } x \geq y
+		\end{cases} \\
+(x = y) &= \lnot (x < y) \land \lnot (y < x) \\
+(x \leq y) &= (x < y) \lor (x = y) 
+\end{align*}
+\end{example}
+
+\begin{example}
+\textbf{Bounded Sum}
+\[g(\bar{x}, y) = \sum_{z < y}f(\bar{x}, z) = f(\bar{x}, 0) + \cdots + f(\bar{x}, y-1)\]
+$g$ can be defined from $f$ by P.R. as: $g(\bar{x}, 0) = 0$ and $g(\bar{x}, y+1) = g(\bar{x}, y) + f(\bar{x},y)$.
+\end{example}
+
+\begin{example}
+\textbf{Bounded Product}
+\[h(\bar{x},y) = \prod_{z<y} f(\bar{x},z) = f(\bar{x},0) \cdots f(\bar{x},y-1).\]
+Similarly, $h$ can be defined from $f$ by P.R. as $h(\bar{x}, 0) = 1 = g$ and $h(\bar{x}, y+1) = h(\bar{x},y) \cdot f(\bar{x}, y)$.
+\end{example}
+
+\begin{example}
+\textbf{Bounded Quantification}
+\begin{align*}
+S(\bar{x},y) &= \exists z< y R(\bar{x}, z) \\
+&= \prod_{z < y} R(\bar{x}, z) = R(\bar{x}, 0) \cdots R(\bar{x}, y-1) \\
+&= h(\bar{x}, y)
+\end{align*}
+Similarly, the universal quantifier is P.R. since
+\begin{align*}
+T(\bar{x}, y) &= \forall z < y R(\bar{x},z) \\
+&= \lnot \exists z < y \lnot R(\bar{x},z)
+\end{align*}
+Thus the computability of $R$ implies the computability of $S$ and $T$.
+\end{example}
+
+\begin{example}
+\textbf{Number Theoretical Functions}
+\begin{align*}
+\mathsf{Prime}(x) &= 	\begin{cases}
+							0 \mbox{ if $x$ is prime }
+							1 \mbox{ otherwise }						
+						\end{cases}\\
+&= (1 < x) \land (\forall z < x: \lnot (z | x) \lor z = 1)
+\end{align*}
+where 
+\[x | y = \exists z \leq y: x \cdot z = y \]
+\end{example}
+
+\begin{definition}
+We will define a conditional by cases:
+\begin{align*}
+f(\bar{x}) &= 	\begin{cases}
+					g(\bar{x}) \mbox{ if } R(\bar{x}) \\
+					h(\bar{x}) \mbox{ otherwise }
+				\end{cases}\\
+&= \mbox{Cond}(R(\bar{x}), g(\bar{x}), h(\bar{x}))\\
+&= \bar{sg}(x)\cdot y + \bar{sg}(\bar{sg}(x)) \cdot z
+\end{align*}
+Where 
+\[\mbox{Cond}(x,y,z) = \begin{cases}
+y &\mbox{ if } x = 0 \\
+z &\mbox{ if } x > 0
+\end{cases}\]
+As before, if $g, h, R$ are P.R. (resp. computable) then so is $f$.			
+\end{definition}
+
+\begin{example}
+\textbf{Bounded Minimization}
+\[f(\bar{x}, y) = \min z < y R(\bar{x}, z) = \begin{cases}
+\mbox{ least $z$ s.t. $z < y$ and $f$} &\mbox{ if such $z$ exists }\\
+y &\mbox{ otherwise }
+\end{cases}\]
+Notice that (1) $f$ is always total since $R$ is a total $0-1$ valued function, and (2) $f$ is P.R. (resp. computable) whenever $R$ is P.R. (resp. computable) since 
+\[f(\bar{x}, y) = \sum_{z<y} \left(\exists v \leq z: R(\bar{x}, v) \right)\]
+
+The idea is to use bounded summation as bounded minimization.
+\end{example}
+
+\section{Simulating RM with Recursive Function}
+We want to consider all computable function (those computable by RM) and show that these can be expressed recursively. Consider 
+\[T([P], \bar{x}, y) \iff y \mbox{ is a halting computation of program $P$ on input $\bar{x}$ }\]
+where $[P]$ is the encoding of program $P$. If $T$ is P.R. then the function $\min_y: T([P],\bar{x},y)$ is recursive and so the function associated with $P$ is recursive. In the following we construct $T$ and show that it is P.R.
+
+\section{G\"{o}del Numbering}
+We wish to encode the follow: commands of RMs, programs (sequences of commands), states, computations (sequences of states) as natural numbers. To do this, we must first define the $i^{\mbox{th}}$ prime function $f(i) = p_i$ and note that $f(i)$ is P.R. Let
+\begin{align*}
+p_0 &= f(0) &= 2 \\
+p_{x+1} &= f(x+1) &= \min y < p_x^{p_x}
+\end{align*}
+This means that $p_x < y$ and $\mathsf{Prime}(y)$ so $f(x+1)$ is the first prime after $p_x$.
+
+Next we need to observe that prime decomposition is also P.R. Notation: $z_x$ is the exponent of $p_x$ in the prime decomposition of $z$ where
+\[z = p_0^{z_0} \cdot p_1^{z_1} \cdots p_m^{z_m}\]
+Thus we can write $z_x$ as
+\[\min y < z: \lnot (p_x^{y+1}| z)\]
+
+Finally we need length $l(z)$ to be P.R. Length is defined as follows:
+\[l(z) = m + 1 \qquad \mbox{ where } z = p_0^{z_0} \cdots p_m^{z_m}.\]
+Alternatively, we can encode $l(z)$ as
+\begin{align*}
+l(z) &= \min y < z : \prod_{x < y} P_x^{z_x} = z\\
+&= 1 + \mbox{ subscript of largets prime which divides $z$}\\
+&= \max y < z: (p_y | z) + 1
+\end{align*}
+
+\subsection{Numbering Programs}
+Using the three P.R functions above, we can number programs as follows. If $P = \anglebrac{c_0, ..., c_{n-1}}$ then $\#(P) = p_0^{\#(c_0)} \cdots p_m^{\#(c_{n-1})}$ where 
+\begin{align*}
+\#(z_i) &= 2^i \\
+\#(s_i) &= 3^i \\
+\#(J_{i,j,k}) &= 5^i 7^j 11^k
+\end{align*}
+Thus distinct programs get distinct numbers and the encoding $\# P$ of $P$ is P.R.
+
+\subsection{Encoding Relations}
+\begin{align*}
+\Succ(x,i) &\iff x = \#(s_i)\\
+\Zero(x,i) &\iff x = \#(z_i)\\
+\Jump(x,i,j,k) &\iff x = \#(J_{i,j,k})\\
+\Command(x) &\iff \exists i < x: (\Succ(x, i) \lor \Zero(x,i)) \lor (\exists i < x, \exists j < x, \exists k < x: \Jump(x,i,j,k))
+\end{align*}
+
+Let $\Prog (z) \iff z = \# (P)$ for some program $P$. $\Prog (z)$ is P.R since 
+\begin{align*}
+\Prog (z) &\iff z \mbox{ encodes a sequence of commands }\\
+&\iff \forall j < l(z): \Command (z_j)
+\end{align*}
+
+\subsection{States}
+Consider RM program $P$, which uses registers $R_1, ..., R_m$. A state for $P$ is $s = \anglebrac{k, R_1, ..., R_m}$ where $k$ is the index of the next command to execute and $R_1, ..., R_m$ is the value in each register.
+
+Next we consider computations. Define
+\[\hat{z} = \begin{cases}
+z \mbox{ if $Prog(z)$ encodes a program } \\
+1 \mbox{ otherwise }
+\end{cases}\]
+And for our use define
+\[\{z\} = \begin{cases}
+
+\end{cases}\]
+
+$\Nex(u,z) = $ the code of the state $u'$ which results when program $\{z\}$ executes one step from the state encoded by $u$. If $u$ is a halting state $u' = u$. We need to show that $\Nex$ is P.R.
+
+\section{Kleene $T$ Predicate}
+Recall $T(P,\bar{x},y)$ from above. Using G\"{o}del encoding we can rewrite $T$ as $T_n(z, x_1, ..., x_n, y) = y$ encodes the computation of $\{z\}$ on input $\bar{x} = (x_1, ..., x_n)$ where $T_{n}$ is a $n+2$-ary relation. 
+\end{document}

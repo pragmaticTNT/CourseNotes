@@ -25,6 +25,11 @@
 \def\NP{\mathsf{NP}}
 \def\EXP{\mathsf{EXP}}
 \def\NEXP{\mathsf{NEXP}}
+\def\LINSPACE{\mathsf{LINSPACE}}
+\def\Space{\mathsf{Space}}
+\def\Time{\mathsf{Time}}
+\def\Size{\mathsf{Size}}
+\def\PSPACE{\mathsf{PSPACE}}
 
 % Use these for theorems, lemmas, proofs, etc.
 \newtheorem{theorem}{Theorem}
@@ -72,7 +77,6 @@ From the previous part we know that the number of palindromes $X$ which have $|S
 \end{enumerate}
 
 
-
 \begin{problem}
 Show that the language $L = \{0\}$ is complete for $\P$, under polytime reduction.
 \end{problem}
@@ -81,54 +85,54 @@ $L$ is certainly in $P$. Consider any language $L' \in \P$. Then there exists a 
 \end{proof}
 
 
-
 \begin{problem}
-Show that if $P = \NP$, then $\EXP = \NEXP$.
+Show that if $\P = \NP$, then $\EXP = \NEXP$.
 \end{problem}
 \begin{proof}
-The trick here is to pad liberally. 
+The trick here is to pad liberally. Since $\EXP \subseteq \NEXP$, to show equality all we need to do is show $\NEXP \subseteq \EXP$. To this end, choose a language $L \in \NEXP$ which can be decided in time $2^{n^c}$. Let the $L' \in \NP$ be the language $L_{p} = \{x01^{2^{n^c}}: x \in L\}$. On input $x$ of $L$ with $|x| = n$ construct the padded input $x_p = x01^{2^{n^c}}$ in exponential time. Since $\P = \NP$, there exists a DTM $M_p$ which decides $L_p$. $M_p$ executes in polynomial time on $x_p$. By unpadding and interpreting the result, we get an exponential algorithm for $L$. Thus $\NEXP \subseteq \EXP$.     
 \end{proof}
 
 
-
 \begin{problem}
-
-\end{problem}
-
-\begin{proof}
-
-\end{proof}
-
-\begin{problem}
-
+Show that $\LINSPACE \neq \P$ where $\LINSPACE = \Space(n)$.
 \end{problem}
 \begin{proof}
-
+By contradiction of space hierarchy. In particular we will show that if $\LINSPACE = \P$ then $\PSPACE = \P$. Consider a language $L \in \PSPACE$. Then $L$ has a TM $M$ which uses at most space $O(n^c)$ on input $x$ of size $n$. Again by padding, we obtain the language $L_p = \{x01^{|x|^c}: x \in L\}$ which can be decided in linear space and thus polynomial time. Thus $L \in \P$ by the following reduction: construct $x_p = x01^{|x|^c}$ in polynomial time. Run $x_p$ on the polytime algorithm for $L_p$ to get a result. Since $\P = \PSPACE$, $\PSPACE = \LINSPACE$ contradicting space hierarchy.        
 \end{proof}
 
 
+\begin{problem}
+Let $t$ be the alloted time. Can we use a $k$-tape TM in the proof of $\Time(t) \subsetneq \Size(t^2)$? How can you get a simulating circuit of size $O(t^2)$?
+\end{problem}
+\begin{proof}
+Yes! Recall the proof of $\Time(t) \subsetneq \Size(t^2)$. We had a table were each row consisted of the tape configuration at each time step. By piping together three consecutive cells on the $i$th row we could determine the state of a cell on the $i+1$th row. This was the structure we used to build our circuit. We can do something similar with $k$-tapes. Observe that turning the $k$-tape TM into a one tape TM is too slow, the conversion would take $O(n^2)$ thus the number of configurations would balloon to $O(n^4)$. 
+
+Let us instead change our $k$-tape TM into a $t^2$ circuit in one go. Just as before we lay out our configuration, $k$ times larger since the configuration of each tape must be recorded. For a cell in the $i+1$th row, we still three consecutive cells from the row $i$, but now we also need the cells of all other tapes in row $i$ as well. Even though this looks bad, we only need to collected all cells from each tape once to be piped to the cells on the other tapes. The size of this circuit is same as before.  
+\end{proof}
+
 
 \begin{problem}
-
+An \textbf{oblivious} TM has a fixed set of tape-head movements for all inputs of the same size. We work towards constructing an oblivious TM $M'$ which decides the same language as TM $M$ with only a $\log$ factor slowdown. 
 \end{problem}
 \begin{enumerate}
-\item 
+\item Show that every language $L \in \Time(t(n))$, for a time-constructible $t(n)$, can be decided by an oblivious TM in time $O(t^2(n))$.
 \begin{proof}
-
+Introduce a new "hatted" version of each symbol; this will allow you to figure out which cell you were just scanning. Let $L \in \Time(t(n))$ and $M$ be a $t(n)$-time TM which decides $L$. Mark off $t(n)$ cells to the left and right of the input. This will be the effective work space of $M$. Our oblivious TM $M'$ will work as follows: for each step of $M$ sweep left for $t(n)$ steps then right for $t(n)$ steps, noting the position of the "hatted" symbol. After registering the state of the tape make another sweep left for $t(n)$ steps and left for $t(n)$ steps to make the necessary changes. 
 \end{proof}
-\item
+\item Show that every language $L$, as above, can be decided by an oblivious TM in time $O(t(n) \cdot \log t(n))$. 
 \begin{proof}
-
+It idea is to use the construction of an efficient universal TM shown in lecture 2. There are quite a few details, so I recommend reading the original. 
 \end{proof}
 \end{enumerate}
 
 
-
 \begin{problem}
-
+Show that there is a universal \emph{nondeterministic} TM $U$ when given a description of a NTM $\anglebrac{M}$ which runs input $x$ in time $t$, $U$ runs $x$ on $M$ in time $c_M \cdot t$ for some constant $c_M$ depending on $M$. 
 \end{problem}
 \begin{proof}
+The provided solution shows that any $k$-tape NTM $M$ with running time $t$ can be simulated by a $2$-tape universal NTM $U$ in time $O(t)$. 
 
+$U$ works by treating tape one as the work tape and tape two as the guess tape. Start with the input $x$ on tape one. Randomly guess a sequence $S_1 = (a^1_1, ..., a^1_k, q_i, r_j)$ where $a^1_l$ is the currently scanned symbol on tape $l$, $q_i$ is a guessed state number, and $r_j$ is the guessed transition rule. $U$ checks to make sure that, starting from state $q_i$, it is possible to use $r_i$ to get state where the tape cells contain $a^1_1, ..., a^1_k$. After running all $t$ steps of $M$, $U$ checks that the final state is an excepting one. 
 \end{proof}
 % ===> END ASSIGNMENT
 \end{document}

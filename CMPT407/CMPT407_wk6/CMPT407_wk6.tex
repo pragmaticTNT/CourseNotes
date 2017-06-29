@@ -111,6 +111,7 @@
 \newcommand\E{\mathbb{E}}
 \def\N{\mathbb{N}}
 \def\R{\mathbb{R}}
+\def\Pr{\mathbf{Pr}}
 \def\P{\mathsf{P}}
 \def\NP{\mathsf{NP}}
 \def\BPP{\mathsf{BPP}}
@@ -120,6 +121,8 @@
 \def\coRP{\mathsf{coRP}}
 \def\SAT{\mathsf{SAT}}
 \def\PolySize{\mathsf{PolySize}}
+\def\EXP{\mathsf{EXP}}
+\def\Poly{\mathsf{Poly}}
 
 \DeclarePairedDelimiter\ceil{\lceil}{\rceil}
 \DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
@@ -130,29 +133,29 @@
 \lecture{6}{Randomized Computation (12 - 16 June)}{Valentine Kabanets}{Lily Li}
 %\footnotetext{These notes are partially based on those of Nigel Mansell.}
 
-The complexity classes we are going to consider in the next little while:
+The complexity classes we are going to consider in the next little while are these:
 \[\P \subseteq \BPP \subseteq \BQP\]
-where $\BPP$ is randomized polynomial time algorithm (assuming access to uniform random bits) and $\BQP$ is quantum polynomial time (assuming Quantum Mechanics is accurate and we can build large quantum systems.
+where $\BPP$ is the class of randomized polynomial time algorithms (assuming access to uniform random bits) and $\BQP$ is quantum polynomial time (assuming Quantum Mechanics is accurate and we can build large quantum systems).
 
-Consider an example in Communication Complexity. Consider two parties $Alice$ and $Bob$ with strings $a$ and $b$ respectively. They both want to know if $a = b$. Let the cost of a protocol is the number of bits sent between the two parties. Consider the following deterministic protocol: $Alice$ sends $Bob$ string $a$. $Bob$ compares $a$ and $b$ and sends $Alice$ one bit denoting if they are equal or not. The complexity of the protocol is $n + 1$ for strings of length $n$. As it turns out, the best we can do with a deterministic protocol is $n$.
+Consider an example in Communication Complexity. Consider two parties $Alice$ and $Bob$ with strings $a$ and $b$ respectively. They both want to know if $a = b$. Let the cost of a protocol be the number of bits sent between the two parties. Consider the following deterministic protocol: $Alice$ sends $Bob$ string $a$. $Bob$ compares $a$ and $b$ and sends $Alice$ one bit denoting if they are equal or not. The complexity of the protocol is $n + 1$ for strings of length $n$. As it turns out, the best we can do with a deterministic protocol is $n$.
 
-What if we use a randomized protocol? $Alice$ picks a random prime number $p$ in the range $(n^2, n^3)$ and a random number $r$ in the range $(1, p)$. For $a = a_1\cdots a_n$, $Alice$ calculates $A(r) = a_1 r^{n-1} + \cdot + a_n \mod p$. $Alice$ sends $Bob$ the string $(q, r, A(r))$ (actually $p$ is not necessary but you might as well send it anyways). For $b = b_1 \cdots b_n$, $Bob$ computes $B(r) = b_1 r^{n-1} + \cdots + b_n \mod p$ and compares $A(r)$ and $B(r)$ returning $Alice$ one bit. The cost of this protocol is $9\log n$. To see how good this protocol is 
+What if we use a randomized protocol? $Alice$ picks a random prime number $p$ in the range $(n^2, n^3)$ and a random number $r$ in the range $(1, p)$. For $a = a_1\cdots a_n$, $Alice$ calculates $A(r) = a_1 r^{n-1} + \cdot + a_n \mod p$ then sends $Bob$ the string $(q, r, A(r))$ (actually $p$ is not necessary but you might as well send it anyways). For $b = b_1 \cdots b_n$, $Bob$ computes $B(r) = b_1 r^{n-1} + \cdots + b_n \mod p$ and compares $A(r)$ and $B(r)$ returning $Alice$ 1 if $A(r) = B(r)$ and 0 otherwise. The cost of this protocol approximately $9\log n$. 
+
+To see how good this protocol is let us calculate the error rate. If $a = b$ then $A(r) = B(r)$. Suppose $a \neq b$ i.e. $A(x) \neq B(x)$ as polynomials in the finite field $\mathbb{F}_{p}$ then what is the likelihood that $A(r) = B(r)$? Well $A(r) = B(r)$ if $a_1 r^{n-1} + \cdot + a_n \equiv b_1 r^{n-1} + \cdots + b_n \mod p$ or $C(r) = (a_1 - b_1) r^{n-1} + \cdot + (a_n - b_n) = 0$. This reduces to finding the number of roots of the polynomial $C(x)$. The maximum degree of $C$ is $n-1$ and $r$ can take on at least $n^2$ different values so $\Pr[C(r) = 0] \leq \frac{n-1}{n^2} \leq \frac{1}{n}$ which is pretty good for large $n$.    
  
 \section{Randomized Complexity Class}
-A more granular subdivision of Randomized Complexity classes:
-\[\ZPP \subset \RP \subset \BPP\]
+A more granular subdivision of Randomized Complexity classes is as follows:
+\[\ZPP \subseteq \RP \subseteq \BPP\]
 \begin{definition}
-A language $L \in \BPP$ if there is a polynomial time DTM $M(x, r)$ such that $\forall x \in L$.
+A language $L \in \RP$ (one-sided error) if there is a polynomial time DTM $M(x, r)$ such that $\forall x \in L: \Pr_r[M(x,r) \mbox{ accepts}] \geq 1/2$ and $\forall x \notin L: \Pr_r[M(x,r) \mbox{ accepts}] = 0$. If $|x| = n$ then we have $|r| \leq n^c$ for some constant $c$. To decide if $x \in L$ the randomized algorithm $R$ flips $r$ fair coins and decides $accept$ or $reject$ in polynomial time. If $R$ accepts then $x \in L$. If $R$ rejects then $R$ might be too cautious and be wrong a proportion of the time. Think of $R$ as allowing false negatives.
 
-Similarly the one sized randomized complexity class $\RP$ is defined as: .
+Similarly for two-sized error class, language $L \in \BPP$ if $\forall x \in L: \Pr_r[M(x,r) \mbox{ accepts}] \geq 3/4$ and $\forall x \notin L: \Pr_r[M(x,r) \mbox{ accepts}] = 1/4$.
 
-Finally the class $\ZPP$ is defined as  
+Finally for the zero-error class, a language $L \in \ZPP$ if $M(x,r)$ produces an answer, then it is correct and $\forall x, \Pr[M(x,r) = ?] \leq 1/3$ where $?$ is the output \emph{"I don't know"}.  
 \end{definition}
 
-To construct a randomized algorithm we need to ensure that
-
 \begin{theorem}
-If $L \in \RP$ (recall $\frac{1}{2}$ chance of error for accepting) then we can reduce the error to $\frac{1}{2^n}$ for any $n\in \N$.
+If $L \in \RP$ then we can reduce the error to $\frac{1}{2^n}$ for any $n\in \N$.
 \end{theorem}
 \begin{proof}
 Quite straight forward. Just run the RTM $M$ on input $x$ a bunch of times. If any trial accepts then $x \in L$ since $M$ cannot be wrong on rejecting inputs.
@@ -164,21 +167,42 @@ If $L \in \BPP$ (recall $\frac{1}{4}$ chance of error for both accepting and rej
 
 Now lets consider $\ZPP$ in-depth:
 \begin{theorem}
-$L \in \ZPP \iff L \in \RP \cap \coRP \iff$ there exists a randomized algorithm that is always correct and has expected polynomial running time. With random variable $T(x, r)$ be the running time on input $x$ with randomness $r$. The expected running time on $x$ is $Exp_r[T(x,r)] = \sum_r T(x,r) \cdot Pr(r)$. 	  
+$L \in \ZPP \iff L \in \RP \cap \coRP \iff$ there exists a randomized algorithm that is always correct and has expected polynomial running time. Let the random variable $T(x, r)$ be the running time on input $x$ with randomness $r$. The expected running time on $x$ is $Exp_r[T(x,r)] = \sum_r T(x,r) \cdot Pr(r)$. 	  
 \end{theorem}
 \begin{proof}
-First show the first $\iff$ holds. In particular we will show that $L \in \RP \cap \bar{L} \in \RP \implies L \in \ZPP$. Next we have $L \in \ZPP$ and need to show that $L \in \RP \cap \bar{L} \in \ZPP$. 
+To show that the first $\iff$ holds we will show that $L \in \RP \cap \bar{L} \in \RP \implies L \in \ZPP$. Let $M_1$ be an algorithm for $L$ and $M_2$ be an algorithm for $\bar{L}$. We chose a random $r$ and run both $M_1(x,r)$ and $M_2(x,r)$. If either accepts then we know if $x \in L$ for sure. In the $1/4$ of the time when both $M_1$ and $M_2$ reject, we say \emph{"I don't know"}.
 
-For the next we show that $L \in \ZPP \iff$ there exists and algorithm which runs in an expected polynomial time. In the backwards direction 
+Next we have $L \in \ZPP$ and need to show that $L \in \RP \cap \bar{L} \in \ZPP$. Suppose that we have an algorithm $M$ for $L \in \ZPP$. Again we choose a random $r$ and run $M(x,r)$. If $M$ accepts or rejects then we know if $x \in L$ or not. Otherwise we reject. It is clear that we will not be wrong in the cases when $x \notin L$.
 
-In the forward direction 
+For the next $\iff$ we show that $L \in \ZPP \iff$ there exists and algorithm which runs in an expected polynomial time. In the backwards direction, let $M$ be the algorithm. To show that $L \in \ZPP$ we need an algorithm that runs in polynomial time. We can do so by timing $M$ and stopping when the time is up. If $M$ did not provide an answer in the alloted time, answer \emph{"I don't know"}.
+
+In the forward direction let $M$ be an algorithm for $L$ in $\ZPP$. This time we have the opposite problem. Let us assume that $L \in \EXP$. We need the expected time to be polynomial, but on occasion we are allowed exponential running time. We achieve this as follows: let $M'$ be a exponential TM for $L$. Run $M'$ on input $x$ and simultaneously generate random strings $r$ to run $M$. If $M$ accepts or rejects, do the same. This will happen most of the time. in the rare occasion that $M$ fails to find an answer in exponential time, $M'$ will provide the answer.
 \end{proof}
 
+It is believed that $\BPP = \P$ so $\BPP \subseteq \NP$ but no
+
 \begin{theorem}
-There exists a zero-error $\ZPP$ randomized algorithm for $k-\SAT$ in expected time $2^{n(1 - \frac{\epsilon}{k})}$ with constant $\epsilon > 0$. 
+There exists a zero-error $\ZPP$ randomized algorithm for $k-\SAT$ in expected time $2^{n(1 - \frac{\epsilon}{k})}$ with constant $\epsilon > 0$. It turns out that this algorithm allows for counting the number of satisfying assignments as well! 
 \end{theorem}
 \begin{proof}
-Do you still remember the switching lemma? It will come in handy.
+Do you still remember the switching lemma? It will come in handy. The actual statement of the lemma is a bit stronger than was stated originally stated. The original was as follows: given a particular restriction $\rho$ and DNF $D$, there exists a CNF logically equivalent to $D$ with restriction $\rho$ with high probability. The actual statement is:
+
+\begin{lemma}
+$\forall k, t, p$ and $\forall k$-CNF $\phi$ on $n$ variables:
+\[\Pr_{\rho \sim R_p}[\mbox{depth of } C\Delta T(\phi |_{\rho}) > t ] < (5pk)^t\]
+\end{lemma}
+
+Notice that instead of any old CNF, you get inparticular the canonical decision tree for our DNF is very likely to have low depth. Observe that there is an equivalence between devision trees of depth $d$ and $d$-DNF. Given a depth $d$ decision tree $D$ 
+
+Next we need to define the notion of a \textbf{canonical decision tree}. Let $\phi$ be some $k$-CNF over variables $x_1, ..., x_n$. We assign an order to the variables, say $x_1 < x_2 < \cdots < x_n$, and an order for each clause, say lexicographical. 
+
+Finally, we will build the \emph{$k-\SAT$ algorithm}. Let the $k$-CNF be over the variables $x_1, ..., x_n$. 
+\begin{enumerate}
+\item For each $i \in \{1, ..., n\}$ decide with probability $p$, to be decided later, to put $i$ in a set $S$
+\item Iterate over all assignments $a$ to the variables with indices not in $S$. We expect $np$ items in $S$ so there should be $n - np$ variables to assign. Check if $\phi | _{a}$ is satisfiable by computing $C\Delta T(\phi |_a)$. If $phi$ is satisfiable then output $yes$, otherwise output $no$. 
+
+Let us analysis this randomized algorithm. First note that the 
+\end{enumerate}
 \end{proof}
 
 The following is an application of our discussion thus far:
@@ -186,8 +210,60 @@ The following is an application of our discussion thus far:
 $\BPP \subseteq \PolySize$
 \end{theorem}
 \begin{proof}
-Suppose $L \in \BPP$. Then on input $x$, the probability that $M(x,r)$ is wrong can be made quite small: $\leq 2^{-2n}$. Consider the grid with all $n$ bit string inputs $x_1, ..., x_{2^n}$ down the rows and all the random strings $r_1, ..., r_{2^{PolySize}}$ across the columns. Each cell $(i,j)$ of the table accepts or rejects depending on the value of $M(x_i, r_j)$. For each row the expected number of wrong results is $2^{-2n}$. Using union bound we have that the expected number of  
+Suppose $L \in \BPP$. Then on input $x$, the probability that $M(x,r)$ is wrong can be made quite small: $\leq 2^{-2n}$. Consider the grid with all $n$ bit string inputs $x_1, ..., x_{2^n}$ down the rows and all the random strings $r_1, ..., r_{2^{PolySize}}$ across the columns. Each cell $(i,j)$ of the table has $accept$ or $reject$ depending on the value of $M(x_i, r_j)$. For each row the expected number of wrong results to be $2^{-2n}$. Using union bound, expected number of random inputs $r_j$ for which $M(x_i, r_j)$ is wrong for some $x_i$ is $2^n/2^{2n} = 1/2^n$. Which is quite small. Thus there must exist some random string $r^*$ which allows $M$ to correctly evaluate every input string. By hard-coding $r^*$ into the $\PolySize$ circuit which represents $M(x,r)$, we obtains a $\PolySize$ circuit for $L$ which always outputs the right answer. 
 \end{proof}
 
-It is conjectured that $\BPP = \P$ though I have no idea why this is...
+\emph{Note: this is an existential proof. We know that such a circuit must exists, but, in-practice, we have no way of finding $r^*$ (we would need a bit chunk of the table to do so) and constructing such a circuit.}  
+
+(It is trivially the case that $\RP \subseteq \NP$. Why?)
+It is not know if $\BPP \subseteq NP$. Further it is not know (and not believed) if $\NP \subseteq \BPP$. And it believed, but now shown that randomized complexity gives no extra power i.e. $\BPP = \P$.
+
+\begin{theorem}
+$\BPP \subseteq \Sigma_2^p \cap \Pi_2^p$. ($\BPP$ is in "generalized" $\NP$)
+\end{theorem}
+\begin{proof}
+First note that $\BPP$ is quite similar to $\P$ in the sense that $\BPP$ is equal to its complement. Thus it is sufficient to prove that $\BPP \subseteq \Sigma_2^p$ since its complement is $\mathsf{coBPP} \subseteq \Pi_2^p$. 
+
+$\forall L \in \BPP$, there exists a probabilistic TM $M$ which decides $L$ with error probability $\leq 1/2^n$. Let $n$ be the input length of $x$ and $m$ be the length of the random string. We want to know if $x \in L$ and given that that $m = \Poly (n)$. Fix input $x$, and define $A = \{r \in {0,1}: M(x,r) \mbox{ accepts }\}$. Observe the following cases:
+\begin{enumerate}
+\item $x \in L$: let $R = \{0,1\}^m$ be the set of all random strings. In this case, $|A|/|R|$ is very close to 1 since the number of bad random strings is only $1/2^n$.
+\item $x \notin L$: then similar to the above, but now $|A|/|R|$ is close to 0 since most of the random strings cause $M$ to reject. 
+\end{enumerate} 
+
+Consider a translation of $A$, namely given a random string $z \in \{0,1\}^m$ let $A \oplus z = \{a \oplus z: \mbox{ for } a \in A\}$. We will use these shifts to cover the domain of all random strings.
+
+\begin{lemma}
+If $|A|/|R| \geq 1 - 2^{-n}$, then there exist strings $s_1, ..., s_k$, for $k = |r|$, such that $R = \cup_{i=1}^k (A \oplus s_i)$.
+\end{lemma}
+\begin{proof}
+Use the probabilistic method. Again we will consider the two cases. First we suppose $x \in L$. Let $S = \cup_{i=1}^k (A \oplus s_i)$ What is the probability that $\Pr[r \notin S]$? Since the random strings $s_1, ..., s_k$ are chosen independently and we can apply union bound we have:
+\begin{align*}
+&= \prod_{i=1}^{k}\Pr[r \oplus s_i \notin A] < (2^{-n})^k = 2^{-nk} \\
+&= \Pr[\exists r \in R \mbox{ such that } r \notin S] \leq |R|2^{-nk} = 2^{-n} << 1
+\end{align*} 
+Thus a randomly chosen set of strings $s_1, ..., s_k$ causes $R$ to cover $\{0,1\}$ with high probability.
+
+Next we consider what happens when $x \notin L$. Then $|A| / |R| < 2^{-n}$ and it is possible to show that now set of $k$ random strings $s_1, ..., s_k$, when shifting $A$, will cover the entire space of random strings. Since at most $|A| * k = k / 2^n < 1$ percent of the random strings are covered by the shifted copies of $A$, some $r \in R$ will not be covered.
+\end{proof}
+
+\end{proof}
+
+\section{Randomness and Nondeterminism}
+Recall one definition of $\NP$. It is the set of all languages such for which there exists a deterministic polynomial time verifier which checks the "proof" of an all powerful prover. To inject some randomness to the party, now the verifier is allowed to be randomized polynomial time. More formally, and we will be using some of the strange naming conventions, we will define the classes as follows:
+ 
+Let the prover be Merlin and the verifier be Arthur. Merlin always wants to convince Arthur that the input is in the language. A language $L \in MA$ if there is a constant $c$, and a polytime relation $R(x,y,z)$ such that, for every $x$ of length $n$, 
+\begin{align*}
+x \in L &\implies \exists y \Pr_z [R(x,y,z) = 1] \geq \frac{3}{4} \\
+x \notin L &\implies \forall y \Pr_z[R(x,y,z) = 1] \leq \frac{1}{4}
+\end{align*} 
+
+Similarly, a language $L \in AM$ if there is a constant $c$ and a polytime relation $R(x,y,z)$ such that, for every $x$ of length $n$
+\begin{align*}
+x \in L &\implies \Pr_z [\exists y: R(x,y,z) = 1] \geq \frac{3}{4} \\
+x \notin L &\implies \Pr_z[\exists y: R(x,y,z) = 1] \leq \frac{1}{4}
+\end{align*}
+The difference here is that the verifier moves first showing the prover the chosen random string. This type of problem is know as Public coin Protocol.
+
+Similarly there exists a Private-coin Protocol. This protocol makes use of the graph non-isomorphism problem.  
+ 
 \end{document}
