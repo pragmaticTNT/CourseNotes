@@ -114,6 +114,8 @@
 \def\Pr{\mathbf{Pr}}
 \def\P{\mathsf{P}}
 \def\NP{\mathsf{NP}}
+\def\coNP{\mathsf{coNP}}
+\def\BP{\mathsf{BP}}
 \def\BPP{\mathsf{BPP}}
 \def\BQP{\mathsf{BQP}}
 \def\RP{\mathsf{RP}}
@@ -122,6 +124,12 @@
 \def\SAT{\mathsf{SAT} then }
 \def\PolySize{\mathsf{PolySize}}
 \def\EXP{\mathsf{EXP}}
+\def\Maj{\mathsf{Maj}}
+\def\NISO{\mathsf{NISO}}
+\def\IP{\mathsf{IP}}
+\def\PSPACE{\mathsf{PSPACE}}
+\def\QBF{\mathsf{QBF}}
+\def\PCP{\mathsf{PCP}}
 
 \def\MA{\mathsf{MA}}
 \def\AM{\mathsf{AM}}
@@ -132,31 +140,40 @@
 
 \begin{document}
 %\lecture{**LECTURE-NUMBER**}{**DATE**}{**LECTURER**}{**SCRIBE**}
-\lecture{7}{Randomized Computation (26 June - 2 July)}{Valentine Kabanets}{Lily Li}
+\lecture{7}{Randomized Computation (26 June - End)}{Valentine Kabanets}{Lily Li}
 %\footnotetext{These notes are partially based on those of Nigel Mansell.}
 
 \section{Randomness and Interaction}
-Today we will show that $\BPP \subseteq \MA \subseteq \AM \subseteq \prod_2^p$. Remark that the first $\subseteq$ is actually quite straight forward. Please consider what $\BPP$ and $\MA$ and explain why. Remark the verifier Arthur check $R(x,y,z)$ where $x$ is the input, $y$ is the value the Merlin sends over, and $z$ is the random string.
+Today we will show that $\BPP \subseteq \MA \subseteq \AM \subseteq \prod_2^p$. Remark that the first $\subseteq$ is actually quite straight forward. Please consider what $\BPP$ and $\MA$ are and explain why (\emph{hint: remember that $\MA$ is essentially the randomized version of $\NP$}). Remark the verifier Arthur checks $R(x,y,z)$ where $x$ is the input, $y$ is the value the Merlin sends over, and $z$ is the random string.
 
-As before, we can decrease the error probability by trying $k$ times and taking the majority. Let us do the analysis (use Chernoff bound):
+As before, we can decrease the error probability by choosing $k$ different random strings $z_1, ..., z_k$ and taking the majority of $R(x,y,z_i)$ for all $z_i$. Let us do the analysis (use Chernoff bound):
 \begin{enumerate}
-\item $x \in L$: Let the indicator random variable be $X_1, ..., X_k$ where $X_i = 1 $ if A accepts $R(x,y,z)$ and $X_i = 0$ otherwise. Let us calculate the probability that fewer than $k/n$ variables accept:
+\item $x \in L$: then $\exists y, s.t. \forall i \leq i\leq k: \Pr_{z_i}[R(x,y,z_i) = 1] \geq 3/4$. Let the indicator random variable be $X_1, ..., X_k$ where $X_i = R(x,y,z_i)$. Note that $\mu = k\cdot 3/4$. Calculate the probability that fewer than $k/2$ variables accept by letting $X_1 + \cdots + X_n = X$:
+\begin{align*}
+\Pr[X < \frac{k}{2}] &\leq \Pr[X \leq \frac{2}{3} \cdot \mu] \\
+&\leq \Pr[|X-\mu| \geq \frac{\mu}{3}] \\
+&\leq 2e^{\frac{\mu}{-27}}
+\end{align*}
 
-Thus this probability is quite low, proportional to exponential decay in $k$.
-\item $x \notin L$: $\forall y \forall 1 \leq i \leq k, \Pr_{z_i}[R(x,y,z_i) = 1]$ 
+where the last inequality follows from the Chernoff bound as discussed below. Thus this probability is quite low, $\propto 2^{-k}$.
+\item $x \notin L$: then $\forall y \forall 1 \leq i \leq k, \Pr_{z_i}[R(x,y,z_i) = 1] \leq \frac{1}{4}$. By a similar application of Chernoff bounds we can show that $\Pr[X > k/2] \leq \Pr[|X-\mu| > k/4] \leq 2e^{k/48}$.
 \end{enumerate}
-\emph{Note: } what does the Chernoff bound actually say? 
+\emph{Note: } what does the Chernoff bound actually say? It says for independent random variable $X_1, ..., X_n \in \{0,1\}$ s.t. $\Pr[X_i = 1] = p$ and $\Pr[X_i = 0] = 1-p$ for some $0 \leq p \leq 1$. If we let $X = \sum_{i=1}^{n} X_i$, then $\mathsf{Exp}[X] = n\cdot p = \mu$ and $\forall 0 < \epsilon < 1$,
+\[\Pr[|X - \mu| > \epsilon \cdot \mu] < 2\cdot e^{-\epsilon^2\cdot \mu /3} \] 
  
-In our original protocol, Arthur uses $m$ bits of randomness and gets reasonable error. However, if we use the above then we can reduced the error to $\porp 2^}-k
- $ by using $k\cdot m$ bits of randomness. 
+In our original protocol, Arthur uses $m$ bits of randomness and gets reasonable error. However, if we use the above modification then we can reduced the error to $\propto 2^{-k}$ by using $k \cdot m$ bits of randomness. 
 
 \begin{theorem}
 $\MA \subseteq \AM$.
 \end{theorem} 
 \begin{proof}
-Let us think about this intuitively: in $\AM$, Merlin is allowed more opportunities to cheat since Merlin sees Arthur's random string.
+Let us think about this intuitively: in $\AM$, Merlin is allowed more opportunities to cheat since Merlin sees Arthur's random string. Let us think about a language $L \in \MA$ and reduce this to a language in $AM$. What does it mean for $L$ to be in $\MA$? It means when given some $x$ as input, Merlin sends Arthur a certificate $y$. If $x \in L$ then for any random string $z$, $\Pr[R(x,y,z) = 1] \geq 3/4$. And if $x \notin L$ then for any random string $z$, $\Pr[R(x,y,z) = 1] \leq 1/4$. Now we need to turn this into a language in $\AM$, that is Arthur must reveal his random string $z$ to Merlin first before Merlin sends over $y$. 
 
-So let us think about a language $L \in \MA$ and reduce this to a language in $AM$. So we are given some Arthur and Merlin 
+If you just switched the order of Arthur and Merlin, then with high probability, there exists a certificate $y$ such that given a random string $z$, $R(x,y,z) = 1$. Thus the trick is to reduce the likelyhood that $R(x,y,z) = 1$ in general. Let $|y| = m$. We will reduce the error probability to $\leq 1/2^{2m}$. Observe that if $x \in L$ then Merlin can still give a valid $y$. However suppose $x \notin L$ and Merlin attempted to cheat:
+\begin{align*}
+\Pr_z[\exists y: R(x,y,z) = 1] &\leq \sum_{y} \Pr_z[R(x,y,z) = 1] \\
+&=2^{m} \cdot 2^{-2m} = 2^{-m}  
+\end{align*}
 \end{proof}
 
 \subsection{Logic of $\MA$ and $\AM$}
@@ -167,37 +184,59 @@ Consider the quantifiers
 \Maj_{2/3}	&\qquad \BP \circ \P = \BPP
 \end{align*}
 
-Let us use these as follows. Consider $AM$: here the majority machine goes first then a non-deterministic machine goes. This can be translated into $\BP \circ \exists \circ \P$. Similarly for $MA$, we can write 
+Let us use these as follows (this will be a very informal perusal of this topic). Consider $AM$: here the majority machine goes first then a non-deterministic machine goes. This can be translated into $\BP \circ \exists \circ \P$. Similarly for $MA$, we can write $\exists \circ \BP \circ \P$.
 
+\begin{claim}
+$\exists \circ \BP \subseteq \BP \circ \exists$
+\end{claim}
+\begin{proof}
+A moment's though and you will realize that this claim is more or less equivalent to the above theorem that $MA \subseteq AM$. 
+\end{proof}
+
+\begin{claim}
+$\BP \subseteq \exists \circ \forall \circ \P$ and $\BP \subseteq \forall \circ \exists \circ \P$.
+\end{claim}
+\begin{proof}
+Again this is quite similar to something we have done before, namely $\BPP \subseteq \sum_2^p \cap \prod_2^p$.
+\end{proof}
 
 Using the above conversions and the above laws we can make quick work of the following theorems.
 \begin{theorem}
-$\AM \subseteq \prod_2^p$
+$\AM \subseteq \prod_2^p$.
 \end{theorem}
 \begin{proof}
-
+First we translate this statement using the quantifier analogies to get: 
+\[\BP \circ \exists \circ \P \subseteq \forall \circ \exists \circ \P.\]
+Then using the above laws:
+\begin{align*}
+\BP \circ \exists \circ \P &\subseteq \forall \circ \exists \circ \exists \circ \P \\
+&\subseteq \forall \circ \exists \circ \P
+\end{align*}
 \end{proof}
 
 \begin{theorem}
-$MA \subseteq \prod_2^p \cap \sigma_2^p$
+$\MA \subseteq \prod_2^p \cap \sum_2^p$.
 \end{theorem}
 \begin{proof}
-
+We will only show $\MA \subseteq \prod_2^p$ here, $\MA \subseteq \sum_2^p$ is quite similar.
+\[\exists \circ \BP \circ \P \subseteq \BP \circ \exists \circ \P \subseteq \forall \circ \exists \circ \exists \circ \P \subseteq \forall \circ \exists \circ \P \]
 \end{proof}
 
-\subsection{Graph Non-isomorphism $\in \AM$}
-Recall the Graph Non-isomorphism. First it is important to remark that the Graph Non-isomorphism problem is a private key protocol, that is the randomness chosen by Arthur is not reveal to Merlin. However we will show that this can be made into a public key protocol ($\in \AM$).
+\section{Graph Non-isomorphism $\in \AM$}
+Recall the Graph Non-isomorphism ($\NISO$). First it is important to remark that the Graph Non-isomorphism problem is a private key protocol, that is the randomness chosen by Arthur is not reveal to Merlin. However we will show that this can be made into a public key protocol ($\in \AM$).
 
-\emph{Note:} (in terms of graphs) remark that there is a difference between an automorphism and an isomorphism.
+\emph{Note:} (in terms of graphs) there is a difference between an automorphism and an isomorphism.
 
 \emph{Note:} (regarding hash functions) $H = \{h\}$ where $h: U \rightarrow M$, for universe $U$ and $M \subset U$, is a random function family if 
 \begin{enumerate}
-\item[Uniform:] $\forall u \in U, \forall a \in M, \Pr_h[h(u) = a] = 1/|M|$.
-\item[2-wise Independent:] $\forall u, u' \in U, u \neq u', \Pr_h[h(u) = h(u') = a] = 1/|M|^2$.
+\item Uniform: $\forall u \in U, \forall a \in M, \Pr_h[h(u) = a] = 1/|M|$.
+\item 2-wise Independent: $\forall u, u' \in U, u \neq u', \Pr_h[h(u) = h(u') = a] = 1/|M|^2$.
 \end{enumerate}   
 
 Lets consider an example hash function. 
 \begin{example}
+Let the universe be $U = \{0,1\}^n$ and the range be $M = \{0,1\}^k$. We create a hash function by picking a random 0-1 matrix $A$ of dimension $k \times n$ and a random 0-1 vector $b$ of dimension $k$. Given an input vector $x$,
+\[h_{A, b} (x) = A\cdot x + b (\mod 2)\]
 
 \end{example}
 
@@ -207,4 +246,99 @@ $\NISO \in \AM$.
 \begin{proof}
 We will first solve this problem with certain assumption (not true). Suppose that we have two graphs $G_1$ and $G_2$ which do not have nontrivial automorphisms. Construct the set $W = \{\}$
 \end{proof}
+
+\begin{theorem}
+$\forall k \geq 2$
+\end{theorem}
+\begin{proof}
+
+\end{proof}
+\emph{Remark: } $k$ needs to be a constant. Every time you move $\BP$ in-front of $\exists$, the predicate increases by a polynomial amount.
+
+It is conjectured that $\BPP = \P$ and $\AM = \MA = \NP$. That is: randomness does not give you any more power than just solving the de-randomized problem. 
+
+What evidence do we have for thinking this way? Consider the following theorems involving circuit complexity. 
+\begin{theorem}
+
+\end{theorem}
+
+It is also unknown if $\SAT$ requires $2^{\Omega(n)}$ circuit complexity. If this is shown to be true, then we have $\BPP = \P$. $\SAT$ is an unusually tricky problem. Our best algorithm has exponential running time as is our circuit size. 
+
+\section{Polynomial Identity Test}
+(The last remaining problem which is in $\BPP$ and unknown if it is in $\P$ or not). The input are arithmetic formulas $f(x_1, ..., x_n)$ and $g(x_1, ..., x_n)$. We want to determine if $f \cong g$. You should remember this theorem from both the previous complexity and linear algebra courses. Hint: we use Schwartz-Zippel Lemma. 
+
+\begin{claim}
+Arithmetic formula of size $\leq A$ computes a polynomial of degree $\leq A$ where the size of an arithmetic formula is the number of leaves in its corresponding tree. 
+\end{claim}
+\begin{proof}
+By induction on $A$ (this is actually quite straight forward). The base case of one variable can be computed by a degree one polynomial. Suppose the claim holds for $n = A > 1$. Show that the claim holds for $n = A+1$. Consider any arithmetic formula with size $n$. This formula is of the form $F_1 \oplus F_2$ where $F_1$ and $F_2$ are child formulas of an arithmetic operator $\oplus \in \{\cdot, + \}$.
+\end{proof}
+
+Next we want to consider equality for two formulas given by circuits of size $A$. The standard technique turns out to not work since the degree of the arithmetic formula associated with the circuit could be quite large. The trick is: modular arithmetics.   
+
+
+\begin{lemma}
+3-CNF $\phi(x_1, ..., x_n)$ with $m$ clauses can be turned into a polynomial of degree $\leq 3m$.
+\end{lemma}
+\begin{proof}
+We can introduce a polynomial for each elementary boolean statement. Notably: $\lnot x$ is simply $(1-x)$, $p_1 \lor p_2$ is $ $  
+\end{proof}
+
+\begin{theorem}
+Multi-round $\# \SAT$. 
+\end{theorem}
+\begin{proof}
+You should remember this theorem from before. Let $f(x)$ be the input 3-CNF. Both the prover and verifier calculate the associated boolean polynomial $\phi_f(x)$. The prover sends the verifier the value $s$ which the prover claims is number of satisfying assignments for $f$. The verifier needs to send a set of challenges to the prover to see if he is lying. Remark that $\phi_f(x) = \sum_{x_1=0}^{1} \cdots \sum_{x_n=1}^{1} f(x_1, ..., x_n)$. The verifier creates the polynomial $f_1(r_1) = \sum_{x_2=0}^{1}\cdots \sum_{x_n=0}^{1} f(r_1, x_2, ..., x_n)$ and choses a random $r_1$ in some large range ${1, 2, ..., 2^n}$.    
+\end{proof}
+
+\begin{theorem}
+$\IP = \PSPACE$
+\end{theorem}
+\begin{proof}
+In one direction $\IP \subseteq \PSPACE$ is quite simple. 
+
+In the other direction $\PSPACE \subseteq \IP$ we need a $\PSPACE$ complete problem problem. Enter $\QBF: \forall x_1 \exists x_2 \cdots$ 
+\end{proof}
+
+Multiple interactive proof. 
+property testing???
+
+\section{Probabilistically Checkable Proof}
+\begin{definition}
+$L \in \PCP[r, q]$ for $r, q$ depending on the such that:
+\begin{enumerate}
+\item (Perfect) Completeness: $x \in L \implies \exists \pi: \Pr[V^{\pi}(x) = 1 ] = 1$ 
+\item Soundness: $x \in L \implies \forall \pi: \Pr[V^{\pi}(x) = 1] \leq 1/2$ 
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}
+(PCP Theorem) Every language $L \in \NP$ has a verifier $V$ such that 
+\begin{itemize}
+\item $V$ is a randomized polytime algorithm (yep, the randomness the crucial here, prevent cheating),
+\item $V$ reads only a constant number of symbols in a give proof such that fer every $x \in \{0,1\}^n$: if $x \in L$, then there is a proof $\phi$ such that $V^{\pi}(x)$ accepts with probability at least $2/3$, and if $x \notin L$, every candidate proof $\pi$ is such that $V^{\pi}$ rejects with probability at least $2/3$.
+\end{itemize}
+Note there that $V^{\pi}$ means that the verifier $V$ has random access to the proof of $\pi$ and can read constantly many symbol of the proof.
+
+Using the above definition we have $\NP = \PCP [\log n, 1]$. 
+\end{theorem}
+Adaptive vs. Non-adaptive Verifiers: in the non-adaptive case the verifier $V$ choses a random string then using this randomness chooses to read a constant number of bits. Alternatively, the adaptive verifier also chooses a random string but may change the bits read depending on the bits seen so far. The former case is more common.  
+\begin{proof}
+The backward direction is actually simpler than the forward direction. Consider some language $L \in \PCP[ \log n, 1]$. 
+
+This definition is almost what we want but, in order to show that $L \in \NP$ we need to make sure of two properties: 1. our proof is short (namely polynomial time) and 2. the verifier runs quickly (again poly-time please). These properties are true because: 	
+\end{proof}
+
+An alternative formulation of the $\PCP$ theorem is as follows:
+\begin{theorem}
+(Reformulation of $\PCP$ Theorem) $\exists 0 < \gamma < 1$ and there exists a polytime reduction $R$ from $\SAT$ to $\SAT$ such that if $\phi \in \SAT$ then $R(\phi) \in \SAT$ and if $\phi \notin \SAT$ then $\leq \gamma$ fraction of the clauses in $R(\phi)$ are simultaniously satisfiable.
+\end{theorem}
+
+\begin{corollary}
+
+\end{corollary}
+\begin{proof}
+
+\end{proof}
+
 \end{document}

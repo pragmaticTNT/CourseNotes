@@ -1,16 +1,6 @@
-%
 % This is a borrowed LaTeX template file for lecture notes for CS267,
 % Applications of Parallel Computing, UCBerkeley EECS Department.
-% Now being used for CMU's 10725 Fall 2012 Optimization course
-% taught by Geoff Gordon and Ryan Tibshirani.  When preparing 
-% LaTeX notes for this class, please use this template.
-%
-% To familiarize yourself with this template, the body contains
-% some examples of its use.  Look them over.  Then you can
-% run LaTeX on this file.  After you have LaTeXed this file then
-% you can look over the result either by printing it out with
-% dvips or using xdvi. "pdflatex template.tex" should also work.
-%
+% Now being used for my class notes.
 
 \documentclass[twoside]{article}
 \setlength{\oddsidemargin}{0.25 in}
@@ -74,19 +64,6 @@
    %outside this class only with the permission of the Instructor.}
    \vspace*{4mm}
 }
-%
-% Convention for citations is authors' initials followed by the year.
-% For example, to cite a paper by Leighton and Maggs you would type
-% \cite{LM89}, and to cite a paper by Strassen you would type \cite{S69}.
-% (To avoid bibliography problems, for now we redefine the \cite command.)
-% Also commands that create a suitable format for the reference list.
-\renewcommand{\cite}[1]{[#1]}
-\def\beginrefs{\begin{list}%
-        {[\arabic{equation}]}{\usecounter{equation}
-         \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
-         \setlength{\labelwidth}{1.6truecm}}}
-\def\endrefs{\end{list}}
-\def\bibentry#1{\item[\hbox{[#1]}]}
 
 %Use this command for a figure; it puts a figure in wherever you want it.
 %usage: \fig{NUMBER}{SPACE-IN-INCHES}{CAPTION}
@@ -125,6 +102,10 @@
 \def\Jump{\mathsf{Jump}}
 \def\Command{\mathsf{Command}}
 \def\Prog{\mathsf{Prog}}
+\def\halt{\mathsf{halt}}
+\def\dom{\mbox{dom}}
+\def\ran{\mbox{ran}}
+\def\graph{\mbox{graph}}
 
 \DeclarePairedDelimiter\ceil{\lceil}{\rceil}
 \DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
@@ -132,7 +113,7 @@
 
 \begin{document}
 %\lecture{**LECTURE-NUMBER**}{**DATE**}{**LECTURER**}{**SCRIBE**}
-\lecture{5}{Computability (26 - 30 June)}{Ternovska, Eugenia}{Lily Li}
+\lecture{5}{Computability (26 June - 10 July)}{Ternovska, Eugenia}{Lily Li}
 %\footnotetext{These notes are partially based on those of Nigel Mansell.}
 
 \section{Recursive Functions}
@@ -338,8 +319,10 @@ Let $\Prog (z) \iff z = \# (P)$ for some program $P$. $\Prog (z)$ is P.R since
 \end{align*}
 
 \subsection{States}
-Consider RM program $P$, which uses registers $R_1, ..., R_m$. A state for $P$ is $s = \anglebrac{k, R_1, ..., R_m}$ where $k$ is the index of the next command to execute and $R_1, ..., R_m$ is the value in each register.
+Consider RM program $P$, which uses registers $R_1, ..., R_m$. A state for $P$ is $s = \anglebrac{k, R_1, ..., R_m}$ where $k$ is the index of the next command to execute and $R_1, ..., R_m$ is the value in each register. We encode a state by:
+\[u = code(s) = p_0^{k_0}p_1^{R_1} \cdots p_m^{R_m}\]
 
+\subsection{Computations}
 Next we consider computations. Define
 \[\hat{z} = \begin{cases}
 z \mbox{ if $Prog(z)$ encodes a program } \\
@@ -347,11 +330,175 @@ z \mbox{ if $Prog(z)$ encodes a program } \\
 \end{cases}\]
 And for our use define
 \[\{z\} = \begin{cases}
-
+\mbox{program $P$ s.t. } \# (P) = \hat{z} &\mbox{ if } \Prog(z) \\
+\Lambda \mbox{(empty program)} &\mbox{ if } \lnot \Prog(z)
 \end{cases}\]
 
-$\Nex(u,z) = $ the code of the state $u'$ which results when program $\{z\}$ executes one step from the state encoded by $u$. If $u$ is a halting state $u' = u$. We need to show that $\Nex$ is P.R.
+$\Nex(u,z) = $ the code of the state $u'$ which results when program $\{z\}$ executes one step from the state encoded by $u$. If $u$ is a halting state $u' = u$. To show that $\Nex$ is P.R. we would iterate through the cases.
+
+if $(u_0, ..., u_t)$ is a sequence of codes of states in a computation of $P$, we encode the entire computation by 
+\[y = p_0^{u_0}\cdot p_1^{u_1} \cdots p_t^{u_t}\]
+
+Define $\halt (u,z) = $ "u encodes a halting state of $\{z\}$". Observe that $\halt (u,z)$ is P.R. since $\halt(u,z) = (u)_o \geq l(\hat{z})$. Recall
+\begin{itemize}
+\item $u = code(s) = p_0^{k}\cdot p_1^{R_1} \cdots p_m^{R_m}$ and $(u)_0 =$ exponent of $p_0$ in the prime decomposition of $u$, so $(u)_0 = k$.
+\item If $z = p_0^{z_0}\cdots p_m^{z_m}$, is the encoding of a program ten $l(z) = m+1$ (there are $m+1$ primes).
+\end{itemize}
 
 \section{Kleene $T$ Predicate}
 Recall $T(P,\bar{x},y)$ from above. Using G\"{o}del encoding we can rewrite $T$ as $T_n(z, x_1, ..., x_n, y) = y$ encodes the computation of $\{z\}$ on input $\bar{x} = (x_1, ..., x_n)$ where $T_{n}$ is a $n+2$-ary relation. 
+
+\begin{theorem}
+For each $n \geq 1$, $T_n$ is a P.R. relation.
+\end{theorem}
+\begin{proof}
+$T_n(z, \bar{x}, y)$ holds if and only if $y$ encodes a computation $(u_0, ..., u_t)$, with initial state
+\[u_0 = p_0^0p_1^{x_1} \cdots p_n^{x_n}\]
+and for all $i < t$,
+\[u_{i+1} = \Nex (u_i, z)\]
+with the last state as a halting state and all previous states, non-halting. 
+\begin{align*}
+T_n(z, \vec{x}, y) = [(y)_0 &= p_1^{x_1}p_2^{x_2} \cdots p_n^{x_n} \land \forall y < t[(y)_{i+1} = \Nex ((y)_i, z) ] \\
+&\land \halt((y)_t, z) \\
+&\land \forall i < t \lnot \halt((y)_i, z)\\ 
+\end{align*}
+where the first line signifies the initial state, the second that the last state is halting and third that no intermediate state is halting.
+\end{proof}
+
+The output function $U(y)$ is the contents of $R_0$ in the final state of the computation encoded by $y$ so $U(y) = ((y)_{l(y) - 1})_1$ and is P.R. Note that $\{z\}_n$ is the $n$-ary function computed by program $\{z\}$. 
+
+\begin{theorem}
+(\textbf{Kleene Normal Form Theorem}) There is a P.R. function U and $\forall n \geq 1$ a P.R. predicate $T_n$ s.t. 
+\[\{z\}_n (x_1, ..., x_n) = U(\mu y T_n(z, \bar{x}, y))\]
+is the content of $R_0$ in the final state of computation of program $\{z\}$ on input $x_1, ..., x_n$. Note: the least $y$ is only $y$ satisfying the condition. 
+\end{theorem}
+
+\begin{corollary}
+Every computable function is recursive and can be obtained using at most one application of $\mu$.
+\end{corollary}
+
+\section{Universal Function $\Phi_n$}
+Define $\Phi_n(z, \bar{x}) = \{z\}_n(\bar{x})$. $\Phi_n$ is the universal function as it encodes every computable function of $n$ variables as $z$ varies. $\Phi_n$ is recursive (thus computable), for $n = 1, 2, ...$. We call a program computing $\Phi_n$ an \textbf{interpreter}. Observe that if we define $\phi_i(x) = \Phi_1(i,x)$ then we can enumerate all (parital) unary computable functions. Here it is important to include non-total functions.
+
+\begin{theorem}
+There is no computable universal function for the set of all total computable unary functions.
+\end{theorem}
+\begin{proof}
+By a diagonalization argument. Suppose for a contradiction that there exists a satisfying computable universal function. Enumerate all unary computable functions $\phi_0, \phi_1, ...$. 
+
+Let $F(z,x) = \phi_z(x)$. We show that $F$ is not computable in the usual way. Consider the diagonal function $D(x) = F(x,x) + 1$. If $F$ were computable, then so would $D$. Thus $D = \phi_e$ for some $e$. However $f_e(e) = D(e) = F(e,e) + 1 = f_e(e) + 1$ which is a contradiction, thus $D$ and by extension $F$ is not computable.  
+\end{proof}
+
+Consider why this same proof \emph{cannot} be used as a proof that no computable universal function for the set of all computable unary functions (note here the functions need not be total). Consider the argument again: we enumerate all computable unary functions. Again we construct another function $D(x)$ which has the value $F(x,x) + 1$. Since we assumed that  
+
+\begin{theorem}
+(\textbf{Church's Thesis}) Every "algorithmically computable" function is computable (on a RM, TM, $\lambda$-calculus). If we give an informal algorithm to compute a function then we claim that it is computable.
+\end{theorem}
+\emph{Note:} this theorem cannot be proved because many believe that algorithmically computable is an informal notion. Attempt to challenge this notion by attempting a definition.
+
+\section{Recursive Sets}
+\begin{theorem}
+The halting set is not recursive (since recursive and computable functions are the same, this is equivalent to saying that the halting set is not computable).
+\end{theorem}
+\begin{proof}
+Let $\{x\}$ be the unary function computable by program $\{x\}$. Define
+\[K = \{x: \{x\}_1(x) \neq \infty\} = \{x: \mbox{ program coded by $x$ halts on input $x$ } \}\]
+As a function 
+\[K(x) = \begin{cases}
+0 (true)
+\end{cases}\]
+The structure of the proof is as follows: first we will construct and show that some function $D$ is not computable. Then by reduction we will show that if $K$ is computable then so is $D$. 
+
+With a suggestive name like $D$, you will can probably guess that we are going to use the diagonalization trick again.
+
+Next suppose that $K$, the halting set, is computable. The process is quite straight forward. Construct a program as follows: on input $x$, execute $x$ on $K$. If $\{x\}$ halts on input $x$, then the program enters an infinite loop. Otherwise the program returns $0$. Observe that this program exactly computes $D$. Note: if you want to be more specific in defining the program using a register machine, you should zero $R_1$, increment $R_1$ to $x$ then run the register machine for program $\{x\}$ with modified outputs.
+\end{proof}
+
+\begin{corollary}
+Let $f(x) = \mu yT(x,x,y)$. Then $f$ is a (partial) computable function which has no extension to a total computable function i.e. there is no total computable function $g(x)$ such that $g(x) = f(x)$ for each $x$ such that $f(x) \neq \infty$.
+\end{corollary}
+\begin{proof}
+Suppose there was a totally computable extension of $f$. Then this same extension will show that $K$ is recursive, a contradiction.
+\end{proof}
+
+\begin{definition}
+Set $A \subset \N^n$ (and also a relation) is \emph{recursive} (also computable, also decidable) if $A(\bar{x})$, its characteristic function, is computable as a total 0-1 valued function. 
+\end{definition}
+This implies that $A$ is recursive if and only if there exists a program $P$ that, given any $n$-tuple $\bar{x}$ as input, halts in finite time and outputs $0$ if $\bar{x}$ in the set $A$ and $1$ otherwise. 
+
+\begin{proposition}
+If $R(\bar{x},y)$ is recursive, $f(\bar{x})$ is total and computable, then $R(\bar{x}, f(\bar{x})$ is recursive. This is necessary due to the closure of total computable functions under composition. 
+\end{proposition}
+
+\section{Rice's Theorem}
+\begin{definition}
+$A \subseteq \N$ is a \emph{function index set} if 
+\[\forall e \in A \forall e': \{e\} = \{e'\} \implies e' \in A\]
+i.e. $A$ contains a code for a program that computes a unary function $\phi$ then $A$ must contain codes for all programs that computes $\phi$. 
+\end{definition}
+
+\begin{theorem}
+(Rice) If $A$ is a function index set and $A$ is non-trivial ($A \neq \emptyset$ and $A \neq \N$), then $A$ is not computable. 
+\end{theorem}
+
+Another useful theorem for reductions is:
+\begin{theorem}
+(SMN - special case) Let $g(x,y)$ be computable, then $\exists$ total computable function $f: \N \rightarrow \N$ s.t. $\{f(x)\}(y) = g(x,y)$ for all $x, y$.  
+\end{theorem}
+\begin{proof}
+Essentially this theorem says that given a function $g$ and a fixed $x = x_0$ we can create a unary function $f_{x_0}(y)$ which behaves the same way as $g(x_0, y)$. Think about it. Yeah, isn't this really straight forward? Let us exhibit such a program. Put input $y$ in register $R_2$, and $x_0$ in the register $R_1$. Run the program for $g$ with adjusted jump instructions (now you have a couple more steps at the start to do the copying).   
+\end{proof}
+
+Lets see how we can use the S-m-n theorem to do a reduction:
+\begin{example}
+Let $H = \{x: \{x\}_1(0) \neq \infty \}$. Show that $K \leq_m H$ where $K$ is the diagonal halting problem. We construct the binary function $g(x,y) = \{x\}(x) = \Phi(x,x)$ where $\Phi$ is the universal function. By the S-m-n theorem there exists a function $f$ such that 
+\[\{f(x)\}_1(y) = g(x, y) = \{x\}_1(x), \quad \mbox{for all} x,y\]
+thus $\{f(x)\}_1(0) = \{x\}_1(x)$ and $\{f(x)\}_1(0) \neq \infty$ if and only if $\{x\}_1(x) \neq \infty$.
+\end{example}
+
+\section{Recursively Enumerable Sets}
+\begin{definition}
+If $A \subseteq \N^n$ then $A$ is \emph{recursively enumerable} (aka. computably enumerable, semi-decidable if there exists a recursive relation $R \subseteq \N^{n+1}$ such that 
+\[\vec{x} \in A \iff \exists y R(\vec{x}, y), \quad \mbox{ for all } \vec{x} \in \N^{n}\]
+Intuitively, we understand this as all sets which can be enumerated by some program.
+\end{definition}
+
+Note: every recursive set is recursively enumerable, but the converse is not true --- consider the diagonal halting set.
+
+\begin{lemma}
+If $A \subset \N$ then $A$ is R.E. if and only $A = \emptyset$ or $A = ran(f)$, where $ran$ is the range function, where $f: \N \rightarrow \N$ is a total computable function.
+\end{lemma} 
+\begin{proof}
+In the forward direction we suppose that $A$ is R.E. and $A \neq \emptyset$. That is there exists a relation $R$ such that $a \in A \implies \exists y: R(x,y)$. We will first construct a binary function $F(x,y)$ from the given relation then transform $F$ into a unary function. 
+
+In the converse direction, suppose that $A = ran(f)$ for some total computable function $f$. We need to come up with a recursive relation $R$. Consider $R(x,y) \coloneqq (x = f(y))$. Since equality and $f$ are both recursive functions, $R$ is recursive.  
+\end{proof}
+
+Now we have many equivalent characterizations of R.E. sets. 
+\begin{enumerate}
+\item $A$ is RE
+\item $A = \dom(f)$ for some recursive function $f$.
+\item $A = \{x: \exists y R(x,y)\}$ for some primitive recursive relation $R$.
+\item $A = \emptyset$ or $A = \ran(f)$ for some primitive recursive unary function $f$.
+\item $A = \ran(f)$ for some recursive unary function $f$ ($f$ not necessarily total).
+\end{enumerate}
+
+\begin{definition}
+Set $A$ is R.E.-complete if and only if $A$ is R.E. and for any other R.E. set $B$, $B \leq_m A$. 
+\end{definition}
+Remark: the notion of R.E.-completeness precedes that of $\mathsf{NP}$-completeness. In-fact you can say that Cook was inspired by this notion to define and prove $\mathsf{NP}$-completeness.
+
+\begin{theorem}
+Suppose $f$ is a partial $n$-ary function then $f$ is computable if and only if $\graph(f)$ is R.E.
+\end{theorem}
+\begin{proof}
+
+\end{proof}
+
+\begin{theorem}
+$A$ is recursive if and only if both $A$ and $A^c$ are R.E.
+\end{theorem}
+\begin{proof}
+In the forward direction, since $A$ is recursive, $A$ is R.E. Next we observe that the complement of a recursive function  
+\end{proof}
 \end{document}

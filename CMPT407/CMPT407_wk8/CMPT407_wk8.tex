@@ -1,0 +1,167 @@
+%
+% This is a borrowed LaTeX template file for lecture notes for CS267,
+% Applications of Parallel Computing, UCBerkeley EECS Department.
+% Now being used for CMU's 10725 Fall 2012 Optimization course
+% taught by Geoff Gordon and Ryan Tibshirani.  When preparing 
+% LaTeX notes for this class, please use this template.
+%
+% To familiarize yourself with this template, the body contains
+% some examples of its use.  Look them over.  Then you can
+% run LaTeX on this file.  After you have LaTeXed this file then
+% you can look over the result either by printing it out with
+% dvips or using xdvi. "pdflatex template.tex" should also work.
+%
+
+\documentclass[twoside]{article}
+\setlength{\oddsidemargin}{0.25 in}
+\setlength{\evensidemargin}{-0.25 in}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textwidth}{6.5 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+
+%
+% ADD PACKAGES here:
+%
+
+\usepackage{amsmath,amsfonts,amssymb, graphicx}
+\usepackage{color}
+\usepackage{comment}
+\usepackage{mathtools}
+
+%
+% The following commands set up the lecnum (lecture number)
+% counter and make various numbering schemes work relative
+% to the lecture number.
+%
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf CMPT 407: Computational Complexity
+	\hfill Summer 2017} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill Lecture #1: #2  \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { {\it Lecturer: #3 \hfill Scribe: #4} }
+      \vspace{2mm}}
+   }
+   \end{center}
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+
+   %{\bf Note}: {\it LaTeX template courtesy of UC Berkeley EECS dept.}
+
+   %{\bf Disclaimer}: {\it These notes have not been subjected to the
+   %usual scrutiny reserved for formal publications.  They may be distributed
+   %outside this class only with the permission of the Instructor.}
+   \vspace*{4mm}
+}
+%
+% Convention for citations is authors' initials followed by the year.
+% For example, to cite a paper by Leighton and Maggs you would type
+% \cite{LM89}, and to cite a paper by Strassen you would type \cite{S69}.
+% (To avoid bibliography problems, for now we redefine the \cite command.)
+% Also commands that create a suitable format for the reference list.
+%\renewcommand{\citep{•}ite}[1]{[#1]}
+\def\beginrefs{\begin{list}%
+        {[\arabic{equation}]}{\usecounter{equation}
+         \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+         \setlength{\labelwidth}{1.6truecm}}}
+\def\endrefs{\end{list}}
+\def\bibentry#1{\item[\hbox{[#1]}]}
+
+%Use this command for a figure; it puts a figure in wherever you want it.
+%usage: \fig{NUMBER}{SPACE-IN-INCHES}{CAPTION}
+\newcommand{\fig}[3]{
+			\vspace{#2}
+			\begin{center}
+			Figure \thelecnum.#1:~#3
+			\end{center}
+	}
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+% **** IF YOU WANT TO DEFINE ADDITIONAL MACROS FOR YOURSELF, PUT THEM HERE:
+
+\newcommand\E{\mathbb{E}}
+\def\C{\mathcal{C}}
+\def\N{\mathbb{N}}
+\def\R{\mathbb{R}}
+\def\Pr{\mathbf{Pr}}
+\def\P{\mathsf{P}}
+\def\NP{\mathsf{NP}}
+\def\QA{|0\rangle}
+\def\QB{|1\rangle}
+\def\BQP{\mathsf{BQP}}
+\def\AND{\mathsf{AND}}
+\def\CNOT{\mathsf{CNOT}}
+
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+\DeclarePairedDelimiter\anglebrac{\langle}{\rangle}
+
+\begin{document}
+%\lecture{**LECTURE-NUMBER**}{**DATE**}{**LECTURER**}{**SCRIBE**}
+\lecture{8}{Quantum Computing (18 July - End)}{Valentine Kabanets}{Lily Li}
+%\footnotetext{These notes are partially based on those of Nigel Mansell.}
+
+\section{Quantum Computing}
+\subsection{Qubit}
+Let $\QA$ measures 0 and $\QB$ measures 1. You should think of each state as an energy level of the electron. However, in reality these states are continuous |rather than discrete. Consider a superposition of $\QA$ and $\QB$. We model quantum mechanics as $\alpha \cdot \QA + \beta \cdot \QB$ where $\alpha, \beta \in \C$ such that $|\alpha |^2 + |\beta |^2$. When we measure the qubit, the duality collapses and we just get classical bits with probability:
+\[\begin{cases}
+0 &\mbox{ with probability } |\alpha |^2 \\
+1 &\mbox{ with probability } |\beta |^2. 
+\end{cases}\]
+Observe that $\alpha, \beta$ are \emph{not} the probabilities, but their squares \emph{are}. Thus even though the probabilities are non-negative, the actual values $\alpha$ and $\beta$ are complex (and can be negative).
+
+\subsection{Quantum Registers}
+For $m$ qubits, we can describe a quantum register as
+\[\sum_{x \in \{0,1\}^m} \alpha_x \cdot x\]S
+where $\alpha_x$ is the amplitude of bit string $x$ and $ \sum |\alpha_x |^2$. Observe that for $m$ qubits, the quantum system can be described by a vector in $\C^{2^m}$ (since the coefficient of each $\alpha_x$ is one variable). This gets exceedingly big exceedingly fast.
+
+\subsection{Quantum Operations}
+First let us describe the operation $F$ on the quantum system equivalent to negation on the classical bits. As it turns out that these operations $F$ are exactly unary matrices. Generally, it is too much to define $F$ for a quantum system with $m$ qubits even if $m$ is modest. Thus we must restrict the number of qubits we operate upon at one time. For us, each operation will be applied to at most three qubits. Thus $F$ will be a $2^3 \times 2^3$ or $8 \times 8$ matrix. It is unclear if each operator $F$ is realizable.
+
+For bits $\QA$ and $\QB$ observe that  
+
+\subsection{Complexity $\BQP$}
+\begin{definition}
+Let $f: \{0,1\}^n \rightarrow \{0,1\}^n$
+\end{definition}
+
+Consider next the $\land$ operation. Classically, we have $x, y \in \{0,1\}$ such that $\AND(x,y) = x \land y$. In quantum computation we need the Trefoli gate which takes in three qubits $x,y,z$ and outputs $\AND(x,y,z) = (x, y, z \oplus (x\land y))$. Observe that the this operation preserves data, in the sense that we can reverse the steps to get back out input. This is a property of the matrices we are using. 
+
+Finally we have use of the operation $\CNOT$ such that $\CNOT(x, y) = (x, x \oplus y)$. Observe, that in essence we, sort of, \emph{copy} the first quantum register into the second (note: this is only cloning for classical bits; in fact it is impossible to clone quantum bits}.  
+
+\begin{theorem}
+It is impossible to copy a quantum bit.
+\end{theorem}
+\begin{proof}
+Suppose for a contradiction that it was possible to copy quantum bits. We will demonstrate a communications system between Alice and Bob with travels faster than the 
+\end{proof}
+\end{document}
