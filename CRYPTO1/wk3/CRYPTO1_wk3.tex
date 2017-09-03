@@ -1,0 +1,313 @@
+%
+% This is a borrowed LaTeX template file for lecture notes for CS267,
+% Applications of Parallel Computing, UCBerkeley EECS Department.
+% Now being used for the Coursera cryptography course, part one.
+%
+
+\documentclass[twoside]{article}
+\setlength{\oddsidemargin}{0.25 in}
+\setlength{\evensidemargin}{-0.25 in}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textwidth}{6.5 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+
+%
+% ADD PACKAGES here:
+%
+
+\usepackage{amsmath,amsfonts,amssymb, graphicx}
+\usepackage{color}
+\usepackage{comment}
+\usepackage{mathtools}
+
+%
+% The following commands set up the lecnum (lecture number)
+% counter and make various numbering schemes work relative
+% to the lecture number.
+%
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf Cryptography Part 1
+	\hfill Fall 2017} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill Lecture #1: #2  \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { {\it Lecturer: #3 \hfill Scribe: #4} }
+      \vspace{2mm}}
+   }
+   \end{center}
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+
+   %{\bf Note}: {\it LaTeX template courtesy of UC Berkeley EECS dept.}
+
+   %{\bf Disclaimer}: {\it These notes have not been subjected to the
+   %usual scrutiny reserved for formal publications.  They may be distributed
+   %outside this class only with the permission of the Instructor.}
+   \vspace*{4mm}
+}
+%
+% Convention for citations is authors' initials followed by the year.
+% For example, to cite a paper by Leighton and Maggs you would type
+% \cite{LM89}, and to cite a paper by Strassen you would type \cite{S69}.
+% (To avoid bibliography problems, for now we redefine the \cite command.)
+% Also commands that create a suitable format for the reference list.
+\renewcommand{\cite}[1]{[#1]}
+\def\beginrefs{\begin{list}%
+        {[\arabic{equation}]}{\usecounter{equation}
+         \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+         \setlength{\labelwidth}{1.6truecm}}}
+\def\endrefs{\end{list}}
+\def\bibentry#1{\item[\hbox{[#1]}]}
+
+%Use this command for a figure; it puts a figure in wherever you want it.
+%usage: \fig{NUMBER}{SPACE-IN-INCHES}{CAPTION}
+\newcommand{\fig}[3]{
+			\vspace{#2}
+			\begin{center}
+			Figure \thelecnum.#1:~#3
+			\end{center}
+	}
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+% **** IF YOU WANT TO DEFINE ADDITIONAL MACROS FOR YOURSELF, PUT THEM HERE:
+
+\newcommand\E{\mathbb{E}}
+\def\N{\mathbb{N}}
+\def\Pr{\mathsf{Pr}}
+\def\Adv{\mathsf{Adv}}
+\def\xor{\oplus}
+
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+\DeclarePairedDelimiter\anglebrac{\langle}{\rangle}
+
+\begin{document}
+%\lecture{**LECTURE-NUMBER**}{**DATE**}{**LECTURER**}{**SCRIBE**}
+\lecture{3}{Integrity}{Dan Boneh}{Lily Li}
+%\footnotetext{These notes are partially based on those of Nigel Mansell.}
+
+\section{Message Authentication Code (MAC)}
+
+We use message authentication codes to ensure integrity (but not confidentiality). Two parties, Alice and Bob have a shared key $k$. When Alice sends message $m$ to Bob she uses a MAC signing algorithm $S$ and generates a short tag $S(k,m)$. She send $m$ along with the tag to Bob. When Bob receives the message and tag he runs the MAC verification algorithm $V(k,m,tag)$ which outputs $yes$ or $no$ depending on if the message-tag pair is valid or not. More succinctly:
+
+\begin{definition}
+MAC $I = (S, V)$ defined over $(K, M, T)$ is a pair of algorithms such that $S(k,m)$ outputs $t \in T$, $V(k, m, t) \in \{yes, no\}$, and $\forall k\in K\forall m \in M: V(k, m, S(k, m)) = yes$.
+\end{definition}
+
+Note: the shared key \emph{is} required for integrity. If Alice only uses a cyclic redundancy check (CRC - used to detect random errors) to generate a tag, an attacker could generate a tag for their own message which fools the CRC.
+
+Lets define security for MACs. Here the attacker can mount a chose message attach. That is: for messages $m_1, m_2, ..., m_q$ the attacker can obtain $t_i \leftarrow S(k, m_i)$. The attacker's goal is to create an existential forgery, that is: a new valid message-tag pair $(m, t) \notin \{(m_1, t_1), ..., (m_q, t_q)\}$. If the attacker cannot produce a valid tag for a new message or a new valid tag for a known message, then the MAC is secure.
+
+\begin{definition}
+For MAC $I = (S, V)$ and adversary $A$ the MAC game is defined between the challenger and adversary as follows. The challenger chooses a random key $k \in K$. The adversary sends the challenger $q$ messages $m_1, ..., m_q$ and gets in return valid tags $t_1, ..., t_q$ associated with each message. Then, the adversary generate a new message-tag pair $(m, t)$ and sends this to the challenger. If 
+\[\Adv_{MAC}[A, I] = \Pr[(m,t) \mbox{ is valid}]\]
+is negligible then the MAC is secure.
+\end{definition}
+
+Note: if the tag is too short, then it is possible for the adversary to guess the tag with non-negligible probability.
+
+\section{Constructing Secure MACs}
+
+There is actually a simple MAC built from a construct that we have seen previously, namely the PRF. 
+
+Given PRF $F: K \times X \rightarrow Y$ a derived MAC $I_{F} = (S, V)$ is simply $S(k, m) = F(k, m)$ and $V(k, m, t)$ outputs $yes$ if and only if$F(k, m) = t$.
+
+\begin{theorem}
+If $F: K \times X \rightarrow Y$ is a secure PRF and $1/ |Y|$ is negligible then $I_F$ is a secure MAC. That is: for every effective MAC adversary $A$ attacking $I_F$ there exists an efficient PRF adversary $B$ attacking $F$: 
+\[\Adv_{MAC}[A, I_F] \leq \Adv_{PRF}[B, F] + \frac{1}{|Y|}\]
+Thus $I_F$ is secure if $|Y|$ is long enough. 
+\end{theorem}
+
+So we see that it is quite advantageous to be able to create a Big-PRF from a Small-PRF. Two main constructions are: CBC-MAC and HMAC. 
+
+Side Note: truncating a secure PRF produces another secure PRF on fewer input bits.
+
+\subsection{CBC-MAC}
+Recall our PRF (AES) can only encrypt short message ($16$-byte) so what we need is a way to encode arbitrary long messages. Enter, encrypted CBC-MAC. Let $F: K \times X \rightarrow X$ be a PRP. We define a new PRF $F_{ECBC}:K^2 \times X^{\leq L} \rightarrow X$, which mean that there are at most $L$ blocks for some large $L$. The construction is as follows: break the message into blocks the same length as elements of $X$. Let these be $m[0], m[1], ..., m[L-1]$. Then the tag is 
+\[F(k_1, F(k, m[L-1] \xor F(k, m[L-1] \xor \cdots F(k, m[0]) \xor m[1]) \cdots )\]
+(drawing a diagram helps).   
+
+Note: this is quite similar to CBC except that we do not output intermediate values and we encrypt the last output using an independent key $k_1$. This construction without the final encryption is call: \textbf{raw-CBC} and it is \emph{not} a secure MAC.
+
+Consider the following attack:
+the adversary asks for a valid tag $t$ associated with a one block message $m$. Then the two block message $(m, t \xor m)$ has $t$ as a valid tag. Observe why this is the case. The first step of raw-CBC is to calculate $F(k, m)$ and XOR it with $m \xor t$. However, $F(k, m) = t$ so $F(k, m) \xor m \xor t = m$. Thus the output is again $F(k, m)$ for which $t$ is a valid tag.
+
+\subsection{NMAC}
+
+To build an NMAC we need a PRF $F: K \times X \rightarrow K$ (note that the range is the key space and not the input space $X$ as before). The new PRF $F_{NMAC}: K^2 \times X^{\leq L} \rightarrow K$. Again the message $m$ is broken up into chunks $m[0], m[1], ..., m[L-1]$. The tag is
+\[F(k_1, F(F(\cdots F(k, m[0]), m[1]) \cdots m[L-1]) \parallel fpad)\]
+where $fpad$ is the padding needed to get a string in the key space to be the same length as a string in the input space (this is used as the second input to $F$).
+
+The construction without the last application of $F$ is called a cascade and it should be easy to see why it is not secure. Observe, if we obtain the message key pair $(m, t)$ we can also obtain the tag for any extension $m \parallel w$ for some message block $w$ since we can just run $F(t, w)$ to get a tag $t'$ for $m \parallel w$.
+
+The following is the security bounds on ECBC and NMAC:
+\begin{theorem}
+For every efficent $q$-query PRF adversary $A$ attacking $F_{ECBC}$ or $F_{NMAC}$, there exists an efficient adversary $B$ such that 
+\begin{align*}
+\Adv_{PRF}[A, F_{ECBC}] &\leq \Adv_{PRP}[B, F] + \frac{2q^2}{|X|} \\
+\Adv_{PRF}[A, F_{NMAC}] &\leq qL\Adv_{PRF}[B, F] + \frac{q^2}{2|K|}
+\end{align*}
+Notice that in analysis of ECBC includes a PRP adversary. As always, $L > 0$ is the length of the blocks and $q$ is the number of blocks encrypted with the same key.
+\end{theorem}
+
+Here is the type of attack that would take place if you do not change the keys often enough. Suppose that the underlying PRF $F$ for both ECBC and NMAC are actually PRPs. Then ECBC and NMAC has the extension property: 
+\[\forall x, y, w: F_{BIG}(k, x) = F_{BIG}(k,y) \Rightarrow F_{BIG}(k, x \parallel w) = F_{BIG}(k, y \parallel w).\]
+
+The attack asks for many (say square-root of the size of the message space) message key pairs $(m_i, t_i)$ and waits for a collision $t_u = t_v$ for two distinct messages $m_u \neq m_vv$ (this will happen with high probability due to the birthday paradox). Then the attacker will query message $m_u \parallel w$ for some block $w$. Suppose $t$ is a valid tag for $m_u \parallel w$, then $t$ is also a valid tag for $m_v \parallel w$. 
+
+\subsection{MAC Padding}
+Suppose that the message is not a multiple of the block size. Then we need to pad the message in-order to encode it properly. One obvious but \emph{insecure} way to do this is to pad by a string of zeros. This is insecure since it gives the attacker information about $m \parallel \mathbf{0}$.
+
+Thus the padding function $pad(m)$ must be invertible. The solution for ISO is to append $100\cdots 0$ to fill up the last block. If the message is already a multiple of the block size then you would need to append a dummy block. Notice to invert this "append the $10 \cdots 0$ until it fills up the block" construction all we need to do is scan, starting from the right, to the first one then remove all previous zeros and this first one.
+
+\subsubsection{CMAC (NIST Standard)}
+All deterministic padding strategies require this dummy block. However CMAC is one randomized padding strategy which does not. CMAC is a variant of CBC-MAC which takes a triple of keys $(k, k_1, k_2)$ (usually $k_1$ and $k_2$ are derived from $k$ using some PRG). Then CMAC runs CBC-MAC until it gets to the last block, say $m[w]$. If $m[w]$ is shorter than the block length, the CMAC pads with a string of $10\cdots0$ as before and XORs with $k_1$ and the output from the previous blocks to produce the tag. If instead $m[w]$ is exactly the block size then CMAC XORs $m[w]$ with $k_2$ and the output from the previous blocks.  
+
+\subsection{PMAC}
+Parallel MAC! Here the message is again broken up into blocks $m[0], m[1], ..., m[L]$. Then each message block $i$ is XORed with $P(k, i)$ for a function $P$. The result, $F(k_1, m[i] \xor P(k, i))$ for $0 \leq i \leq L-2$ (notice not $L-1$) are all XORed together then encrypted with the key $k_1$ one more time. The padding is similar as the one for CMAC.
+
+The security analysis for PMAC is:
+\begin{theorem}
+For $q$ which is the number messages map with the same key and $L$ which is the length of all the message. If $F$ is a secure PRF over $(K, X, X)$ then $F_{PMAC}$ is a secure PRF over $(K, X^{\leq L}, X)$.
+
+For every efficient $q$-query PRF adversary $A$ attacking $F_{PMAC}$ there exists an efficient PRF adversary $B$ such that 
+\[Adv_{PRF}[A, F_{PMAC}]\leq \Adv_{PRF}[B, F] + \frac{2q^2L^2}{|X|}\]
+PMAC is secure as long as $qL \ll |X|^{1/2}$.
+\end{theorem}
+
+Observe that PMAC has the property that you can reuse your tag computation if two messages are very similar. 
+
+\subsection{One-time MAC}
+These are analogs of the One-time pad used for encryption. These are much faster than the previous MACs and use each key to encrypt one message.
+
+The security game this time sees the challenger pick a random key $k \in K$. The adversary send the challenger one message $m_1 \in M$ the the challenger returns the associated tag $S(k, m_1)$. Then the adversary attempts to forge a new message tag pair $(m, t)$. The challenger outputs $b = 1$ if and only if $(m,t)$ is valid and $(m, t) \neq (m_1, t_1)$.
+
+If you have a one-time MAC it is possible to modify this into a many-time MAC. In particular let $(S, V)$ be a secure one-time MAC over $(K_{I}, M, \{0,1\}^n)$ and $F: F: K_F \times \{0,1\}^n \rightarrow \{0,1\}^n$ be a secure PRF.
+
+The \textbf{Carter-Wegman MAC} is defined as: $CW\left((k_1, k_2), m\right) = (r, F(k_1, r)\xor S(k_2, m)$ for some random string $r \leftarrow \{0,1\}^n$. This is desirable since the fast one-time MAC is used to compute the tag for the long message and the slow PRF is used on the short random string $r$. 
+
+\section{Collision Resistance}
+
+\begin{definition}
+Let $H: M \rightarrow T$ be a has function $(|M| \gg |T|)$. A \textbf{collision} for $H$ is a pair $m_0, m_1 \in M$ such that $H(m_0) = H(m_1)$ but $m_0 \neq m_1$. 
+
+A function $H$ is \textbf{collision resistant} if for all \emph{explicit} efficient algorithms $A$:
+\[\Adv_{CR}[A, H] = \Pr[A \mbox{ outputs collisions for }H\]
+is negligible. 
+\end{definition}
+
+An example of a collision resistant function is SHA-256 (note the previous version SHA-1 has a function  which generates collisions).
+
+Now we can use the this hashing idea to turn a MAC for short messages into one for big messages. Suppose $I = (S, V)$ is a MAC for short messages over $(K, M, T)$ and let $H: M^{big} \rightarrow M$ be a hash function. 
+
+\begin{definition}
+$I^{big} = (S^{big}, B^{big})$ over $(K, M^{big}, T)$ as
+\[S^{big}(k, m) = S(k, H(m)); \qquad V^{big}(k, m, t) = V(k, H(m), t)\]
+\end{definition}
+
+\begin{theorem}
+If $I$ is a secure MAC and $H$ is collision resistant, then $I^{big}$ is a secure MAC.
+\end{theorem}
+
+Consider why collision resistance is necessary here. Suppose that the adversary can find two distinct messages $m_0, m_1$ which hash to the same value $H(m_0) = H(m_1)$. Then they can ask for the tag for one message and this tag would also be valid for the other message.
+
+\subsection{Generic Attack on CR Function} 
+
+This attack is based on the birthday paradox, stated as follows:
+
+\begin{theorem}
+Let $r_1, ..., r_n \in \{1, ..., B\}$ be independently identically distributed integers.
+
+When $n = 1.2 \times B^{\frac{1}{2}}$:
+\[\Pr[\exists i\neq j: r_i = r_j] \geq \frac{1}{2}\]
+\end{theorem}
+\begin{proof}
+Consider the probability of a collision on each of the $n$ choices. On the first try no collisions are possible. On the second try $B-1$ choices are safe --- do not cause any collisions. On the third try $B-2$ choices are safe and so on. Thus the probability that there exists a collision is
+\begin{align*}
+1 - \left(\frac{B-1}{B})\right) \cdot \left(\frac{B-2}{B}\right) \cdots \left(\frac{B-n+1}{B}\right) &= 1 - \prod_{i=1}^{n-1}\left( 1 - \frac{i}{B} \right) \\
+&\geq 1 - e^{-\frac{1}{B}\left( \sum
+_{i=1}^{n-1} i\right)} \\
+&\geq 1 - e^{-\frac{n^2}{2B}}
+\end{align*}
+If you plug in $n = 1.2 \cdot B^{\frac{1}{2}}$ into the last expression, you get something that is pretty close to 0.5.
+\end{proof}
+
+Now that we understand the paradox we can use it to build the attack. Let $H: M \rightarrow \{0,1\}^n$ be a has function ($|M| \gg 2^n$). The following algorithm finds collisions in $O(2^{n/2})$ expected hashes.
+
+\begin{enumerate}
+\item Choose $2^{n/2}$ random messages in $M$: $m_1, ..., m_{2^{n/2}}$ (these are distinct with high probability).
+\item For $i=1, ..., 2^{n/2}$ compute $t_i = H(m_i) \in \{0,1\}$.
+\item Look for a collision $(t_i = t_j)$. If none found go back to step 1.
+\end{enumerate}
+
+By the birthday paradox, the expected number of times we have to execute step one is two, so we expect $O(2^{n/2})$ hashes to be performed.
+
+\subsection{Building Collision Resistant Hash Functions (Merkle-Damgard Paradigm)}
+
+Here we are going to show a method for turning a collision resistant CR function for short messages into CR functions for long messages.
+
+Suppose $h: T\times X \rightarrow T$ is our CR function for short messages (sometimes called the compression function). We want to build $H: X^{\leq L} \rightarrow T$. As always, we break our message into chunks $m[0], m[1], ..., m[i]$ if the last block is shorter than the block length then we pad it with our usual string of $10 \cdots 0$, denoted $PB$. We first input a fixed $IV$ as the tag and $m[0]$ into $h$. This produces $H_1$, the first chaining variable. Then with $H_1$ as the tag and $m[1]$ as the message, apply $h$ to get chaining variable $H_2$. Continue in this way until we obtain chaining variable $H_{i}$. Let $H_i = H$. 
+
+\begin{theorem}
+If $h$ is a CR then so is $H$.
+\end{theorem}
+\begin{proof}
+By contraposition. Suppose $H(M) = H(M')$. Let $IV = H_0, H_1, ..., H_t, H_{t+1} = H(M)$ and $IV = H_0' = H_1' = \cdots = H_r' = H_{r+1}' = H(M')$. be the chaining variable associated with the hashing of messages $M$ and $M'$ respectively. Observe that since $H(M) = H(M')$, it must be case that $h(H_t, M_t \parallel PB) = h(H'_r, M_r' \parallel PB')$. Since $h$ is a CR function the inputs must be identical. In particular $r = t$ and $M_r' = M_t$. The same argument can be repeated to show that $M_{t-1}' = M_{t-1}$, $M_{t-2}' = M_{t-2}$, ..., $M_0' = M_0$. But this means that $M = M'$.    
+\end{proof}
+
+\subsection{Building Compression Functions}
+
+One way to build a compression function is by using a block cipher. Suppose $E: K \times \{0, 1\}^n \rightarrow \{0,1\}^n$ is a block cipher. The \textbf{Davies-Meyer} compression function: $h(H, m) = E(m, H) \xor H$. 
+
+\begin{theorem}
+Suppose $E$ is an ideal cipher (collection of $|K|$ random permutations). Finding a collision $h(H, m) = h(H', m')$ takes $O(2^{n/2})$ evaluations of $(E, D)$.
+\end{theorem}
+
+Note: it is essential to do the final  $\xor$ otherwise the pair $(H, m)$ and $(H', m')$ where $H' = D(m', E(m, H))$ is a collision.
+
+Another class of compression functions are the provable compression functions. We choose a random 2000-bit prime $p$ and random $1 \leq u, v \leq p$. for $m, h \in \{0, ..., p-1\}$ define $h(H, m) = u^H \cdot v^m (\mod p)$.
+
+NOTE: if you can find a collision for $h$ then you can solve the \emph{discrete-log} problem modulo $p$.
+
+\subsection{HMAC}
+This is a standard method for converting a collision resistant function (CR) into a MAC.
+
+HMAC does the following:
+\[S(k, m) = H\left(k \xor opad, H\left(k \xor ipad \parallel m\right)\right)\]
+
+Note that $opad$ and $ipad$ are both public. 
+
+\subsection{Timing Attacks on MAC Verification}
+If you check the tag byte by byte and rejecting when a difference is detected you are vulnerable to a timing attack. By slightly modifying the tag guesses the attacker can cause the checker to leak information about the number of correct block. Tags which have a large satisfying prefix will take longer to reject than if the first block of the tag differs.  
+
+Possible defenses force the computer to take the same time to compare the tags or obfuscate the tags being compared by hashing both the expected tag and the input tag.
+\end{document}
