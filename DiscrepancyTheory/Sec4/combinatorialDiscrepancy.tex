@@ -1,0 +1,161 @@
+%
+% This is a borrowed LaTeX template file for lecture notes for CS267,
+% Applications of Parallel Computing, UCBerkeley EECS Department.
+%
+
+\documentclass[twoside]{article}
+\setlength{\oddsidemargin}{0.25 in}
+\setlength{\evensidemargin}{-0.25 in}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textwidth}{6.5 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+
+%
+% ADD PACKAGES here:
+%
+
+\usepackage{amsmath,amsfonts,amssymb, graphicx}
+\usepackage{algpseudocode}
+\usepackage{color}
+\usepackage{comment}
+\usepackage{mathtools}
+
+%
+% The following commands set up the lecnum (lecture number)
+% counter and make various numbering schemes work relative
+% to the lecture number.
+%
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf Introduction to Geometric Discrepancy
+	\hfill Fall 2017} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill Section #1: #2  \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { {\it Lecturer: #3 \hfill Scribe: #4} }
+      \vspace{2mm}}
+   }
+   \end{center}
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+   \vspace*{4mm}
+}
+\renewcommand{\cite}[1]{[#1]}
+\def\beginrefs{\begin{list}%
+        {[\arabic{equation}]}{\usecounter{equation}
+         \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+         \setlength{\labelwidth}{1.6truecm}}}
+\def\endrefs{\end{list}}
+\def\bibentry#1{\item[\hbox{[#1]}]}
+
+\newcommand{\fig}[3]{
+			\vspace{#2}
+			\begin{center}
+			Figure \thelecnum.#1:~#3
+			\end{center}
+	}
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+% **** IF YOU WANT TO DEFINE ADDITIONAL MACROS FOR YOURSELF, PUT THEM HERE:
+
+\newcommand\vol{\mathsf{vol}}
+\newcommand\R{\mathcal{R}}
+\newcommand\disc{\mathsf{disc}}
+\newcommand\A{\mathcal{A}}
+\newcommand\SSet{\mathcal{S}}
+
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+\DeclarePairedDelimiter\anglebrac{\langle}{\rangle}
+\DeclarePairedDelimiter\norm{\parallel}{\parallel}
+
+\begin{document}
+\lecture{4}{Combinatorial Discrepancy}{Jiri Matousek}{Lily Li}
+
+\section{Upper Bounds for General Set Systems}
+The question we want to consider here is: Given an $n$-point set $X$ and a set system $\S$ on $X$ where $|\SSet| = m$ (typically with $n \leq m$) what is the largest value of $\disc(\SSet)$? We show that random coloring actually produces pretty good discrepancy.
+
+\begin{lemma}
+(Random coloring lemma). Let $\SSet$ be a set system on an $n$-point set $X$. For random coloring $\chi: X \rightarrow \{1, -1\}$,
+\[|\chi(S)| \leq \sqrt{2|S|\ln(4|\SSet|)}\]
+for all sets $S \in \SSet$ simultaneously with probability at least $1/2$.
+\end{lemma}
+\begin{proof}
+\emph{Warning:} random probability in coming!Consider any $S \subset X$. For a random coloring $\chi$, $\chi(S) = \sum_{x \in S} \chi(x)$ which is the sum of $s = |S|$ random $\pm 1$ random variables. This sum has a binomial distribution with standard deviation $\sqrt{2}$ (why?). Use the Chernoff tail estimate to get
+\[\Pr[|\chi(S) \geq \gamma \sqrt{2}] < 2e^{-\gamma^2/2}.\]
+By setting $\gamma = \sqrt{2\ln (4|\SSet |)}$ in the above we have the probability bounded by $(2|\SSet |)^{-1}$. Thus over all $|\SSet |$ sets there is at least a $1/2$ probability that $|\chi(S)| \leq \sqrt{2|S|\ln(4|\SSet|)}$ for all $S \in \SSet$. 
+\end{proof}
+
+Notice that if nothing is known about the sets $S \in \SSet$ then $|S| \leq |X| = n$ and the bound reduces to $\disc(\SSet) = O(\sqrt{n\log m})$. Thus the discrepancy varies with both the sizes of each set in $\SSet$ as well and the number of sets in $\SSet$ though the latter is of greater importance (small sets are better). Next we show a small improvement on the above lemma:
+
+\begin{theorem}
+(Spencer's upper bound) Let $\SSet$ be a set system on a $n$-point set $X$ with $|\SSet| = m \geq n$ then 
+\[\disc(\SSet) = O\left(\sqrt{n\log (\frac{2m}{n})}\right)\]
+in particular if $m = O(n)$ then $\disc(\SSet) = O(\sqrt{n})$.
+\end{theorem}
+
+We will be ready for this proof after reading section 4.6. But first a nice theorem (they are presenting it not to be used but to be marveled at):
+\begin{theorem}
+(Beck-Fiala theorem) Let $\SSet$ be a set system on an arbitrary finite set $X$ such that $\deg_{\SSet}(x) \leq t$ for all $x \in X$, where $\deg_{\SSet}(x) = |\{S \in \SSet: x \in S\}|$. Then $\disc(\SSet) \leq 2t-1$.
+\end{theorem}
+\begin{proof}
+Remember, to show that $\disc(\SSet) \leq 2t - 1$ we need to find some coloring $\chi$ such that for all $n$, a point set $|P| = n$ and all $S \in \SSet$, $\disc(\chi, P, S) \leq 2t - 1$. Let $X = \{1, ..., n\}$ and to each $j \in X$ assign the real variable $x_j \in [-1, 1]$. We will fix a coloring one variable at a time by changing the value of the $x_j$s. Defined \emph{fixed} variable $x_j$ to a variable with value $\pm 1$ otherwise the variable is \emph{floating}. Set all $v_j$ to be $0$ a the beginning of the algorithm (thus making them all float). Further call a set $S \in \SSet$ \emph{dangerous} if it contains more than $t$ elements $j$ with $x_j$ currently floating. Otherwise $S$ is \emph{safe}. We maintain invariant (1):
+\[\sum_{j \in S} x_j = 0 \quad \mbox{for all dangerous } S \in \SSet.\]
+For each $S \in \SSet$ we can build a linear equation of the form of invariant $(1)$ with floating variable as variables of out equation. The system of equations has a solution (namely the current value of the floating variables) and the set of all possible solutions lives inside of the cube $[-1, 1]^{|F|}$. We want to show that some solution exists on the boundary (picking this boundary point will fix some floating variables). This is because the number of dangerous sets is smaller than the number of floating variables. Thus this system has more variables than unknowns an there exists a line in the solution space (this line hits the boundary of the boundary of the hyper cube). When all sets become safe there can be at most $t$ floating variables per set. Each variable can change by less than $2$ thus the discrepancy is at most $2t-1$. 
+\end{proof}
+
+\section{Matrices, Lower Bounds, and Eigenvalues}
+\begin{definition}
+Let $(X, \SSet)$ be a set system on a finite set. Let the elements of $X$ be $x_1, x_2, ..., x_n$ and the elements of $\SSet$ be $S_1, S_2, ..., S_m$. The \textbf{the incidence matrix} of $(X, \SSet)$ is the $m \times n$ matrix $X$ with columns corresponding to the points of $X$ and rows corresponding to sets of $\SSet$, whose element $a_{ij}$ are 
+\[a_{ij} = \begin{cases}
+	1 &\mbox{if }x_j \in S_i\\
+	0 &\mbox{otherwise.}
+\end{cases}\]
+\end{definition}
+
+Let coloring $\chi: X \rightarrow \{-1, 1\}$ be regarded as the column vector $(\chi(x_1), \chi(x_2), ..., \chi(x_n))^T \in \R^n$. The product $A_{\chi}$ is the row vector $(\chi(S_1), \chi(S_2), ..., \chi(S_m)) \in \R^m$. We can rewrite the definition of discrepancy of $\SSet$ to be
+\[\disc(\SSet) = \min_{x \in \{-1,1\}^n} \norm{Ax}_{\infty} \]
+where the norm $\norm{y}_{\infty}$ of a vector $y$ is defined to be its maximum element.
+
+\begin{definition}
+A \textbf{Hadamard Matrix} is an $n\times n$ matrix $H$ with entries $\pm 1$ such that any two distinct columns are orthogonal i.e. $H^TH = nI$ where $I$ is the $n\times n$ identity matrix. One convention is to assume that the first column of $H$ consists of all ones.
+\end{definition}
+
+Note $H$ does not exist for every $n$. Simple requirements include $n$ must be even but the existence problem for $H$ is not yet solved. 
+
+\begin{proposition}
+\textbf{(Hadamard set system).} Let $H$ be an $n\times n$ Hadamard matrix and $\SSet$ be the set system with incident matrix $A = \frac{1}{2}(H + J)$ where $J$ is the $n\times n$ all ones matrix. Then 
+\[\disc(\SSet) \geq \disc_2(\SSet) \geq \frac{\sqrt{n-1}}{2}.\]
+\end{proposition}
+\begin{proof}
+
+\end{proof}
+\end{document}

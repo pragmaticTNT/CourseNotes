@@ -1,0 +1,221 @@
+%
+% This is a borrowed LaTeX template file for lecture notes for CS267,
+% Applications of Parallel Computing, UCBerkeley EECS Department.
+% Now being used for my course notes.
+%
+
+\documentclass[twoside]{article}
+\setlength{\oddsidemargin}{0.25 in}
+\setlength{\evensidemargin}{-0.25 in}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textwidth}{6.5 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+
+%
+% ADD PACKAGES here:
+%
+
+\usepackage{amsmath,amsfonts,amssymb, graphicx}
+\usepackage{color}
+\usepackage{comment}
+\usepackage{mathtools}
+
+%
+% The following commands set up the lecnum (lecture number)
+% counter and make various numbering schemes work relative
+% to the lecture number.
+%
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf Introduction to Machine Learning
+	\hfill Fall 2017} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill Lecture #1: #2  \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { {\it Lecturer: #3 \hfill Scribe: #4} }
+      \vspace{2mm}}
+   }
+   \end{center}
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+   \vspace*{4mm}
+}
+
+\renewcommand{\cite}[1]{[#1]}
+\def\beginrefs{\begin{list}%
+        {[\arabic{equation}]}{\usecounter{equation}
+         \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+         \setlength{\labelwidth}{1.6truecm}}}
+\def\endrefs{\end{list}}
+\def\bibentry#1{\item[\hbox{[#1]}]}
+
+%Use this command for a figure; it puts a figure in wherever you want it.
+%usage: \fig{NUMBER}{SPACE-IN-INCHES}{CAPTION}
+\newcommand{\fig}[3]{
+			\vspace{#2}
+			\begin{center}
+			Figure \thelecnum.#1:~#3
+			\end{center}
+	}
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+% **** IF YOU WANT TO DEFINE ADDITIONAL MACROS FOR YOURSELF, PUT THEM HERE:
+\newcommand\X{\mathbf{X}}
+\newcommand\XT{\mathbf{X}^T}
+\newcommand\x{\mathbf{x}}
+\newcommand\y{\mathbf{y}}
+\newcommand\wstar{\mathbf{w}^*}
+\newcommand\w{\mathbf{w}}
+\newcommand\R{\mathbb{R}}
+\newcommand\NPH{\mathsf{NP-Hard}}
+\newcommand\N{\mathcal{N}}
+\newcommand\Var{\mathbf{Var}}
+\newcommand\E{\mathbf{E}}
+\newcommand\Cov{\mathbf{Cov}}
+
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+\DeclarePairedDelimiter\anglebrac{\langle}{\rangle}
+
+\begin{document}
+\lecture{2}{Linear Classification and Logistic Regression}{Ethan Fetaya}{Lily Li}
+
+\section{From Last Week}
+Note $p(\w)$ is the prior. Then $p(w | data)$ is the most probable model given the data. Convenient prior (conjugate): $p(\w) = \N(0, \sigma^2_w)$. Linear models works when the features are great they are also quite fast (fast to deploy and run on your weak sauce machine). Otherwise the model will fail.  
+
+\begin{definition}
+Functions which are linear in the unknown parameter $\w$ are called \textbf{linear models}.
+\end{definition}
+
+\section{Linear Classification}
+This week we are going to map $\x \in \R^d$ into categorical $y$ which is a finite set $S$. Usually $S$ is taken to be $\{1, ..., k\}$, $\{0,1\}$ or $\{-1, 1\}$. We will focus on the last one for now. 
+
+The linear model $\hat{y} = f(\x, \w) = \w^T\x$ outputs a real score. To turn this into a binary decision we will take $f$ to be the threshold function:
+\[\hat{y} = f(\x, \w) = sign(\w^T \x) = 
+\begin{cases}
+1 &\mbox{if } \w^T\x \geq 0\\
+-1 &\mbox{if } \w^T\x < 0
+\end{cases}
+\]
+The decision boundary is then the hyperspace defined by $\w$. 
+
+$\w^T\x = 0$ is a hyperplane passing through the origin orthogonal to $w$. Thus
+\[\w^T\x + w_0 = 0\]
+is the the same hyperplane shifted by $w_0$. Notice that the decision boundary, $\w$, is invariant under scaling. If the classes can be separated by a hyperplane, then the problem is \textbf{linearly separable}.
+
+Reasons that separation might not be possible include:
+\begin{enumerate}
+\item Model is too simple
+\item Noise
+\item Errors in the data target (missing labels for data)
+\item Simple features that do not account for all variation (underlying problem is not linear); you could use a transformation to make data linearly separable
+\item Poorly chosen feature parametrization
+\end{enumerate}
+
+Learning in the context of this class amounts to find a good decision boundary. In particular we need to find $\w$ (direction) and $w_0$ (location) of the boundary. The quality of our boundary will be defined using the natural loss function \emph{zero-one loss}
+\[l_{0-1}(\hat{y}, y) = \begin{cases}
+1 & \mbox{if } y \neq \hat{y} \\
+0 & \mbox{if } y = \hat{y}
+\end{cases}\]
+Unfortunately this loss is hard to optimize because it is not continuous. 
+
+Another loss function to consider is the \emph{asymmetric binary loss}
+\[l_{ABL}(\hat{y}, y) = \begin{cases}
+\alpha & \mbox{if } y = 0 \land \hat{y} = 1\\
+\beta & \mbox{if } y = 1 \land \hat{y} = 0\\
+0 & \mbox{if } y = \hat{y}
+\end{cases}\]
+
+Our goal is to optimize either loss function, but the problem is $NPH$ and piecewise constant. Thus we will make use of a \textbf{surrogate loss} $\hat{l}$ in our optimization instead. Good surrogate losses have the property that: (1) they are easy to optimize --- smooth and convex --- and (2) they are representative --- upper bound $\forall y \forall \hat{y} (y, \hat{y}) leq \hat{l}(y, \hat{y})$ --- (since surrogate loss is proportional to original loss). If we just use our continuous $l_2$ loss it is not representative, because the value of the prediction --- not just the sign --- is taken into account.
+
+We evaluate the quality of a classifier with \textbf{metrics}. Typically we cannot directly optimize for the metrics. The following are possible metrics
+
+\begin{enumerate}
+\item \emph{Accuracy:} percent of correct predictions, $1 - l_{0-1}(w)$. Problems when the data is very unbalanced (small number of $TP$). 
+\item \emph{Recall:} fraction of relevant instances that are retrieved:
+\[R = \frac{TP}{TP + FN} = \frac{TP}{\mbox{all ground-truth instances}}.\]
+\item \emph{Precision:} fraction of retrieved instances that are correct
+\[P = \frac{TP}{TP + FP} = \frac{TP}{\mbox{all positive predictions}}.\]
+\item \emph{F1 score: } harmonic mean of precision and recall
+\[F1 = 2\frac{P \cdot R}{P + R}\]
+\end{enumerate}
+(Note here $TP$ are the true positives, $FN$ are the false negatives, and $FP$ are the false positives.) There is a trade-off between precision and recall. The \textbf{Precision-Recall curve} records this given a particular decision threshold. The \textbf{Average Precision (AP)} is the area under the Precision-Recall curve. Increasing both precision and recall is a good idea.
+
+\begin{definition}
+\textbf{Receiver Operator Characteristic (ROC)} is the trade-off between false-positive-rate (FPR) and true-positive-rate (TPR) using the decision threshold. Note that a better ROC implies a better PR but the opposite is not always the case. The difference can be quite large with unbalanced data.
+\end{definition}
+
+\section{Logistic Regression}
+Continuing with binary classification with $\{0,1\}$ labels: we have turned a real score $\w^T\x = w_0\cdot 1 + \sum_{i=1}^{d}w_i \cdot x_i$ to a binary decision by thresholding.
+
+An alternative first models the probability $P(y = 1 | \x)$. Then squishes $\w^T\x$ into $[0,1]$, $p(y = 1|\x) = f(\w^T\x)$. Then we know that $P(y = -1|\x) = 1 - P(y=1 |\w) = 1 - f(\w^T\x)$. 
+
+A useful squashing function is the \textbf{sigmoid (a.k.a. logistic function} $\sigma(z) = \frac{1}{1 + \exp(-z)}$. Nice properties include: differentiable, monotonic increasing, $\sigma(0) = 0.5$, and $lim_{z \rightarrow -\infty} \sigma(z) = 0$ and $lim_{z \rightarrow \infty} \sigma(z) = 1$. By modifying $\w$ we can change the shape of the sigmoid function. In the 1D case $y = \sigma(w_1 x + w_0)$. $w_1$ determines the "sharpness" of the increase from zero to one on the $y$-axis. $w_0$ shifts the curve along the $x$-axis.
+
+The decision boundary for logistic regression is $\w^T\x = w_0 + \sum_{j=1}^{d}w_jx_j = 0$. When the output $p(y = 1| \x, \w) = \sigma(\w^T\x) \geq 0.5$ then this implies that $\w^T\x \geq 0$. 
+
+We will use \textbf{maximum likelihood} to learn the weights $\w = (w_0, ..., w_d)$ given the probabilistic model. Assume $y \in \{0, 1\}$ and write the probability distribution of each training data point (likelihood) as 
+\[p(y^{(1)}, ..., y^{(N)} | \x^{(1)}, ..., \x^{(N)}; w).\] Assuming the training examples are sampled i.i.d, the \emph{likelihood function} is:
+\[L(\w) = p(y^{(1)}, ..., y^{(N)} | \x^{(1)}, ..., \x^{(N)}; w) = \prod_{i=1}^{N} p(y^{(i)}|\x^{(i)}; \w)\]
+
+Never use test data for tuning the hyper-parameters. You are suppose to divide the data into training and validation sets. Use the training data to estimate the weights $\w$ for different values of $\alpha$. Use the validation data to estimate the best $\alpha$. Ultimately there is suppose to be three set. 
+
+\section{Gradient Decent}
+The issue with gradient decent is that calculating the gradient might be quite slow if your data set is huge. The way to deal with this is to randomize your data and take a certain subset of it to calculate your gradient. This method is called \textbf{Stochastic Gradient Decent}.
+
+Our goal it to find $\theta^* = \arg\min_{\theta} f(\theta)$ where $\theta \in \R^n$ is our optimization variable and $f: \R^n \rightarrow \R$ is the objective function. Remember, maximizing $f$ is the same as minimizing $-f$. We need to ask: is $\theta$ discrete or continuous, what form do constraints on $\theta$ take, and is $f$ "well-behaved". $\theta$ is the parameters of the model we want to learn. Our goal is to minimize the loss function e.g. if the data are pairs $(x,y)$ then we might want to maximize the likelihood, $P(y | x, \theta)$. This is equivalent to minimize $-\log P(y|x, \theta)$. 
+
+We use gradients to find the minimum of $f$. The gradient is given by $\nabla_{\theta}f$. Let $\eta$ be the learning rate and $T$ be the number of iterations. Initialize $\theta_0$ randomly. For $t = 1$ to $T$: 
+\begin{align*}
+\delta &\leftarrow -\eta\nabla_{\theta_{t-1}}f + \alpha\delta_{t-1}\\
+\theta_t &\leftarrow \theta_{t-1} + \delta_t
+\end{align*}
+You can do Gradient Descent with Line-Search which first finds a step size value $\eta_t$ such that $f(\theta_t - \eta_t\nabla_{\theta_{t-1}} < f(\theta_t)$ at each iteration. Note that $\alpha \in [0,1)$ is the momentum coefficient so that the update takes into account the previous step. Adding this momentum can help speed up convergence.
+
+\section{Thoughts about the Course}
+The course material is \emph{not} that difficult --- I would even say that it is the same as what Andrew teaches --- but there is just \emph{so much} jargon. All of this \emph{maximum likelihood, prior, model, etc} stuff and all of the mathematic notation on the slides makes it both intimidating and difficult to follow. Also \emph{why} is he doing what he is doing? He is taking the logarithm of the likelihood function $L(\w)$. But he really doesn't give a good reason for why we do this. There are lots of notational inconsistencies and there is \emph{a lot} of nation. When the first assignment comes out we will really be able to tell how difficult the course is actually going to be. You do have a couple of blind spots: covariance, loss functions, and some linear algebra, but if you can fill in those blanks and get the jargon, you will be fine.
+
+\section{The Basics}
+As we have noted, there are some holes in your understanding. Thus here are some tid-bits which might be useful for machine learning.
+
+\begin{definition}
+The \textbf{variance} $\Var (X)$ of a random variable $X$ is the square of its standard deviation. Formally it is defined to be 
+\[\Var(X) = \E[(X - \mu)^2]\]
+Further the variance can be seen as a special case of the covariance $\Cov (X, X)$ where you take the covariance of a random variable with itself. If you take the definition of the variance and play with the math a little you will find that $\Var(X) = \E[X^2] - \E[X]^2$.
+\end{definition}
+ 
+\begin{definition}
+The \textbf{covariance} measures how closely two values are linearly related as well as the scales of these variables. It is defined as 
+\[\Cov(f(x), g(y)) = \E[(f(x) - \E[f(x)])(g(y) - \E[g(y)])]\]
+Note that covariance can be positive or negative depending on whether the two values are proportional or inversely proportional respectively. covariance with large magnitude indicate that the two variable are tightly linked. 
+\end{definition} 
+ 
+\end{document}

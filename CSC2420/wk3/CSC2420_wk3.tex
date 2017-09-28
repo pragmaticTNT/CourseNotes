@@ -1,0 +1,166 @@
+%
+% This is a borrowed LaTeX template file for lecture notes for CS267,
+% Applications of Parallel Computing, UCBerkeley EECS Department.
+% Now being used for the Coursera cryptography course, part one.
+%
+
+\documentclass[twoside]{article}
+\setlength{\oddsidemargin}{0.25 in}
+\setlength{\evensidemargin}{-0.25 in}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textwidth}{6.5 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+
+%
+% ADD PACKAGES here:
+%
+
+\usepackage{amsmath,amsfonts,amssymb, graphicx}
+\usepackage{color}
+\usepackage{comment}
+\usepackage{mathtools}
+
+%
+% The following commands set up the lecnum (lecture number)
+% counter and make various numbering schemes work relative
+% to the lecture number.
+%
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf CSC2420: Algorithm Design, Analysis and Theory
+	\hfill Fall 2017} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill Lecture #1: #2  \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { {\it Lecturer: #3 \hfill Scribe: #4} }
+      \vspace{2mm}}
+   }
+   \end{center}
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+
+   %{\bf Note}: {\it LaTeX template courtesy of UC Berkeley EECS dept.}
+
+   %{\bf Disclaimer}: {\it These notes have not been subjected to the
+   %usual scrutiny reserved for formal publications.  They may be distributed
+   %outside this class only with the permission of the Instructor.}
+   \vspace*{4mm}
+}
+%
+% Convention for citations is authors' initials followed by the year.
+% For example, to cite a paper by Leighton and Maggs you would type
+% \cite{LM89}, and to cite a paper by Strassen you would type \cite{S69}.
+% (To avoid bibliography problems, for now we redefine the \cite command.)
+% Also commands that create a suitable format for the reference list.
+\renewcommand{\cite}[1]{[#1]}
+\def\beginrefs{\begin{list}%
+        {[\arabic{equation}]}{\usecounter{equation}
+         \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+         \setlength{\labelwidth}{1.6truecm}}}
+\def\endrefs{\end{list}}
+\def\bibentry#1{\item[\hbox{[#1]}]}
+
+%Use this command for a figure; it puts a figure in wherever you want it.
+%usage: \fig{NUMBER}{SPACE-IN-INCHES}{CAPTION}
+\newcommand{\fig}[3]{
+			\vspace{#2}
+			\begin{center}
+			Figure \thelecnum.#1:~#3
+			\end{center}
+	}
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+% **** IF YOU WANT TO DEFINE ADDITIONAL MACROS FOR YOURSELF, PUT THEM HERE:
+
+\newcommand\E{\mathbb{E}}
+
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+\DeclarePairedDelimiter\anglebrac{\langle}{\rangle}
+
+\begin{document}
+%\lecture{**LECTURE-NUMBER**}{**DATE**}{**LECTURER**}{**SCRIBE**}
+\lecture{3}{Introductions}{Allan Borodin, Nisarg Shah}{Lily Li}
+%\footnotetext{These notes are partially based on those of Nigel Mansell.}
+
+\section{Continuation of Greedy, Greedy-Like Algorithms}
+\subsection{Priority Stack Algorithm}
+Recall: you look at the input item and make an immediate solution to put it on a stack or throw it away. The resulting stack might not be feasible, so you pop the stack to ensure feasibility. For covering problems, the popping operation needs to insure minimality.
+
+\begin{example}
+Chordal graphs and perfect elimination ordering. Note an interval graph is an example of a chordal graph (which are example of perfect graph --- chromatic number of induced subgraph equals size of largest clique in subgraph).
+
+Start with empty stack, sort nodes as in PEO (perfect elimination ordering), for all starting at node $v_1$... they he moved on.
+
+Basic idea: put on stack if the value is better (not necessarily that much better, just the residual is better). 
+\end{example}
+
+\begin{example}
+\textbf{Interval Coloring Problem} Given set of intervals, color all intervals so that interval having same color does not intersect. Want to use as few colors as possible where number of colors is $m$.
+
+One possible solution is to iterate the problem for increasing $m$. Stopping when the scheduling is possible. Unfortunately this is not very efficient. 
+
+Here is a better way (best actually): consider the earliest starting time for each interval. Use a color you used if possible. Otherwise given the interval a new color. To see why this works, think about the associated graph. You only add new colors when there is a clique using all previous colors.
+\end{example}
+
+\subsection{$m$-machine Interval Scheduling}
+
+\section{Dynamic Programming}
+\begin{example}
+In the makespan problem let $n$ be the number of jobs and $m$ be the number of machines and $1/\epsilon$ where $1 + \epsilon$ is your approximation.
+\end{example}
+
+Recall the essence of DP algorithm is optimum substructure. Note that we don't know that if: everything that can be done in polynomial time can be done using dynamic programming (this is true if you swap in greedy for DP). Maybe think about how to do a perfect matching in a bipartite graph using DP in polynomial time. (Trivia: Bellman came up with dynamic programming! He says: don't formalize it.)
+
+\begin{example}
+\textbf{Weighted Interval Scheduling Problem (WISP):} here you want to work on the head subset of the intervals. Consider what is the optimum value you could get from the first $i$ intervals, $V[i]$. We want $V[n]$ ($n$ being the total number of items). Borodin makes a distinction between the semantic array $V[\cdot]$ and $\tilde{V}[\cdot]$ which he calls a \emph{computation or recursive array}. 
+
+With $m$ machines the lower bound on the problem is $\Omega(n^m)$. 
+\end{example}
+
+Note that the distinction between DP and divide-and-conquer is the difference between non-repeating and repeating sub-problems.  
+\begin{example}
+DP algorithm for knapsack. Yay! Recall if $C$ is the capacity (an integer) running time is $O(nC)$. That was a $PTAS$. Now lets try for a $FPTAS$. $S[j, v]$ it he minimum size $s$ needed to achieve a certain value $v$ from items $v_1, ..., v_j$. Running time is $O(nV)$. To achieve the FPTAS you just scale the values down decreasing the total value. 
+\end{example}
+
+Lets try something similar for the makespan problem:
+\begin{example}
+Let $T$ be a candidate achievable makespan. Depending on $T$ and $\epsilon$, scale down large jobs ($p_i\geq T/s = T\cdot \epsilon$) to largest multiple of $T/s^2$. Eventually only $s^2$ large values. Binary search on $T$.
+\end{example}
+
+Even though Bellman said ``don't do it'': there are models for dynamic programming. Consider priority branching tree (pBT) model: leveled tree where each path is a priority algorithm. The tree branches according to different decisions and continue down the path or terminate. Three cases:
+\begin{enumerate}
+\item Fixed order pBT (with online as a special case): make order initially. Each item corresponds to a level.
+\item Adaptive order pBT: at each level node can choose what to look at. Every node on the same level sees the same things.
+\item Strong adaptive: same as the above but nodes in the same level see different things. 
+\end{enumerate}
+
+\end{document}

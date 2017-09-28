@@ -1,0 +1,240 @@
+%
+% This is a borrowed LaTeX template file for lecture notes for CS267,
+% Applications of Parallel Computing, UCBerkeley EECS Department.
+% Now being used for my course notes.
+%
+
+\documentclass[twoside]{article}
+\setlength{\oddsidemargin}{0.25 in}
+\setlength{\evensidemargin}{-0.25 in}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textwidth}{6.5 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+
+%
+% ADD PACKAGES here:
+%
+
+\usepackage{amsmath,amsfonts,amssymb, graphicx}
+\usepackage{color}
+\usepackage{comment}
+\usepackage{mathtools}
+
+%
+% The following commands set up the lecnum (lecture number)
+% counter and make various numbering schemes work relative
+% to the lecture number.
+%
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf Introduction to Machine Learning
+	\hfill Fall 2017} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill Lecture #1: #2  \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { {\it Lecturer: #3 \hfill Scribe: #4} }
+      \vspace{2mm}}
+   }
+   \end{center}
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+   \vspace*{4mm}
+}
+
+\renewcommand{\cite}[1]{[#1]}
+\def\beginrefs{\begin{list}%
+        {[\arabic{equation}]}{\usecounter{equation}
+         \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+         \setlength{\labelwidth}{1.6truecm}}}
+\def\endrefs{\end{list}}
+\def\bibentry#1{\item[\hbox{[#1]}]}
+
+%Use this command for a figure; it puts a figure in wherever you want it.
+%usage: \fig{NUMBER}{SPACE-IN-INCHES}{CAPTION}
+\newcommand{\fig}[3]{
+			\vspace{#2}
+			\begin{center}
+			Figure \thelecnum.#1:~#3
+			\end{center}
+	}
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+% **** IF YOU WANT TO DEFINE ADDITIONAL MACROS FOR YOURSELF, PUT THEM HERE:
+
+\newcommand\X{\mathbf{X}}
+\newcommand\XT{\mathbf{X}^T}
+\newcommand\x{\mathbf{x}}
+\newcommand\y{\mathbf{y}}
+\newcommand\wstar{\mathbf{w}^*}
+\newcommand\w{\mathbf{w}}
+\newcommand\R{\mathbb{R}}
+\newcommand\I{\mathbf{I}}
+\newcommand\Var{\mathsf{Var}}
+\newcommand\Cov{\mathsf{Cov}}
+\newcommand\z{\mathbf{z}}
+\newcommand\N{\mathcal{N}}
+
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+\DeclarePairedDelimiter\anglebrac{\langle}{\rangle}
+\DeclarePairedDelimiter\norm{\parallel}{\parallel}
+
+\begin{document}
+\lecture{1}{Introductions}{Ethan Fetaya}{Lily Li}
+
+\section{Administration}
+Our Instructor is Ethan Fetaya. A recommended textbook is \emph{Understanding Machine Learning: from Theory to Algorithm} by Shal Shalev-Shwartz, Shal Ben-David.
+
+For graduate students there is a project instead of a final (it is still worth $30\%$). Details are forth-coming.
+
+Assignments are due by 22:00 on the day (observe that it is \emph{NOT} due at 23:59).
+
+\section{Introduction to Machine Learning}
+Learning is: goal orientated skill acquisition. As computer scientists we use code to solve our problems, however, there are some complications: the solution maybe difficult to formalize, the task maybe mailable.
+
+\subsection{ML Categories}
+\begin{enumerate}
+\item Supervised learning: correct outputs known. Given input $X$ and output $Y$. We assume there is an distribution $D$ on $X \times Y$. There is a also a lose function: $l: Y \times Y \rightarrow R$. We are given a set of $m$ independent and identically distributed input-output pairs. What we want is a \textbf{hypothesis} function $f_\textbf{w}(\textbf{x}) = w_0 + w_1x_1 + \cdots + w_dx_d$ for $\mathbf{w} \in \R^{d+1}$ which minimizes the loss $l$. 
+\item Unsupervised Learning: find structure in data.
+\item Online Learning: data keeps coming in there are no separate learning and validation data.
+\item Reinforcement Learning: maximize future reward.
+\end{enumerate}
+
+\subsection{ML Viewpoints}
+\begin{enumerate}
+\item Agnostic approach: minimize loss on unseen data.
+\item Discriminative approach: fit with some parametric model.
+\item Generative approach: fit $P(x, y: \theta)$ by parametric model then use the model to improve $P(x,y: \theta)$.
+\end{enumerate}
+
+\section{Linear Regression}
+Let the inputs be: $\mathbf{x} \in \R^d$. The outputs are $\mathbf{y}$ where $y \in \R$. And the input-output pair $(x^{(1)}, y^{(1)}), ..., (x^{(k)}, y^{(k)})$.
+
+Any (fixed) transformation $\phi(x) \in \R$, run linear regressions with features $\phi(x)$. Observe that a polynomial $w_0 + w_1x + \cdots + w_d x^d$ are actually linear in the parameters $w_i$! (Just consider the $x^i$ as the features.)
+
+The common loss is often set to $L_2 = (y - \hat{y})^2$. Unfortunately this loss model punishes infrequent large mistakes. The best prediction under this model is the mean. Another loss model is $L_1 = |y - \hat{y}|$. The best prediction here is the median. Another loss function is the Huber loss (which stitches together $L_1$ and $L_2$ losses --- $L_2$ near the zero point) in a smooth way.
+
+Note: we often include the bias in $\mathbf{x}$ as follows: $x^{(i)} = [1, x^{(i)}_1, ..., x^{(i)}_d]$ where our prediction is $\mathbf{x}^T\mathbf{w}$. 
+
+The target vector is $\mathbf{y} = [y^{(1)}, ..., y^{(N)}]^T$. The feature vectors are: $\mathbf{f}^{(j)} = [\mathbf{x}^{(1)}_j, ..., \mathbf{x}^{(N)}_j]^T$ and the design matrix $\mathbf{X}$ has the property that $\mathbf{X}_{i,j} = \mathbf{x}^(i)_j$. It is easiest think about $f^{(j)}$ as the $j^{th}$ column and $x^{(i)}$ as the $i^{th}$ row. 
+
+\begin{theorem}
+The optimal $\mathbf{w}$, with respect to $L_2$, is 
+\[\mathbf{w}^* = \arg\min \sum_{i=1}^{N} \left( y^{(i)} - \mathbf{w}^Tx^{(i)} \right)^2 = (\mathbf{X}^T\mathbf{X})^{-1} \mathbf{X}^T \mathbf{y}\]
+\end{theorem}
+\begin{proof}
+Remark that the prediction vector is $\mathbf{\hat{y}} = \mathbf{Xw}$. Consider the $L_2$ loss of $\mathbf{w}$. All we really need to do here is simplify this equation then take the derivative with respect to $\mathbf{w}$. Lets do just that 
+\begin{align*}
+L_2(\mathbf{w}) &= \parallel \mathbf{y} - \mathbf{\hat{y}}\parallel^2 \\
+&= \parallel \mathbf{y} - \mathbf{Xw} \parallel^2 \\
+&= (\mathbf{y} - \mathbf{Xw})^T \cdot (\mathbf{y} - \mathbf{Xw}) \\
+&= \mathbf{y}^T\mathbf{y} + \mathbf{w}^T\mathbf{X}^T\mathbf{Xw} - 2\mathbf{w}^T\mathbf{X}^T\mathbf{y}
+\end{align*}
+Now if we take the partial derivative with respect to $\mathbf{w}$ we get:
+\[\nabla L(\mathbf{w}^*) = 2\mathbf{X}^T\mathbf{X}\mathbf{w}^* - 2\mathbf{X}^T\mathbf{y} = 0.\]
+By rearranging the above equation we obtain $\mathbf{w}^* = \left( \mathbf{X}^T\mathbf{X} \right)^{-1}\mathbf{X}^T\mathbf{y}$. 
+\end{proof}
+
+Since our prediction is $\mathbf{\hat{y}} = \mathbf{X}^T\mathbf{y}$ and we calculated that the optimal weights is $\mathbf{X}^T\mathbf{X}\mathbf{w}^* = \mathbf{X}^T\mathbf{y}$, this gives us some information about the residual $r = \mathbf{y} - \mathbf{\hat{y}}$. In particular if we substitute  for the value of $\mathbf{\hat{y}}$ and multiply by $\mathbf{X}^T$, then we see that $\mathbf{X}r = 0$. This means that the residual (think of this as the remainder) is orthogonal to each $\mathbf{x}^{(i)}$.
+
+\textcolor{red}{There is something else here about covariance that I didn't quite catch.}
+
+\subsection{Regularization}
+Typically, if you over fit data, the model tends to have terms with large norm. Thus it is a good idea to introduce a regularizer term $R(\mathbf{w})$. The modified optimal model $w^* = \arg\min_{\mathbf{w}} L_S(\mathbf{w}) + R(\mathbf{w})$.
+
+Commonly used regularizers include:
+\begin{enumerate}
+\item $L_2$ regularization: 
+\[R(\mathbf{w}) = \frac{\lambda}{2} \mathbf{w}^T \mathbf{w}.\]
+Note that the analytic solution is $\mathbf{w}^* = (\XT\X + \lambda \I)^{-1}\X\y$ (why). Normally we do not regularize the bias $w_0$ and we use validation/ cross-validation to find a good $\lambda$.
+\item $L_1$ regularization: 
+\[ R(\w) = \lambda \norm{\w}_1 = \lambda \sum |w_i|.\]
+This regularization is convex (Simple Gaussian Distribution) but has no analytic solution. It also tends to induce \emph{sparse} solutions. 
+\end{enumerate} 
+
+\section{Tutorial: Probability}
+Sample space $\Omega$: set of all possible outcomes of the experiment. Observation $\omega \in \Omega$ are sample outcomes, realizations, or elements. $E \subset \Omega$ are subsets of the sample space.
+
+\begin{definition}
+\textbf{Joint Probability} of $A$ and $B$ is $P(A, B)$. Note that the joint probability is simply $P(A, B) = P(A|B)P(B) = P(B|A)P(A)$.
+
+Events $A$ and $B$ are \textbf{conditionally independent} given $C$ if $P(A, B|C) = P(B|A, C)P(A|C) = P(B|C)P(A|C)$.
+\end{definition}
+
+\begin{definition}
+\textbf{Marginalization (Sum Rule)} $P(X) = \sum_{Y} P(X, Y)$. 
+
+\textbf{Law of Total Probability} $P(X) = \sum_{Y} P(X, Y)$.
+\end{definition}
+
+Bayes' Rules can be reworded to be more useful for Machine Learning as follows:
+\begin{align*}
+P(\theta | x) &= \frac{P(x|\theta)P(\theta)}{P(x)} \\
+\mbox{Posterior} &= \frac{\mbox{Likelihood}*\mbox{Prior}}{\mbox{Evidence}} \\
+\mbox{Posterior} &\propto \mbox{Likelihood} \times \mbox{Prior}
+\end{align*}
+
+where $P(x|\theta)$ is the likelihood, $P(\theta)$ is the prior, and $x$ is the evidence.
+
+The difference between discrete and continuous random variables is the difference between summation and integration when marginalizing. Further:
+\begin{enumerate}
+\item[Discrete:] distribution defined by probability mass function (PMF). Marginalization: $p(x) = \sum_{y} p(x,y)$.
+\item[Continuous:] distribution defined by probability density function (PDF). Marginalization: $p(x) = \int_{y}p(x,y) dy$.
+\end{enumerate}
+
+The mean $\mu$ is the \textbf{First Moment} and the variance $\sigma^2$ is the \textbf{Second Moment}. Variance is defined as $\int_{-\infty}^{\infty} (x - \mu)^2 p(x) dx$. With a little bit of algebra, you can work out that $\Var[x] = E[x^2] - E[x]^2$.
+
+\subsection{Covariance Matrix}
+Let $\x$ be a $D$-dimensional vector and $\mu$ be a $D$-dimensional mean vector. Then $\Sigma$ is a $D\times D$ covariance matrix with determinant $|\Sigma |$. Note that the $(i,j)$ entry of $\Sigma$ is the covariance of $x_i, x_j$: 
+\[\Cov(x_i, x_j) = E[(x_i - \mu_i)(x_j - \mu_j)] = E[(x_ix_j)] - \mu_i\mu_j.\]
+Thus the diagonal entries are the variance of each element. $\Sigma$ has the property that it is positive and semi-definite. 
+
+\textbf{Whitening} is a linear transformation that takes a vector of random variables with a known covariance changes these into a set of new random variables with the identity matrix as its covariance. This means that the random variables are all independent of one another. Formally, the random $d$-dimensional vector is $\x  = (x_1, ..., x_d)^T$, the mean $\mu = E[\x] = (\mu_1, ..., \mu_d)^T$ and postive definite $d \times d$ covariance matrix $\Cov(\x) = \sigma$ into. $\x$ is changed into $\z = (z_1, ..., z_d)^T = W\x$ with \emph{white} covariance matrix, $\Cov(\z) = \I$. 
+
+Ok... the course lectures are a bit all over the place. We are going to do \emph{linear models for regression} again, this time using the textbook.
+
+\section{Linear Models for Regression}
+The training data $\{\x_n\}$ comprises of $N$ observations (each $\x_n$ is one observation). The target values is the vector $\{t_n\}$ with our goal of predicitng the value of $t$ for a new input vector $\x$. From a probabilistic perspective we want to model the predictive distribution $p(t | \x)$ (this encapsulates our uncertainty abou the value of $t$ for each value of $\x$. 
+
+\subsection{Linear Basis Function Models}
+General linear model for regression (a.k.a. \emph{linear regression}) take the form
+\[y(\x, \w) = w_0 + w_1x_1 + \cdots + w_{D}x_{D}\]
+where $\x = (x_1, ..., x_D)^T$. The function needs to be linear in the parameters $w_0, ..., w_D$. If we have fixed nonlinear functions of the input variables $\x$, of the form
+\[y(\x, \w) = w_0 + \sum^{M-1}_{j=1}w_j \phi_j(\x)\]
+where the $\phi_j(\x)$ are the \emph{basis functions}, then the model is more general than before ($x_i$ was also linear). Typically we also add a dummy basis function $\phi_0(\x) = 1$ to be able to write $y$ as a single summation
+\[y(\x, \w) = \sum^{M-1}_{j=0}w_j\phi_j(\x) = \w^T\phi(\x).\]
+
+\subsubsection{Maximum likelihood and least squares}
+Assume that the target variable $t$ is some deterministic function $y(\x, \w)$ with additive Gaussian noise $\epsilon$ (that is, $\epsilon$ is a zero mean Gaussian random variable with precision (inverse variance $\beta$. Write
+\[t = y(\x, \w) + \epsilon.\]
+Recall that is is similar to asking for the predictive distribution
+\[p(t | \x, \w, \beta) = \N(t| y(\x, \w), \beta^{-1}).\] 
+\end{document}
