@@ -1,0 +1,120 @@
+\documentclass{article}
+\usepackage{amssymb,amsmath}
+\usepackage{color}
+\usepackage{comment}
+%\usepackage{geometry}
+% 	\geometry{margin=1in}
+\usepackage{graphicx}
+\usepackage{mathtools}
+
+%----------------------- Macros and Definitions -----------------------
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{cor}[theorem]{Corollary}
+\newtheorem{obs}{Observation}
+\newtheorem{conj}{Conjecture}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{prop}[theorem]{Proposition}
+
+\setlength{\parindent}{0em}
+\setlength{\parskip}{1em}
+
+\def\QED{\ensuremath{{\square}}}
+\def\markatright#1{\leavevmode\unskip\nobreak\quad\hspace*{\fill}{#1}}
+\newenvironment{proof}
+  {\begin{trivlist}\item[\hskip\labelsep{\bf Proof.}]}
+  {\markatright{\QED}\end{trivlist}}
+
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+\DeclarePairedDelimiter\norm{\parallel}{\parallel}
+
+\newcommand\SetL{\mathcal{L}}
+\newcommand\B{\mathcal{B}}
+\newcommand\U{\mathcal{U}}
+\newcommand\R{\mathbb{R}}
+\newcommand\Z{\mathbb{Z}}
+\newcommand\N{\mathbb{N}}
+\newcommand\lindisc{\mathsf{lindisc}}
+\newcommand\LD{\mathsf{LD}}
+\newcommand\GroupColor{\mathsf{GroupColor}}
+\newcommand\Yes{\mathsf{Yes}}
+\newcommand\No{\mathsf{No}}
+
+%----------------------- Title ---------------------------------------
+
+\title{Linear Discrepancy is $\Pi_2$-Hard}
+\author{Lily Li}
+
+%------------------------------ Text ---------------------------------
+
+\begin{document}
+\thispagestyle{empty}
+\maketitle
+
+\begin{abstract}
+Maybe the following shows that Linear Discrepancy is Hard?
+\end{abstract}
+
+\section{Introduction}
+
+Kr\'{a}l and Nejedl\'{y} showed that Group Coloring is $\Pi_2^P$-Complete \cite{nejedly2004group}. We will show that linear discrepancy is $\Pi_2$-Hard by reducing $\GroupColor_{\Z_3}$ to linear discrepancy (hence forth denoted $\LD$). First we define $\GroupColor_{\Z_3}$ and $\LD$ and their associated decision problems.  
+
+\begin{definition}
+The input to $\GroupColor_{\Z_3}$ is a directed graph $G = (V, E)$. An \emph{edge labeling} of $G$ is a function $\phi: E \rightarrow \Z_3$. Let $\chi: V \rightarrow \Z_3$ be a coloring of the vertices using elements of $\Z_3$. $\chi$ \emph{satisfies} edge label $\phi$ if for every directed edge $e = uv$, $\chi(u) - \chi(v) \neq \phi(e)$. $G$ is \emph{$\Z_3$-colorable} if every edge label is satisfied by some coloring of the vertex set.
+
+The associated decision problem asks if $G$ is $\Z_3$-colorable.   
+\end{definition}
+
+\begin{definition}
+Given an $m \times n$ matrix $A$ with entries in $\R$, the linear discrepancy of $A$ is defined as:
+\[\lindisc(A) = \max_{w \in [0,1]^n}\min_{x \in \{0,1\}^n} \norm{A(x-w)}_\infty.\]
+
+The decision problem associated with linear discrepancy asks if $\lindisc(A) \leq d$ for some constant $d \geq 0$.
+\end{definition}
+
+The structure of the proof will be similar to Haviv and Regev's hardness result for the Covering Radius Problem \cite{haviv2006hardness}. In particular we will use the basis of their lattice $\SetL_G$ --- with some slight modifications --- as our matrix $A$.
+
+\section{Completeness}
+Consider a $\Yes$-instance of $\GroupColor_{\Z_3}$. That is, consider some digraph $G = (V, E)$, where $|V| = n$ and $|E| = m$, which is $\Z_3$-colorable. Consider the $m \times n$ matrix $C$ where 
+\[C_{i,j} = \begin{cases}
+1, &\mbox{if $e_i = v_ju$ for some vertex $u$}\\
+-1, &\mbox{if $e_i = uv_j$ for some vertex $u$}\\
+0 &\mbox{otherwise.}
+\end{cases}\]
+The lattice $\SetL_G = \{y \in \Z^m: \exists x \in \Z^n \mbox{ such that } y = Cx \mod 3\}$ is the set of all edge labels induced by colorings of $V$. Let $\B_G$ be the basis of $\SetL_G$ consisting of vectors $y \in \{0,1,2\}^m$. Observe that each column of $\B_G$ corresponds to some edge labeling modulo $3$, thus all the entries of $\B_G$ are positive. Let $A = \B_G$ be an $m \times m$ matrix --- since $\B_G$ spans $\R^m$ --- and let $d = 1$. We will show that $\lindisc(A) \leq d$.  
+
+Consider any vector $w \in [0,1]^{m}$. Define $\U_G \subset \SetL_G$ to be the \emph{unit polytope} of $\SetL_G$ such that $y^* \in U_G$ if and only if $y^* = \B_Gx$ for some $x \in \{0,1\}^{m}$. The \emph{Hardness of the Covering Radius Problem on Lattices} \cite{haviv2006hardness} showed that for every $z \in \R^m$ there exists a lattice point $y$ such that $\norm{y - z}_{\infty} \leq \frac{3-1}{2} = 1$ (we can reproduce the proof here if necessary). Thus for $y \in \SetL_G$ such that
+\[y = \arg\min_{y \in \SetL_G} \norm{y - Aw}_{\infty},\]
+$y$ satisfies $\norm{y - Aw}_{\infty} \leq 1$. By Lemma \ref{lem:closestptisunit}, we know that $y$ must be some point in $\U_G$. Thus there exists a vector $x \in \{0,1\}^{m}$ such that $y = Ax$. Then $\lindisc(A) = \max_{w \in [0,1]^{m}}\min_{x \in \{0,1\}^{m}} \norm{A(x - w)}_{\infty} \leq 1$ as required.  
+
+\begin{lemma}
+\label{lem:closestptisunit} Let $\B_{G}$ be the basis of lattice $\SetL_G$ with entries in $\{0,1,2\}$. For each $w \in [0,1]^{w}$ there exists a point $y$ in the unit polytope (i.e. $y = \B_Gx$ for $x \in \{0,1\}^{w}$) such that
+\[y = \arg\min_{y \in \SetL_G} \norm{y - \B_Gw}_{\infty}.\] 
+\end{lemma}
+\begin{proof}
+Consider any $z \in \SetL_G$ such that
+\[z = \arg\min_{z \in \SetL_G} \norm{z - \B_Gw}_{\infty}\]
+(that is: $z$ is the closest lattice point to $\B_Gw$ using the infinity norms as the metric). We will find a point $y$ in the unity polytope such that
+\[\norm{y - \B_Gw}_{\infty} \leq \norm{z - \B_Gw}_{\infty}\]
+
+Since $z \in \SetL_G$, $z = \B_Gc$ for some $c \in \Z^{m}$. Let $d \in \{0,1\}^{m}$ be defined as follows:
+\[d_i = \begin{cases}
+c_i &\mbox{if } c_i \in \{0,1\}\\
+1 &\mbox{if } c_i > 1\\
+0 &\mbox{if } c_i < 0
+\end{cases}\]
+Compare each element of $c-w$ with the associated element of $d-w$ and observe that $|d_i - w_i| \leq |c_i - w_i|$ (recall: $w_i \in [0,1]$). Since $\B_G$ is a matrix with positive entries, it follow that $\norm{\B_G(d - w)}_{\infty} \leq \norm{\B_G(c - w)}_{\infty}$ as required.   
+\end{proof}
+
+\section{Soundness}
+Consider a $\No$-instance of $\GroupColor_{\Z_3}$. That is, consider a graph $G = (V, E)$ which is not $\Z_3$-colorable. Again, construct the lattice $\SetL_G$ from the induced edge-labels and a basis $\B_G$ for $\SetL_G$ with entries in $\{0,1,2\}$. 
+
+The \emph{Hardness of the Covering Radius Problem on Lattices} \cite{haviv2006hardness} showed that there exists a $z \in \Z^m$ such that $\norm{y - z}_{\infty} \geq \frac{3}{2}$ for every $y \in \SetL_G$. We can write $z = \B_Gw$ for some $w \in \R^{m}$ since $\B_G$ is a spanning set of $\R^{m}$. Let $w' \in [0,1]^{m}$ be the vector such that $0 \leq w_i' \leq 1$ and $w_i = w_i' + c_i$ for some integer $c_i$. Thus 
+\[\lindisc(A) \geq \min_{x\in \{0,1\}^{m}} \norm{\B_G(x - w')}_{\infty} \geq \frac{3}{2} > 1.\]  
+
+%---------------------------- Bibliography -------------------------------
+\bibliography{bibliography}{}
+\bibliographystyle{acm}
+\end{document}

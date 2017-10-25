@@ -1,0 +1,75 @@
+\documentclass[11pt]{article}
+
+% ===> PACKAGES
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{color}
+\usepackage{comment}
+\usepackage{fancyhdr}
+\usepackage{mathtools}
+\usepackage[margin=1in]{geometry} 
+\usepackage{thmtools}
+
+% ===> PARAMETERS
+\pagestyle{fancy}
+
+% ===> MACROS
+\setlength{\parindent}{0em}
+\setlength{\parskip}{0.5em}
+\algdef{SE}[DOWHILE]{Do}{doWhile}{\algorithmicdo}[1]{\algorithmicwhile\ #1}%
+
+%	\def\macrosName{Fill in the content of the macros and use \textit{\\macrosName} whenever necessary}
+\newcommand\writeF{\textsc{write}}
+\newcommand\updateF{\textsc{update}}
+\newcommand\scanF{\textsc{scan}}
+\newcommand\COLLECT{\textsc{COLLECT}}
+\newcommand\READ{\textsc{READ}}
+
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{problem}{Problem}
+
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+\DeclarePairedDelimiter\anglebrac{\langle}{\rangle}
+
+\begin{document}
+
+\lhead{CSC 2221}
+\chead{Xinyuan Li: 1000858244}
+\rhead{\today}
+
+\section*{Assignment 6}
+% ===> START ASSIGNMENT
+\begin{claim}
+The following (Algorithm \ref{pseudocode:multiwritersnapshot}) is a linearizable, obstruction-free implementation of a multi-writer snapshot object. Here $R$ is a multi-writer register and $S$ is an array of $m$ multi-writer registers. Explain why the object is not non-blocking.
+
+\begin{algorithm}
+	\caption{Operations for the multi-writer snapshot object.}
+    \label{pseudocode:multiwritersnapshot}
+    \begin{algorithmic}[1]
+	\State $\updateF(j, v)$ by process $p_i$:
+	\State $R \leftarrow \writeF(i)$
+	\State $S[j] \leftarrow \writeF(v)$
+	\State return
+	\State
+	\State $\scanF$ by processor $p_i$:
+	\Do 
+		\State $R \leftarrow \writeF(i)$
+		\State $c \leftarrow \COLLECT(S)$
+	\doWhile{$\READ(R) = i$}
+	\State return $c$
+    \end{algorithmic}
+\end{algorithm}
+\end{claim}
+\begin{proof}
+
+\end{proof}
+% ===> END ASSIGNMENT
+\end{document}

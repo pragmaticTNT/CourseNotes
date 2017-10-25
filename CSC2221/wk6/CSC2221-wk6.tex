@@ -1,0 +1,225 @@
+%
+% This is a borrowed LaTeX template file for lecture notes for CS267,
+% Applications of Parallel Computing, UCBerkeley EECS Department.
+\documentclass[twoside]{article}
+\setlength{\oddsidemargin}{0.25 in}
+\setlength{\evensidemargin}{-0.25 in}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textwidth}{6.5 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+
+%
+% ADD PACKAGES here:
+%
+
+\usepackage{amsmath,amsfonts,amssymb, graphicx}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{color}
+\usepackage{comment}
+\usepackage{mathtools}
+
+%
+% The following commands set up the lecnum (lecture number)
+% counter and make various numbering schemes work relative
+% to the lecture number.
+%
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf CSC2221: Introduction to Distributed Computing
+	\hfill Fall 2017} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill Lecture #1: #2  \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { {\it Lecturer: #3 \hfill Scribe: #4} }
+      \vspace{2mm}}
+   }
+   \end{center}
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+   \vspace*{4mm}
+}
+\renewcommand{\cite}[1]{[#1]}
+\def\beginrefs{\begin{list}%
+        {[\arabic{equation}]}{\usecounter{equation}
+         \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+         \setlength{\labelwidth}{1.6truecm}}}
+\def\endrefs{\end{list}}
+\def\bibentry#1{\item[\hbox{[#1]}]}
+
+\newcommand{\fig}[3]{
+			\vspace{#2}
+			\begin{center}
+			Figure \thelecnum.#1:~#3
+			\end{center}
+	}
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+% **** IF YOU WANT TO DEFINE ADDITIONAL MACROS FOR YOURSELF, PUT THEM HERE:
+
+\newcommand\readF{\mathsf{read}}
+\newcommand\writeF{\mathsf{write}}
+\newcommand\timestamp{\mathsf{TimeStamp}}
+\newcommand\GetTS{\mathsf{GetTS}}
+\newcommand\N{\mathbb{N}}
+\newcommand\updateF{\mathsf{update}}
+\newcommand\scanF{\mathsf{scan}}
+
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+\DeclarePairedDelimiter\anglebrac{\langle}{\rangle}
+
+\begin{document}
+\lecture{6}{Timestamps}{Faith Ellen}{Lily Li}
+
+\section{Lock-Freedom, Obstruction-Freedom}
+\begin{definition}
+An implementation is \textbf{wait-free} if in every admissible execution, \emph{every} non-faulty process completes its operations on the implemented object within a finite number of its own steps.
+
+A \textbf{non-blocking/ lock-free} implementation is one were every configuration has some process that finishes its operation within a finite number of its own steps. Consider the following example.
+
+\begin{algorithm}
+	\caption{Implementation of Fetch\&Increment using Weak \textproc{CAS}}
+    \label{pseudocode:FNI}
+    \begin{algorithmic}[1]
+	\State Repeat
+	\State $v \leftarrow \mathsf{read}(C)$
+	\State until $\mathsf{CAS}(C, v, v+1) =$ true
+    \State return $v$
+    \end{algorithmic}
+\end{algorithm}
+
+\textbf{Obstruction-free/ solo-terminating}: from every reachable configuration in which some process has a pending operation the process can complete its operation if it is given sufficiently many consecutive steps.
+\end{definition}
+
+\section{Timestamps (AW 220-222)}
+
+$\timestamp$ objects are used to record info about various operations or even occurring in relation to one another. Suppose $T$ is a $\timestamp$ object. The function $\mathsf{GetTS}(T)$ returns the values from a partially ordered set $U$ such that if $\GetTS(T)$ operation $g_2$ that returns $t_2$ is invoked after $\GetTS(T)$ operation $g_1$ that returns $t_1$. Then $t_1 < t_2$. If $g_1$ and $g_2$ are concurrent then any order of $t_1$ and $t_2$ is possible, even $t_1$ and $t_2$ are incomparable. Below is the implementation of a $\timestamp$ object: Algorithm \ref{pseudocode:timestamp}.
+\begin{algorithm}
+	\caption{Implementation of $\timestamp$ Object}
+    \label{pseudocode:timestamp}
+    \begin{algorithmic}[1]
+	\State \# Using a Fetch and Increment
+	\State $\GetTS(T)$
+	\State returns $\mathsf{Fetch\&Increment}(T)$
+	\State
+	\State \# Using a Counter: $U = \N - \{0\}$
+	\State $\GetTS(C)$
+	\State Increment $C$
+	\State return read $C$
+	\State
+	\State \# Using a Fetch and Increment again (for processor $i$ when there are a total of $n$ processors) 
+	\State $\GetTS(T)$
+	\State Increment $C$
+	\State return $n \cdot \readF(C) + i$
+	\State
+	\State \# Use registers for process $p_i$
+	\State $\GetTS(R)$
+	\State $y = 0$
+	\For{$j$ from $0$ to $n-1$}
+		\State $y \leftarrow \max{y, \readF(x_j)}$
+	\EndFor
+	\State $y \leftarrow y + 1$
+	\State $x_i \leftarrow y$
+	\State return $y$
+	\State
+	\State \# Vector timestamps $U = \N^n$
+	\State $\GetTS$	
+	\For{$j$ from $0$ to $n-1$}
+		\State $v_j \leftarrow \readF(x_j)$ \# this is called a \textbf{collect}
+	\EndFor
+	\State $v_i \leftarrow v_i + 1$
+	\State $x_i \leftarrow v_i$
+	\State return $v$
+	\State \# Here we would use lexicographical or component-wise for $v$
+	\State
+	\State \# Bounded timestamps: process only has timestamp from its last $\GetTS$ operation
+	\State $n = 2$
+	\State $U = \{0, 1, 2\}$ and $0 < 1$, $1 < 2$, $2 < 0$
+	\State $\GetTS$ by process $p_i$
+	\State $x \leftarrow \readF(T_{1-i})$
+	\State $T_i \leftarrow \writeF(x + 1 \mod 3)$
+    \end{algorithmic}
+\end{algorithm}
+
+\section{Atomic Snapshots (AW 10.3)}
+This object has $m$-components $S_0, ..., S_{m-1}$. It supports two operations $\updateF(S, i, w)$ which sets $S_i$ to have value $w$ and $\scanF(S)$ which returns $(S_0, ..., S_{m-1})$. Observe that when $m = 1$ then we simply have a register. Let us consider how to implement these two operations so that they are linearizable. 
+
+\begin{algorithm}
+	\caption{Implementation of $\timestamp$ Object}
+    \label{pseudocode:timestamp}
+    \begin{algorithmic}[1]
+	\State Scan		
+	\end{algorithmic}
+\end{algorithm}
+
+Notice that the sequence numbers are really problematic since they are unbounded. Here is what we can do to improve the situation: the scanner is going to have to write (though in a really limited way). The problem is call the ABA problem (the register changed from $A$ to $B$ then back to $A$ and we want a way to distinguish between the first and last $A$). What we need to do is implement a register that avoids the ABA problem without using sequence numbers and timestamps. For single writer/reader register $R$ with reader $p_r$ and writer $p_w$.  We make use of two additional single bit registers $H_w$ (single writer by $p_w$) and $H_r$ (single writer by $p_r$). The new write will be:
+
+\begin{algorithm}
+	\caption{Implementation of $\timestamp$ Object}
+    \label{pseudocode:register}
+    \begin{algorithmic}[1]
+	\State $WRITE(R, v)$ by $p_w$
+	\State $\writeF(R, v, process ID of writer)$
+	\State $h \leftarrow \readF(H_r)$
+	\State $\writeF(H_w, 1-h)$
+	\State
+	\State $READTWICE(R)$ by $p_r$
+	\State $h \leftarrow READ(H_w)$
+	\State $\writeF(H_r, h)$
+	\State $r \leftarrow \readF(R)$
+	\State $r' \leftarrow \readF(R)$
+	\State $h' \leftarrow \readF(H_W)$
+	\If{$r = r'$ and $h = h'$}
+		\State return $True$
+	\Else
+		\State return $False$
+	\EndIf		
+	\end{algorithmic}
+\end{algorithm}
+
+\begin{claim}
+If $READ-TWICE$ return $F$ then either the value of $R$ changed between the two reads of $R$ or the value of $H_w$ changed between the reads of $H_w$.
+\end{claim}
+
+\begin{claim}
+If $READ-TWICE(R)$ returns $True$ then the value of $T$ did not change between the two reads of $R$.
+\end{claim}
+\begin{proof}
+Suppose that $READ-TWICE(R)$ returns $True$ and $r = r'$ and $h = h'$. If you think about it a little bit you see that it is impossible to have some writes between the two reads. Every time a write occurs the writer will force $H_w$ to differ from $H_r$. Since only $w$ can write to $H_w$ there is no way that $H_w = H_r$ until $r$ successfully finished a write. Thus the reader can detect any writes that occurred.  
+\end{proof}
+
+The way to extend this construction to $n$ processes who behave as readers and writers is to have such a pair of bits for every pair of process (actually you want two pair for process pair since both might want to be readers and writers).
+
+\subsection{Handshaking (AW 10.3.1)}
+Actually we already saw an implementation of handshaking from the above involving registers. This idea can be further implemented to Atomic-Snapshot objects to remove the need of the sequence numbers.  
+
+\end{document}

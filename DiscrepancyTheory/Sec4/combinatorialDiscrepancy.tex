@@ -91,6 +91,8 @@
 \newcommand\disc{\mathsf{disc}}
 \newcommand\A{\mathcal{A}}
 \newcommand\SSet{\mathcal{S}}
+\newcommand\herdisc{\mathsf{herdisc}}
+\newcommand\lindisc{\mathsf{lindisc}}
 
 \DeclarePairedDelimiter\ceil{\lceil}{\rceil}
 \DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
@@ -143,18 +145,96 @@ Let $(X, \SSet)$ be a set system on a finite set. Let the elements of $X$ be $x_
 
 Let coloring $\chi: X \rightarrow \{-1, 1\}$ be regarded as the column vector $(\chi(x_1), \chi(x_2), ..., \chi(x_n))^T \in \R^n$. The product $A_{\chi}$ is the row vector $(\chi(S_1), \chi(S_2), ..., \chi(S_m)) \in \R^m$. We can rewrite the definition of discrepancy of $\SSet$ to be
 \[\disc(\SSet) = \min_{x \in \{-1,1\}^n} \norm{Ax}_{\infty} \]
-where the norm $\norm{y}_{\infty}$ of a vector $y$ is defined to be its maximum element.
+where the norm $\norm{y}_{\infty}$ of a vector $y$ is defined to be its maximum element. Notice here that what we have is essentially a matrix multiplication. Your resulting vector contains the chromatic number of each set.
+
+Next we need to recall the definition of $\disc_p$ from chapter 1:
+\[\disc_p(\chi, \SSet) = \left( \frac{1}{| \SSet |}\sum_{S \in \SSet} |\chi(S)|^p \right)^{1/p} \]
+in particular we will need the instance when $p = 2$ because
+\[\disc_2(\SSet) = \left( \frac{1}{| \SSet |}\sum_{S \in \SSet} |\chi(S)|^2 \right)^{1/2} = \frac{1}{\sqrt{m}}\cdot \min_{x \in \{-1, 1\}^n} \norm{Ax}.\]
+The linear algebra fact that $\norm{Ax}^2 = (Ax)^T(Ax) = x^T(A^TA)x$ comes in handy soon.
 
 \begin{definition}
 A \textbf{Hadamard Matrix} is an $n\times n$ matrix $H$ with entries $\pm 1$ such that any two distinct columns are orthogonal i.e. $H^TH = nI$ where $I$ is the $n\times n$ identity matrix. One convention is to assume that the first column of $H$ consists of all ones.
 \end{definition}
 
-Note $H$ does not exist for every $n$. Simple requirements include $n$ must be even but the existence problem for $H$ is not yet solved. 
+Side note $H$ does not exist for every $n$. Simple requirements include $n$ must be even but the existence problem for $H$ is not yet solved. 
 
 \begin{proposition}
 \textbf{(Hadamard set system).} Let $H$ be an $n\times n$ Hadamard matrix and $\SSet$ be the set system with incident matrix $A = \frac{1}{2}(H + J)$ where $J$ is the $n\times n$ all ones matrix. Then 
 \[\disc(\SSet) \geq \disc_2(\SSet) \geq \frac{\sqrt{n-1}}{2}.\]
 \end{proposition}
+\begin{proof}
+Ok, linear algebra incoming. Observe that
+\[A^TA = \frac{1}{4}\left( H + J \right)^T\left( H + J \right) = \frac{1}{4}\left(  nI + nJ + nR + nR^T\right)\]
+where $R$ is the $n\times n$ matrix whose first row is all ones and the rest of the matrix is all zeros. Now lets put back the $x^T$, $x$, and the $1/n$ (used to be a $1/m$ in the above side note but here $m = n$ since $A$ is square):
+\begin{align*}
+\frac{1}{n}x^T(A^TA)x &= \frac{1}{4}\left( \sum_{i=1}^{n}x_i^2 + 2x_1\left( \sum_{i=1}^{n}x_i \right) + \left( \sum_{i=1}^{n} x_i \right)^2 \right)\\
+&= \frac{1}{4}\left(  \sum_{i=2}^{n}x_i^2 + (2x_1 + x_2 + \cdots + x_n)^2\right) \\
+&\geq  \frac{1}{4}\left( \sum_{i=2}^{n}x_i^2 \right) = \frac{n-1}{4}.
+\end{align*}
+After applying Spencer's upper bound (from) above, you get the inequality that you want. 
+\end{proof}
+
+\begin{theorem}
+\label{thm:eigbounddisc}
+\textbf{(Eigenvalue bound for discrepancy.)} Let $(\SSet, X)$ be a system of $m$ sets on an $n$-point set, and let $A$ denote its incidence matrix. Then 
+\[\disc(\SSet) \geq \disc_2(\SSet) \geq \sqrt{\frac{n\lambda_{min}}{m}}\]
+\end{theorem}
+
+\section{Hereditary and Linear Discrepancy}
+\begin{definition}
+The \textbf{hereditary discrepancy} of a set system $\SSet$ taken over a ground set $X$ is
+\[\herdisc(\SSet) = \max_{Y \subset X} \disc(\SSet|_{Y}).\]
+It should be easy to see that $\herdisc(\SSet) \geq \disc(\SSet)$. In-fact, by the way it is defined, hereditary discrepancy avoids the issue of \emph{bad} ground sets so can be a good measure of complexity for the set system.
+\end{definition}
+
+\begin{definition}
+On a related note: \textbf{linear discrepancy} of $\SSet$ is a form of discrepancy arising from the rounding problem. If each point $x \in X$ has weight $w(x) \in [-1, 1]$, now we want to color the points $\pm 1$ such that $\chi(S)$ is close to the sum of the weights of points in $S$ for every $S \in \SSet$.
+\[\lindisc(A) = \max_{w\in [-1,1]^n} \min_{x \in \{-1, 1\}^n} \norm{A(x-w)}_{\infty}\]
+for incidence matrix $A$. Again it should be easy to see that $\lindisc(A) \geq \disc(A)$ since $\disc(A) = \min_{x \in \{-1, 1\}^n} \norm{Ax}_{\infty}$. 
+\end{definition}
+
+Though there does not seem to be a large connection between $\herdisc$ and $\lindisc$ we have the following relationship:
+\begin{theorem}
+For any set system $\SSet$, 
+\[\lindisc(\SSet) \leq 2\herdisc(\SSet).\]
+The above remains true if we replace the set system with an incidence matrix $A$.
+\end{theorem}
+\begin{proof}
+Before we can go through with the proof, we actually need some geometric intuition of the three different types of discrepancies. Let $A$ be an $m \times n$ incidence matrix and define 
+\[U_{A} = \{x \in \R^n: \norm{Ax}_{\infty} \leq 1\}.\]
+Observe that $U_A$ is some symmetric convex polyhedron about the origin which contain all real colorings of the $n$ points such that the discrepancy is less than one. Generally, each row of the incidence matrix can be though of as a pair of constraints bounding the coloring to be less than one, but also greater than $-1$.
+
+Next observe that for any $x \in \R^n$, $\norm{Ax}_{\infty} = \min\{t \geq: x \in tU_A\}$ since $U_A$ is the unit bounding region for the solution and you need to scale up by $\norm{Ax}_{\infty}$ for the bounding region to contain $x$. Thus $\disc(A)$ can be restated as the smallest value of $t$ such that $tU_A$ contains a vertex of the cube $[-1, 1]^n$. Note a vertex of the cube represents a valid coloring. Alternatively, we could shift this whole arrangement from the origin to each vertex $a \in \{-1, 1\}^n$ of the cube and ask for the smallest $t$ such that $tU_A + a$ contains the origin.
+
+Thus the geometric interpretation of $\disc(A)$, $\herdisc(A)$, and $\lindisc(A)$ are
+\begin{enumerate}
+\item $\disc(A)$ is the first moment when the growing polytopes first encloses the origin (the reason for this is discussed above).
+\item $\herdisc(A)$ is the first moment that for each face $F$ of the cube (of every dimension), the center of $F$ is covered by some bodies centered at the vertices of $F$. Note that the center of $F$ corresponds to setting some $x \in X$ to be $0$ i.e. do not worry about coloring some subset of $X$. This corresponds precisely with coloring a subset of $X$. 
+\item $\lindisc(A)$ is the first moment when the whole cube is covered. Consider what it means for a point in the cube to be covered by the growing polytopes. It means that there is a $\pm 1$ coloring $a$ of the elements of $X$ (each coloring is a vertex of the cube) such that there infinity norm is contain with in $tU_A + a$ (described above). Since linear discrepancy is concerned with rounding, all points are covered. 
+\end{enumerate}
+See page $111$ of the book for an illustrative picture.
+
+Lets see if we can get anything out of this proof. In light of the geometry, we show that if $U$ is a closed convex body such that $\cup_{a \in \{-1,1\}^n}(U + a)$ covers all the points of $\{-1, 0, 1\}^n$ then the set $C = \cup_{a\in \{-1,1\}^n}(2U + a)$ covers the whole cube. This should be pretty reasonable if you consider the two dimensional case. 
+
+Hum... they prove this in quite a round about way. First they divide the cube into a grid and induct on the length of one edge of the grid i.e. grid size $1, 1/2, 1/2^2, ..., 1/2^k$ and induct on $k$. I think you can manage.   
+\end{proof}
+
+\subsection{Lower Bound in Terms of Determinants}
+\begin{theorem}
+\label{thm:herdisBDdet}
+For any set system $\SSet$,
+\[\herdisc(\SSet) \geq \frac{1}{2}\max_{k}\max_{B}|\det(B)|^{1/k},\]
+where $B$ ranges over all $k \times k$ sub-matrices of the incident matrix of $\SSet$.
+\end{theorem}
+\begin{proof}
+Use $\lindisc(\SSet) \leq 2\herdisc(A)$ and Lemma \ref{lem:lindisBDdet}.
+\end{proof}
+
+\begin{lemma}
+\label{lem:lindisBDdet}
+If $A$ is an $n \times n$ matrix, then $\lindisc(A) \geq |\det(A)|^{1/n}$. 
+\end{lemma}
 \begin{proof}
 
 \end{proof}

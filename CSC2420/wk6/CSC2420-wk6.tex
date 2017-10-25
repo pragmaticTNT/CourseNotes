@@ -1,0 +1,155 @@
+%
+% This is a borrowed LaTeX template file for lecture notes for CS267,
+% Applications of Parallel Computing, UCBerkeley EECS Department.
+% Now being used for the Coursera cryptography course, part one.
+%
+
+\documentclass[twoside]{article}
+\setlength{\oddsidemargin}{0.25 in}
+\setlength{\evensidemargin}{-0.25 in}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textwidth}{6.5 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+
+%
+% ADD PACKAGES here:
+%
+
+\usepackage{amsmath,amsfonts,amssymb, graphicx}
+\usepackage{color}
+\usepackage{comment}
+\usepackage{mathtools}
+
+%
+% The following commands set up the lecnum (lecture number)
+% counter and make various numbering schemes work relative
+% to the lecture number.
+%
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf CSC2420: Algorithm Design, Analysis and Theory
+	\hfill Fall 2017} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill Lecture #1: #2  \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { {\it Lecturer: #3 \hfill Scribe: #4} }
+      \vspace{2mm}}
+   }
+   \end{center}
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+
+   %{\bf Note}: {\it LaTeX template courtesy of UC Berkeley EECS dept.}
+
+   %{\bf Disclaimer}: {\it These notes have not been subjected to the
+   %usual scrutiny reserved for formal publications.  They may be distributed
+   %outside this class only with the permission of the Instructor.}
+   \vspace*{4mm}
+}
+%
+% Convention for citations is authors' initials followed by the year.
+% For example, to cite a paper by Leighton and Maggs you would type
+% \cite{LM89}, and to cite a paper by Strassen you would type \cite{S69}.
+% (To avoid bibliography problems, for now we redefine the \cite command.)
+% Also commands that create a suitable format for the reference list.
+\renewcommand{\cite}[1]{[#1]}
+\def\beginrefs{\begin{list}%
+        {[\arabic{equation}]}{\usecounter{equation}
+         \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+         \setlength{\labelwidth}{1.6truecm}}}
+\def\endrefs{\end{list}}
+\def\bibentry#1{\item[\hbox{[#1]}]}
+
+%Use this command for a figure; it puts a figure in wherever you want it.
+%usage: \fig{NUMBER}{SPACE-IN-INCHES}{CAPTION}
+\newcommand{\fig}[3]{
+			\vspace{#2}
+			\begin{center}
+			Figure \thelecnum.#1:~#3
+			\end{center}
+	}
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+% **** IF YOU WANT TO DEFINE ADDITIONAL MACROS FOR YOURSELF, PUT THEM HERE:
+
+\newcommand\Z{\mathbb{Z}}
+
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+\DeclarePairedDelimiter\anglebrac{\langle}{\rangle}
+
+\begin{document}
+%\lecture{**LECTURE-NUMBER**}{**DATE**}{**LECTURER**}{**SCRIBE**}
+\lecture{6}{Randomized Algorithms}{Allan Borodin}{Lily Li}
+\section{From Last Time...}
+Recall the $\{0,1\}$-metric labeling problem is $\mathsf{NP-Hard}$ for three or more labels.
+
+Next consider an IP/LP relation solution for the makespan problem in the unrestricted machine model. We can use the indicator variables $x_{ij}$ to say if job $b_i$ has been put on machine $h_j$ or not. Further you have $1 \geq x_{ij} \geq 0$ and $\sum x_{ij} \leq T$ for the maximum makespan $T$ on any machine. The exact solution is integral. The relation allows any real value between $0$ and $1$. However you should be able to see that the integrality gap could be as bad as possible.
+
+Concluding remarks for LP rounding. Note that the integrality gap is in relation to the LP formulation so it may help to add more constraints. This shrinks the poly-tope. One useful technique is the LS lift and project method.  
+
+\section{Duality}
+(In terms of LPs) The dual of a primal maximization instance is the dual minimization instance and vice versa. Consider the following example:
+\begin{example}
+Recall the set cover problem in its IP/LP formulation:
+\begin{align*}
+&\mbox{minmize } \sum_{j} w_jx_j\\
+&\mbox{subject to } \sum_{j: e_i \in S_j} x_j \geq 1 \mbox{ for all }i; \quad e_i \in U\\ 
+&x_j \in \{0,1\} \quad(x_j \geq 0)
+\end{align*}
+Now consider its dual:
+\begin{align*}
+&\mbox{maximize } \sum_{i} y_i\\
+&\mbox{subject to } \sum_{i: e_i \in S_j} y_i \leq w_j \mbox{ for all }j\\ 
+&y_i \geq 0
+\end{align*}
+
+It is a fact that the optimal value for the primal is the same as the dual if both exist and are finite. 
+\end{example}
+
+The \textbf{Weak Duality} for a minimization problem is: that if $x$ and $y$ are primal and dual solutions respectively then $\mathcal{D}(y) \leq \mathcal{P}(x)$. 
+
+\section{Randomized Algorithms}
+Problems in randomized poly-time not known to be in poly-time:
+\begin{enumerate}
+\item Symbolic determinant.
+\item Given $n$ find prime in $[2^n, 2^{n+1}]$.
+\item Estimating volume of a convex body given by a set of linear inequalities. 
+\item Solving a quadratic equation in $\Z_p[x]$.  
+\item Polynomial Identity Testing (via Schwartz Zipple)
+\end{enumerate}
+
+\subsection{Naive Application}
+Consider the example of $\mathsf{Max-k-SAT}$. When we are talking about approximations here we are going to use fractional ratios $c < 1$ (what $c \cdot P_{OPT}$ of the clauses can you cover, where $P_{OPT}$ is the maximum number of clauses coverable given any assignment).
+
+Naive randomized approximation algorithm? Randomly assign value the variables! Suppose we are just consider exact $\mathsf{k-SAT}$. Each clause has probability $1 - \frac{1}{2^k}$ of being satisfied.   
+
+\end{document}

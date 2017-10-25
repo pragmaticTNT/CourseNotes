@@ -1,0 +1,141 @@
+%
+% This is a borrowed LaTeX template file for lecture notes for CS267,
+% Applications of Parallel Computing, UCBerkeley EECS Department.
+% Now being used for the Coursera cryptography course, part one.
+%
+
+\documentclass[twoside]{article}
+\setlength{\oddsidemargin}{0.25 in}
+\setlength{\evensidemargin}{-0.25 in}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textwidth}{6.5 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+
+%
+% ADD PACKAGES here:
+%
+
+\usepackage{amsmath,amsfonts,amssymb, graphicx}
+\usepackage{color}
+\usepackage{comment}
+\usepackage{mathtools}
+
+%
+% The following commands set up the lecnum (lecture number)
+% counter and make various numbering schemes work relative
+% to the lecture number.
+%
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf CSC2420: Algorithm Design, Analysis and Theory
+	\hfill Fall 2017} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill Lecture #1: #2  \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { {\it Lecturer: #3 \hfill Scribe: #4} }
+      \vspace{2mm}}
+   }
+   \end{center}
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+
+   %{\bf Note}: {\it LaTeX template courtesy of UC Berkeley EECS dept.}
+
+   %{\bf Disclaimer}: {\it These notes have not been subjected to the
+   %usual scrutiny reserved for formal publications.  They may be distributed
+   %outside this class only with the permission of the Instructor.}
+   \vspace*{4mm}
+}
+%
+% Convention for citations is authors' initials followed by the year.
+% For example, to cite a paper by Leighton and Maggs you would type
+% \cite{LM89}, and to cite a paper by Strassen you would type \cite{S69}.
+% (To avoid bibliography problems, for now we redefine the \cite command.)
+% Also commands that create a suitable format for the reference list.
+\renewcommand{\cite}[1]{[#1]}
+\def\beginrefs{\begin{list}%
+        {[\arabic{equation}]}{\usecounter{equation}
+         \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+         \setlength{\labelwidth}{1.6truecm}}}
+\def\endrefs{\end{list}}
+\def\bibentry#1{\item[\hbox{[#1]}]}
+
+%Use this command for a figure; it puts a figure in wherever you want it.
+%usage: \fig{NUMBER}{SPACE-IN-INCHES}{CAPTION}
+\newcommand{\fig}[3]{
+			\vspace{#2}
+			\begin{center}
+			Figure \thelecnum.#1:~#3
+			\end{center}
+	}
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+% **** IF YOU WANT TO DEFINE ADDITIONAL MACROS FOR YOURSELF, PUT THEM HERE:
+
+\newcommand\E{\mathbb{E}}
+\newcommand\F{\mathcal{F}}
+\newcommand\NP{\mathsf{NP}}
+
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+\DeclarePairedDelimiter\anglebrac{\langle}{\rangle}
+
+\begin{document}
+\lecture{5}{Local Search}{Allan Borodin}{Lily Li}
+
+\section{Continuing from Last Time...}
+Maximum independent set in $k+1$ claw free graphs using local search. Apparently we do better if the graph is undirected. And there are two variants of the local search: oblivious and non-oblivious (dependent on a potential function). One possible potential function is: small heavy edges are preferable to light edges (you need to pick fewer vertices to get the same weight). Thus his potential function is just the sum of the square of the weights obtained.
+
+\section{Max Flow}
+\subsection{Ford Fulkerson}
+A flow network $\F = (G, s, t,c)$ consisting of a \textbf{bi-directional} graph $G = (V, E)$, $s$ is source, $t$ is terminal and $c$ is non-neg real valued capacity. We require: (1) capacity constraint ($f(e) \leq c(e)$), (2) skew symmetry ($f(u,v) = -f(v,u)$), and (3) flow conservation (for all internal node, flow-in equals flow-out).  
+
+The goal is to find the most flow from $s$ to $t$. It uses augmenting paths and is an example of local search (as was previously defined). Basically you always take the $s$-$t$ path with greatest flow (each path is constrained by the edge with least capacity). Update the graph to form a new residual graph. Repeat as long as a there are such $s$-$t$ paths. Do you still remember the max-flow min-cut theorem?
+
+There could be exponentially number of augmenting paths if you are doing things funny. Edmonds and Karp proved the first polynomial algorithm by taking the shortest augmenting path (running time: $O(|V||E|^2)$. Dinitz had something with leveled graphs and blocking flows. Comes out to $O(|V|^2|E|)$. 
+
+The above regards only unweighted edges. This type of graph can be used to solved the bipartite matching problem.
+
+\subsection{Metric Labeling Problem}
+Given graph $G = (V, E)$, a set of labels $L = \{a_1, ..., a_r\}$ in a metric space $M$ with distance $\gamma$ and cost function $\kappa$. The goal is to construct an assignment $\alpha$ of the labels to the nodes to minimize some cost of mis-labeling (want close vertices to have similar labels, but can't just label everything the same).
+
+\subsection{Application of Min-cut Max-flow}
+Arkin-Silverberrg reduction of Weighted Interval Scheduling Problem (WISP) to a min-cost flow problem. Achieves $O(n\log n)$ (independent of the number of machines $m$, unlike DP techniques). 
+
+
+\section{Linear Programming}
+... most often solved by some variant of the simplex method. You will recall that IP is an $\NP$-Hard problem. There are polynomial time algorithm for LP using the ellipsoid and interior points method.
+
+\subsection{Weighted Vertex Cover}
+We can formulated the weighted vertex cover problem as an IP. Then we relax our problem to an LP and solve. Finally we take our LP solution (where $0 \leq x_i \leq 1$) for each variable and round to a valid IP solution. This results in a 2-approximation for the optimum IP solution.
+
+
+\end{document}

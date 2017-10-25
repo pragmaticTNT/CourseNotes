@@ -1,0 +1,179 @@
+%
+% This is a borrowed LaTeX template file for lecture notes for CS267,
+% Applications of Parallel Computing, UCBerkeley EECS Department.
+\documentclass[twoside]{article}
+\setlength{\oddsidemargin}{0.25 in}
+\setlength{\evensidemargin}{-0.25 in}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textwidth}{6.5 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+
+%
+% ADD PACKAGES here:
+%
+
+\usepackage{amsmath,amsfonts,amssymb, graphicx}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{color}
+\usepackage{comment}
+\usepackage{mathtools}
+
+%
+% The following commands set up the lecnum (lecture number)
+% counter and make various numbering schemes work relative
+% to the lecture number.
+%
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf CSC2221: Introduction to Distributed Computing
+	\hfill Fall 2017} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill Lecture #1: #2  \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { {\it Lecturer: #3 \hfill Scribe: #4} }
+      \vspace{2mm}}
+   }
+   \end{center}
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+   \vspace*{4mm}
+}
+\renewcommand{\cite}[1]{[#1]}
+\def\beginrefs{\begin{list}%
+        {[\arabic{equation}]}{\usecounter{equation}
+         \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+         \setlength{\labelwidth}{1.6truecm}}}
+\def\endrefs{\end{list}}
+\def\bibentry#1{\item[\hbox{[#1]}]}
+
+\newcommand{\fig}[3]{
+			\vspace{#2}
+			\begin{center}
+			Figure \thelecnum.#1:~#3
+			\end{center}
+	}
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+% **** IF YOU WANT TO DEFINE ADDITIONAL MACROS FOR YOURSELF, PUT THEM HERE:
+
+\newcommand\N{\mathbb{N}}
+\newcommand\READ{\mathsf{read}}
+\newcommand\INC{\mathsf{inc}}
+\newcommand\WRITE{\mathsf{write}}
+
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+\DeclarePairedDelimiter\anglebrac{\langle}{\rangle}
+
+\begin{document}
+\lecture{5}{Linearizability}{Faith Ellen}{Lily Li}
+
+\section{From Last Time...}
+An implementation of an object $O$ is \textbf{linearizable} if for every admissible execution, there is a linearization $\pi$ of the completed operation on $O$ and some subset of the pending operations on $O$ such that the response to each operation in the execution is the same as in $\pi$ and if the response of the op occurs before the invocation of op' in the execution then op occurs before op' in $\pi$.
+
+\begin{theorem}
+\label{thm:composition}
+If an object of type $T$, shared by $n$ processors, can be implemented (in a linearizable way --- assumed) using only objects from type $S$ and there is a problem $P$ which can be solved by $n$ processors using objects $S \cup \{T\}$. Then $P$ can be solved in a system of $n$ processors using objects of type $S$ only.
+\end{theorem}
+
+\begin{definition}
+(Alternative definition of $\pi$, above.) Each completed operation and some subset of the pending operations gets assigned a linearization point in its execution interval.
+\end{definition}
+
+Note: \textbf{wait-free} for $n$ processors is equivalent to $(n-1)$-resilient.
+
+\begin{theorem}
+There is no wait-free implementation of a Test$\&$Set object shared by two processors using only registers.
+\end{theorem}
+\begin{proof}
+If there were a wait-free implementation of Test$\&$Set object shared by two processors using only registers then there is a wait-free $2$-consensus algorithm for two processors by Theorem \ref{thm:composition}. But this is impossible (by valency arguments from last week).
+\end{proof}
+
+\begin{theorem}
+\label{thm:B15.5} If the consensus number of $X$ is $m$ and consensus number of $X'$ is $n > m$, there is no wait-free simulation of $X'$ with $X$ and read/write registers in a system with more than $m$ processors.
+\end{theorem}
+\begin{proof}
+Suppose, for a contradiction, that there exists a simulation of $X'$ using only $X$ and read/write registers in a network with $k > m$ processors. Let $l = \min\{k, n\}$. Then there exists such a simulation in a network with $l$ processors (if $l < k$ then just add $k-l$ dummy processors). Since the algorithm only uses $X$ objects and read/write registers, the consensus number of $X$ is $> l$. This is a contradiction. 
+\end{proof}
+
+\section{Implementation of Useful Objects (From Registers)}
+\subsection{Counter}
+The set of possible values is $\N$. The initial value is zero. Operation allowed are: $\READ (R)$ (reads the value of $R$) and $\INC (R)$ (increments the value in $R$ and returns an acknowledgement). See Algorithm \ref{pseudocode:Counter}.
+
+Since each call to $\INC$ only increments the sum by 1, there exists a point between to invocations of $\INC$ which exactly corresponds to the expected value of any $\READ$ call. Note that this implementation does not work when we are allowed to increment by arbitrary values. This is because the incrementation order may differ from the read order. Another possibility that you can think about is if both increment and decrement are allowed. Would this object be linearizable?
+
+\begin{algorithm}
+	\caption{Counter Implementation from Registers.}
+    \label{pseudocode:Counter}
+    \begin{algorithmic}[1]
+    \State $\INC(c)$
+    \State $y \leftarrow \READ(x_i)$
+    \State $x_i \leftarrow \WRITE(y + 1)$ \# Here is were need the linearization points.
+    \State
+    \State $\READ()$
+    \State $y \leftarrow 0$
+    \State $y \leftarrow y + x_i$ for all $i = 0, ..., n$
+    \State return $y$
+    \end{algorithmic}
+\end{algorithm}
+
+\section{Large (L-bit) Single-writer Register}
+Note that the naive representation is not linearizable (why?). Instead we will use a tree with $2^L$ leaves. Further each internal node will store a bit (zero means left child and one means a right child); technically we use a heap instead of tree but that's just a technicality. $\READ$ follows the internal nodes to a leaf and returns the value of the leaf. $\WRITE(v)$ starts at the desired leaf and switches the nodes along its path to the root.
+
+\emph{Wait!} There is a problem. Can you see it? (Consider the following sequence of operations: $\WRITE(2)$, $\WRITE(1)$, and two reads, one which read a $1$ and the second which reads a $2$.) 
+
+\begin{definition}
+A register is \textbf{regular} if the value returned by each $\READ$ is either the value written by the last $\WRITE$ completed before the $\READ$ began (or initial value if there were no writes) or the value written by a $\WRITE$ operation concurrent with the $\READ$.
+
+Note that \emph{linearizable} is a stronger notion than \emph{regular}. 
+\end{definition}
+
+\begin{claim}
+This (the above) is a regular implementation of a register. 
+\end{claim}
+\begin{proof}
+Consider a $\READ$, $R$. There are two cases: (1) either $R$ only reads nodes before they get written to or (2) $R$ reads some node which has been written to. In case (1), $R$ must read a $0$ and further all writes must finish after $R$ reads (do you see why?).
+
+In case (2) let $w$ be the last $\WRITE$ such that one of the nodes $v$ that $R$ reads is written by $w$ prior to $R$ reading $v$. Why don't $\WRITE$ operations over-lap? Two more cases! (a) Suppose that the child of $v$ is some internal $v'$ and that $w$ wrote in $v$ pointing to $v'$. Then $w$ must have already written to $v'$ (this is subtle, do you see why?). Continue this argument down the tree until we get to case (b), the child of $v$ that $w$ wrote in $v$ is a leaf. Thus $R$ return the value written by $w$.
+
+Notice that we cannot have a write that occurs after $w$ and before $R$ began (why?). Thus $R$ read the appropriate value as required.   
+\end{proof}
+
+So the above structure is not linearizable. Let us see what we can do to change that (hint: let us add more information into the tree). In particular we will now build a tree with $\binom{n}{2} \cdot 2^L$ leaves. $\READ$ operations will be as before. $\WRITE$ will change as follows: let $v'$ be the old value and $v$ be the new value. Find the node $p$ in the second to last level such $v'$ and $v$ are the value of the children of $p$. We will perform \emph{two} of our usual write operations. Suppose that the current node on the second to last level is $p'$. In the first write we will update the path from $p'$'s $v'$ to $p$'s $v'$. In the second write we will update $p$'s $v'$ to $p$'s $v$. Observe that this is an atomic operation. We will put our linearization point for the write operation here. 
+
+To show that this is correct suppose that $R$ (that the $\READ$ operation) returns the value $a$. If there is a write $w$ of $a$ linearized to within the execution interval of $R$, then simply linearize $R$ to be sometime after the linearization point of $w$ in the execution interval.
+
+Otherwise we can argue that the write $w$ which wrote $a$ must have been the last write before the start of $R$ and that all other writes have their linearization points after $R$ has terminated.
+
+\section{Homework}
+Bounded counter using bounded registers (the size of the register can be some function of the bound).
+\end{document}

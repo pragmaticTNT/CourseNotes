@@ -120,7 +120,7 @@ Suppose each processor $p_i$ has special state components:  the input $x_i$, the
 \begin{enumerate}
 \item[Termination:] In every admissible execution $y_i$ is eventually assigned a value for any non-faulty processor $p_i$.
 \item[Agreement:] if $y_i$ and $y_j$ are assigned, then $y_i = y_j$, for all non-faulty processors $p_i$ and $p_j$.
-\item[Validity:] The output is an input for some processor. 
+\item[Validity:] The output is an input for some processor. More precisely, every processor gets an input of $v$ then the output of all processors should be $v$.  
 \end{enumerate}
 At termination we want all processes which have not crashed to output $y_i$. This is the liveness condition. Agreement and validity are safety conditions. All three are needed for the consensus to be interesting. If you only have two out of the three, there exists a trivial algorithm. 
 

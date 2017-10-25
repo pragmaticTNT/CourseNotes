@@ -1,0 +1,249 @@
+%
+% This is a borrowed LaTeX template file for lecture notes for CS267,
+% Applications of Parallel Computing, UCBerkeley EECS Department.
+\documentclass[twoside]{article}
+\setlength{\oddsidemargin}{0.25 in}
+\setlength{\evensidemargin}{-0.25 in}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textwidth}{6.5 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+
+%
+% ADD PACKAGES here:
+%
+
+\usepackage{amsmath,amsfonts,amssymb, graphicx}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{color}
+\usepackage{comment}
+\usepackage{mathtools}
+
+%
+% The following commands set up the lecnum (lecture number)
+% counter and make various numbering schemes work relative
+% to the lecture number.
+%
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf CSC2221: Introduction to Distributed Computing
+	\hfill Fall 2017} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill Lecture #1: #2  \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { {\it Lecturer: #3 \hfill Scribe: #4} }
+      \vspace{2mm}}
+   }
+   \end{center}
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+   \vspace*{4mm}
+}
+\renewcommand{\cite}[1]{[#1]}
+\def\beginrefs{\begin{list}%
+        {[\arabic{equation}]}{\usecounter{equation}
+         \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+         \setlength{\labelwidth}{1.6truecm}}}
+\def\endrefs{\end{list}}
+\def\bibentry#1{\item[\hbox{[#1]}]}
+
+\newcommand{\fig}[3]{
+			\vspace{#2}
+			\begin{center}
+			Figure \thelecnum.#1:~#3
+			\end{center}
+	}
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+% **** IF YOU WANT TO DEFINE ADDITIONAL MACROS FOR YOURSELF, PUT THEM HERE:
+
+\newcommand\E{\mathbb{E}}
+\newcommand\comp{\mathsf{comp}}
+\newcommand\pref{\mathsf{pref}}
+
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+\DeclarePairedDelimiter\anglebrac{\langle}{\rangle}
+
+\begin{document}
+\lecture{3}{Byzantine Fault Consensus}{Faith Ellen}{Lily Li}
+
+\section{From Last Week}
+We looked at synchronous model with crash failures. Now we will look at asynchronous model with crash failures. It is a bit more difficult for us to tell when a processor crashed as opposed to it running really slow. Generally we say a processor \textbf{crashed in an infinite execution} if it only have finitely many execution steps and the last step is not is terminating step. As before,  when a process crashed a subset of its sent messages get put on the out buffer.
+
+\begin{theorem}
+(FLP) It is impossible to solve $1$-resilient binary consensus in an asynchronous message passing system.
+\end{theorem}
+\begin{proof}
+(This follows closely the original proof in the paper.) The theorem follows from Lemma \ref{lem:initialBivalent} and Lemma \ref{lem:noCritMod}. Use the first lemma to start a bivalent configuration. Repeated apply the second lemma to the longest pending process. This gives an infinite bivalent execution.
+\end{proof}
+
+\begin{lemma} 
+\label{lem:initialBivalent}
+A binary consensus algorithm has an initial bivalent configuration.  
+\end{lemma}
+
+\begin{definition}
+A \textbf{critical configuration} is a multivalent configuration where all next step moves turns the system into a univalent configuration.
+\end{definition}
+
+\begin{lemma}
+\label{lem:noCrit}
+No binary consensus algorithm has a critical configuration.
+\end{lemma}
+\begin{proof}
+By contradiction. Suppose $C$ is a critical configuration. Then there is some $s_0$ that leads to a $0$-valent config. and $s_1$ which leads to a $1$-univalent configuration. Suppose that $s_0$ and $s_1$ are both computation events by different processes then the processes commute and we have a contradiction. This is the same thing that happens when you have two delivery events or one comp and one deliver but the message gets delivered to someone else. You only need to consider a $\comp(i)$ event and a delivery event to process $p_i$. 
+
+Welp, we are $1$-resilient so you just sort of \emph{crash} process $i$ (I say sort of since the adversary doesn't really say any process crashed, it just slows $p_i$ down). The algorithm must still terminate so $s_0$ followed by $s_1$ needs to output $0$ (remember $s_0$ is one univalent). Since this is indistinguishable to all other processors as $s_1$ followed by $s_0$ that must output $0$ as well. But $s_1$ is $1$-valent, contradiction.  
+\end{proof}
+
+\begin{lemma}
+\label{lem:noCritMod}
+Let $C$ be a multivalent configuration and let $s$ be a step that can be performed in $C$ then there is a finite execution starting at $C$ and ends at $s$. That ends in a multivalent configuration.
+\end{lemma}
+\begin{proof}
+Note that the above lemma is not strong enough to prove the theorem (not the one we are currently proving)! We need \emph{finite} executions! Suppose all executions ending in $s$ are univalent. WLOG $Cs$ is $0$-univalent. Since $C$ is bivalent there must be some other execution which ends up being $1$-univalent. If this execution contains $s$ then one branch in the tree is $1$ univalent. If not in tree just tack on a $s$ and then add it into the tree. Consider the shortest execution $\gamma$ in the tree which ends in $1$. On the path from $C$ to $s$ via $\gamma$ we have $s'$ followed by $s$. If there is another execution $p$ from $s'$ then $s'$ followed by $p$ must be $0$-univalent (why?). There is a contradiction as before if process $s$ and $s'$ commute. Suppose $s$ and $s'$ do not commute since they are computing and delivering for some processor $p_i$.   
+\end{proof}
+
+\section{Byzantine Agreement}
+\subsection{Formal Model}
+\begin{definition}
+In the execution of an \textbf{$f$-resilient Byzantine system}, there exists a subset of at most $f$ processors (known as the \textbf{faulty} or \textbf{traitor} processors). For each computation step of a faulty processor, the new state and the content of the message sent are unconstrained.
+\end{definition}
+
+\subsection{Consensus Again}
+The definition of consensus under the Byzantine failure model is the same as that of the crash failure model. Note that in the case of validity we need that if all processors get the same input $v$ then the output of all non-faulty processors is $v$. 
+
+First it is a good idea to show a lower bound on the ratio of faulty to non-faulty processors. This makes sense intuitively since too many traitors can sway the vote considerable.
+
+\begin{theorem}
+\label{thm:threePoneB}
+In a system with three processors and one Byzantine processor, there is no algorithm that solves the consensus problem.
+\end{theorem}
+\begin{proof}
+The proof is by contradiction. Suppose there is an algorithm for three processes $p_0$, $p_1$, and $p_2$. In order to see that this doesn't work we will look another situation: consider the cycle $p_0, p_1, p_2, p_0', p_1', p_2'$ where the unprimed processors get $0$ and the primed processors get input $1$. Consider an execution $\alpha$ in this hexagon (which is the same algorithm for the three processor case, we don't expect that it will work). For each processor, the local picture is the same. Consider $p_0$ and $p_1$ with a Byzantine processor $q$. By validity, $p_0$, $p_1$ must output $0$. $q$ will behave like $p_2'$ to $p_0$ and $p_2$ to $p_1$. Similarly for $p_2'$ and $p_1'$ with another Byzantine processor $q'$. Now consider the pair $p_0$ and $p_2'$ with a third Byzantine processor $q"$. What happens?
+\end{proof}
+
+We can generalize the above to the following:
+\begin{theorem}
+\label{thm:threenPonenB}
+In a system with $n$ processors and $f$ Byzantine processors, there is no algorithm that solves the consensus problem if $n \leq 3f$. 
+\end{theorem}
+\begin{proof}
+We will reduce to Lemma \ref{thm:threePoneB}. Again proof by contradiction. We are first going to divide the $n$ processes into three groups each with $\leq f$ processes. We will have $p_0, p_1, p_2$ simulate one of these groups each. At most one of these simulated big nodes is faulty. Well the algorithm still has to work so it has to work in the three node case which we know is impossible.
+\end{proof}
+
+Thus in the forgoing we can assume that fewer than one third of the processors are Byzantine. There are two different algorithms which solve the $f$-resilient Byzantine system for consensus. One has optimal round complexity but exponential bit complexity while the other has twice the round complexity but constant bit complexity.
+
+\subsubsection{Exponential Bit Complexity}
+
+\begin{theorem}
+There is an algorithm that solves the Byzantine Agreement (BA) problem in a complete network in $f+2$ rounds when $f < n/3$ processors are Byzantine.
+\end{theorem}
+\begin{proof}
+Not going to go through this in detail. In the analysis you see the bit complexity is quite bad.
+\end{proof}
+
+\begin{algorithm}
+	\caption{Algorithm for BA in a complete network: code for processor $p_i$.}
+    \label{pseudocode:BAExpBit}
+    \begin{algorithmic}[1]
+    \State Broadcasts input value $u_i$
+    \For{rounds $2, ..., f+1$}
+    	\State Broadcasts all the information it receives in that round
+    \EndFor
+    \State Compute $u_i$ output from all the messages it receives using something like a recursive majority function.
+    \end{algorithmic}
+\end{algorithm}
+
+\subsubsection{Constant Bit Complexity}
+\begin{theorem}
+There is a BA algorithm for a complete network that runs in $2f + 3$ rounds where each message consists of only one input value and tolerates $f < n/4$ Byzantine processors.
+\end{theorem}
+Termination should be pretty obvious. Use Lemma \ref{lem:phasekingValid} to show validity and Lemma \ref{lem:phasekingAgree} to show agreement.
+
+\begin{algorithm}
+	\caption{Phase King Algorithm: code for processor $i$.}
+    \label{pseudocode:BAConstBit}
+    \begin{algorithmic}[1]
+    \State Initialize array $\pref_i$ of length $n-1$.
+    \State $\forall j \neq i$ set $\pref_i[j] \leftarrow 0$.
+    \For{rounds $1, ..., f+1$}
+    	\State do Phase $k$:
+    	\State Round 1:
+    	\State Broadcast $\pref_i[i]$
+    	\State $majority \leftarrow$ majority value in $\pref_i$
+    	\State $multiplicity \leftarrow $ number of times $majority$ appears in $\pref_i$
+    	\If{$i = k$}
+    		\State $p_i$ is the King of phase $k$
+    		\State send $majority$ to all processors
+    	\Else
+    		\State $kingmajority \leftarrow$ value received from King
+    		\If{$multiplicity > n/2 + f$}
+    			\State $\pref_i[i] \leftarrow majority$
+    		\Else
+    			\State $\pref_[i] \rightarrow kingmajority$
+    		\EndIf
+    	\EndIf
+    \EndFor
+    \State output $\pref_i[i]$
+    \end{algorithmic}
+\end{algorithm}
+
+\begin{lemma}
+\label{lem:phasekingValid}
+If all non-faulty processors prefer $v$ at the beginning of phase $k$, then they all prefer $v$ at the end of phase $k$ for all $1 \leq k\leq f+1$.
+\end{lemma}
+\begin{proof}
+During the first part of $k$ phases each non-faulty process gets $\geq n-f$ copies of $v$. This is greater than $3n/4 > f + n/2$ so the multiplicity is greater than $3/4$. Thus all the non-faulty processors set $\pref_i[i]$ to $majority$. 
+\end{proof}
+
+\begin{lemma}
+\label{lem:phasekingAgree}
+Let $g$ be a phase whose king $p_g$ is non-faulty. Then all non-faulty processors finish phase $g$ with the same preference.
+\end{lemma}
+\begin{proof}
+Since $p_g$ is non-faulty it will send $majority_k$ to all other processors during the second round of phase $k$. We will show that for every non-faulty processor $p_i$, $\pref_i[i] = kingmajority_k$. Suppose there exists some non-faulty processor $p_i$ for which $\pref_i[i] = v \neq kingmajority_k$. Then $p_i$ must have gotten $n/2$ messages for $v$ from \emph{non-faulty} processors. But $p_g$ must have gotten more than $n/2$ messages of $v$ as well. Then $kingmajority_k = v$. This is a contradiction.
+\end{proof}
+
+
+\section{Asynchronous Shared Memory System}
+\begin{definition}
+The \textbf{shared memory} communication model has processors which communicate via a common memory area containing a set of \textbf{shared variables}. Here we only consider \textbf{asynchronous shared memory systems}
+
+There are a variety of different types of shared variables including: read/write registers, read-modify-write, test \& set, or compare \& swap. There is further classification according to the number of processors allowed to access a specific variable with a particular operation.
+\end{definition}
+
+
+\section{Homework}
+There is a Byzantine Agreement algorithm that tolerates $f < n/3$ Byzantine faults in a network if and only if the network is $2f + 1$ connected. 
+
+\end{document}
