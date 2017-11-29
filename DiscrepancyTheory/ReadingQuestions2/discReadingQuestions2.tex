@@ -68,7 +68,7 @@
 1.3.2 Let $\K_2$ denote the collection of all closed convex sets in the plane. Show that $D(n, \K_2) = o(n)$ and $\disc(n, \K_2) \geq \frac{n}{2}$.
 \end{problem}
 \emph{Solution.}
-We choose a triangular lattice of points. This obtains a Lebesgue-measure discrepancy of about $\sqrt{n} \in o(n)$ according to the book (page 3). \textcolor{blue}{To show that $\disc(n, \K_2) \geq \frac{n}{2}$ consider the following set of points $P$ in the plane where $|P| = n$. Let $P$ be $n$ points evenly spaced about the circle of radius $\frac{1}{2}$ centered at $\left( \frac{1}{2}, \frac{1}{2} \right)$ within the unit cube. Denote this circle by $C$. By the pigeon hole principle every coloring $\chi$ of $C$ will color one at least $\frac{n}{2}$ of the points of $P$ the same color. Let the closed convex polygon formed by these points be denoted by $G$. Then $|\chi(P \cap G)| \geq \frac{n}{2}$.} 
+We choose a triangular lattice of points. This obtains a Lebesgue-measure discrepancy of about $\sqrt{n} \in o(n)$ according to the book (page 3). To show that $\disc(n, \K_2) \geq \frac{n}{2}$ consider the following set of points $P$ in the plane where $|P| = n$. Let $P$ be $n$ points evenly spaced about the circle of radius $\frac{1}{2}$ centered at $\left( \frac{1}{2}, \frac{1}{2} \right)$ within the unit cube. Denote this circle by $C$. By the pigeon hole principle every coloring $\chi$ of $C$ will color one at least $\frac{n}{2}$ of the points of $P$ the same color. Let the closed convex polygon formed by these points be denoted by $G$. Then $|\chi(P \cap G)| \geq \frac{n}{2}$.
 
 \begin{comment}
 \begin{problem}
@@ -116,7 +116,21 @@ Let $X = Y \cup Z$ where $Y$ and $Z$ are two disjoint sets of size $n$. Let $\SS
 (\emph{linear discrepancy with weights $-1$, $0$, $1$}). Prove that $\lindisc(A) \leq 2\Delta$.
 \end{problem}
 \begin{proof}
+\begin{comment}
 We will show that $\Delta \geq \herdisc(A)$. Then by Theorem 4.6 in the book ($\lindisc(A) \leq 2\cdot \herdisc(A)$), we have that $\lindisc(A) \leq 2\Delta$. First observe that $\Delta \geq \disc(A)$ since $\disc(A) = \min_{x \in \{-1, 1\}^n} \norm{A(x - \mathbf{0})}_{\infty}$ where $\mathbf{0}$ is the zero vector. Next consider $A'$ which consists of a subset of the columns of $A$; this is equivalent to restricting the set system to a subset of the universe $X$. Observe that the colorings $\chi$ forms a bijection with the $n$-dimensional vectors $x$. Let $x = \anglebrac{x_1, x_2, ..., x_n}$. Suppose we wish to restrict to the columns $c_1, c_2,..., c_k$. If we take $w = \anglebrac{w_1, w_2, ..., w_n}$ where $w_{c_i} = 0$ and $w_j = -x_j$, then we have such a restriction. Thus $\Delta \geq \disc(A')$. Since $\Delta$ is greater than or equal to all restrictions of the universe $X$, $\Delta \geq \herdisc(A)$ as required. 
+\end{comment}
+\textcolor{blue}{From our discussion two weeks ago, we observe that the proof of $\lindisc \leq 2\cdot \herdisc$ is essentially the same as that for $\lindisc(A) \leq 2\cdot \Delta$. We will reproduce the proof here in our own words to make sure it sticks. $\Delta$ can be interpreted as the moment when $B = \cup_{a \in \{-1,1\}^n} U+a$ covers the points $w \in \{-1,0,1\}^n$. We claim that at the same moment $C = \cup_{a \in \{-1,1\}^n} 2U+a$ covers all points $x \in [-1,1]^n$. Since $C$ is closed (all boundary points of $C$ are in $C$), we can restrict our attention to the dense set of dyadic rationals of the form $v = \frac{z}{2^k} \in [-1,1]^n$ where $z \in \Z^n$. The base case holds since $B$ covers the points $w$ described above. Consider any point $v = \frac{z}{2^k} \in [-1,1]^n$. Then $2v = \frac{z}{2^{k-1}} \in [-2,2]^n$. There exists $b \in \{-1,1\}^n$ such that $2v-b \in [-1,1]^n$. Since $2v - b = \frac{z + 2^{k-1}b}{2^{k-1}}$, by the induction hypothesis there exists some $a \in \{-1,1\}^n$ such that $2v - b \in U + a$ and $v \in U + \frac{a+b}{2}$ (1). $\frac{a+b}{2} \in \{-1,0,1\}^n$. Since $B$ covers all such points, there exists some $c \in \{-1,1\}^n$ such that $\frac{a+b}{2} \in U + c$. By substituting this into (1) we have
+\[v \in U + (U + c) = 2U + c.\]
+It is important to note that $U$ is convex here. Otherwise it might not be the case that elements of $U$ are closed under addition.}
 \end{proof}
+
+\textcolor{blue}{
+\begin{problem}
+4.3.4 Show that the $1 \times n$ matrix $[1,2,2^2,..., 2^{n-1}]$ has hereditary discrepancy $2^{n-1}$ and linear discrepancy at most $2$. 
+\end{problem}
+\begin{proof}
+(I know you talked about solution to this problem last time, but I just want to write it down to make sure.) Consider the subset of the universe consisting of the element $2^{n-1}$. Coloring this element $\pm 1$ will yield hereditary discrepancy of $2^{n-1}$. Consider any $w \in [0,1]^n$ and let $[1,2,2^2, ..., 2^{n-1}]\cdot w = k \in [0, 2^{n}-1]$. Observe that each of the $2^{n}$ elements of $x \in {-1,1}^n$ yields a distinct integer in the range $\{0,1,..., 2^{n}-1\}$. Thus $[1,2,2^2, ..., 2^{n-1}] \cdot x$ is within distance $1$ to any value $k$. Now if we consider the definition of linear discrepancy where $w \in [-1,1]^n$ and $x \in \{-1,1\}^n$, we see that the linear discrepancy is at most $2$.     
+\end{proof}
+}
 % ===> END ASSIGNMENT
 \end{document}

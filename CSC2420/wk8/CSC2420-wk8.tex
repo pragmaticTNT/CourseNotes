@@ -1,0 +1,134 @@
+%
+% This is a borrowed LaTeX template file for lecture notes for CS267,
+% Applications of Parallel Computing, UCBerkeley EECS Department.
+% Now being used for the Coursera cryptography course, part one.
+%
+
+\documentclass[twoside]{article}
+\setlength{\oddsidemargin}{0.25 in}
+\setlength{\evensidemargin}{-0.25 in}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textwidth}{6.5 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+
+%
+% ADD PACKAGES here:
+%
+
+\usepackage{amsmath,amsfonts,amssymb, graphicx}
+\usepackage{color}
+\usepackage{comment}
+\usepackage{mathtools}
+
+%
+% The following commands set up the lecnum (lecture number)
+% counter and make various numbering schemes work relative
+% to the lecture number.
+%
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf CSC2420: Algorithm Design, Analysis and Theory
+	\hfill Fall 2017} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill Lecture #1: #2  \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { {\it Lecturer: #3 \hfill Scribe: #4} }
+      \vspace{2mm}}
+   }
+   \end{center}
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+
+   %{\bf Note}: {\it LaTeX template courtesy of UC Berkeley EECS dept.}
+
+   %{\bf Disclaimer}: {\it These notes have not been subjected to the
+   %usual scrutiny reserved for formal publications.  They may be distributed
+   %outside this class only with the permission of the Instructor.}
+   \vspace*{4mm}
+}
+%
+% Convention for citations is authors' initials followed by the year.
+% For example, to cite a paper by Leighton and Maggs you would type
+% \cite{LM89}, and to cite a paper by Strassen you would type \cite{S69}.
+% (To avoid bibliography problems, for now we redefine the \cite command.)
+% Also commands that create a suitable format for the reference list.
+\renewcommand{\cite}[1]{[#1]}
+\def\beginrefs{\begin{list}%
+        {[\arabic{equation}]}{\usecounter{equation}
+         \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+         \setlength{\labelwidth}{1.6truecm}}}
+\def\endrefs{\end{list}}
+\def\bibentry#1{\item[\hbox{[#1]}]}
+
+%Use this command for a figure; it puts a figure in wherever you want it.
+%usage: \fig{NUMBER}{SPACE-IN-INCHES}{CAPTION}
+\newcommand{\fig}[3]{
+			\vspace{#2}
+			\begin{center}
+			Figure \thelecnum.#1:~#3
+			\end{center}
+	}
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+% **** IF YOU WANT TO DEFINE ADDITIONAL MACROS FOR YOURSELF, PUT THEM HERE:
+
+\newcommand\E{\mathbb{E}}
+
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+\DeclarePairedDelimiter\anglebrac{\langle}{\rangle}
+
+\begin{document}
+%\lecture{**LECTURE-NUMBER**}{**DATE**}{**LECTURER**}{**SCRIBE**}
+\lecture{8}{New Material}{Nisarg Shah}{Lily Li}
+%\footnotetext{These notes are partially based on those of Nigel Mansell.}
+\section{Online Bipartite Matching}
+We have a fixed set $V$ and an online set $U$. At each step, some $u_i$ arrives and gets matched to an element of $V$, if possible. The naive approach is to pick a random vertex to match for $u_i$. Notice that the resulting matching is maximal (and an is a $1/2$-approximation).
+
+A better algorithm is known as the ranking algorithm: first the $v_i$'s are given a ranking. As the $u_j$'s come in, match $u_j$ to its highest ranked neighbor $v_i$. This algorithm provides a $1 - 1/\epsilon$ approximation. 
+
+Lets go into the proof: First start with an optimal perfect matching $m^*$. Then for a random ordering $\sigma$ of $V$ let $m_\sigma$ be the matching produced by the ranking algorithm. Note two claims: (1) if $v$ of priority $t$ is unmatched, then $u$ (which $v$ gets matched to in $m^*$) must get matched to some higher priority vertex under $\sigma$ and (2)... this is a bit more annoying.
+
+Here is another proof using LP relaxation and duality. The algorithm (Devanur et al) starts with the solution by the ranking algorithm. Then show that the dual solution is better than the optimal solution which is better than the primal. Since the ranking algorithm depends on the randomization $\sigma$ the value is an expectation. Again we have two claims: (too slow!) 
+
+There is actually some setup necessary so you need to get that if you wanted the exact proof. 
+
+\subsection{Better Bounds} 
+We know that for the adversary from above gives a lower bound of $1 - \frac{1}{\epsilon}$. Thus we need to weaken the adversary to improve the bound. Suppose the adversary decides the graph but the distribution of the $u_i$'s i.i.d (with possibly a known non-uniform distribution). This turns out that the ROM model is approximately the same with unknown distribution which is worse than the know distribution model.
+
+\section{Randomization to reduce Running Time}
+
+\subsection{Exact 2-SAT}
+First the deterministic algorithm. This is simple: first satisfy all your unit clauses. What we end up with is a set of two term clauses. From each clause we derive an edge in a directed graph (nodes are all $x$ and $\bar{x}$ for all variables $x$). There is an assignment if there is no path from $x$ to $\bar{x}$ or vice versa. Running time $O(n^3)$. 
+
+Next the random walk 2-$SAT$: (we have seen this result before!) First set every clause to false, then for each clause pick one term and flip it. Observe that the number of satisfied variable changes by one at each step (one closer to the actual assignment $\tau$ or one farther to $\tau$). Notice the probability of improving (getting closer to $\tau$) is no worse than $\frac{1}{2}$. So, imagine a drunkard's walk from some $i \in \{0, ..., n\}$ (think of this as the hamming distance from your current assignment from $\tau$) down to $0$. The expected running time is $O(n^2)$. 
+
+\end{document}

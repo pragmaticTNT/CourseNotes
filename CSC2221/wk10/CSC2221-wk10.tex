@@ -1,0 +1,251 @@
+%
+% This is a borrowed LaTeX template file for lecture notes for CS267,
+% Applications of Parallel Computing, UCBerkeley EECS Department.
+\documentclass[twoside]{article}
+\setlength{\oddsidemargin}{0.25 in}
+\setlength{\evensidemargin}{-0.25 in}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textwidth}{6.5 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+
+%
+% ADD PACKAGES here:
+%
+
+\usepackage{amsmath,amsfonts,amssymb, graphicx}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{color}
+\usepackage{comment}
+\usepackage{mathtools}
+
+%
+% The following commands set up the lecnum (lecture number)
+% counter and make various numbering schemes work relative
+% to the lecture number.
+%
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf CSC2221: Introduction to Distributed Computing
+	\hfill Fall 2017} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill Lecture #1: #2  \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { {\it Lecturer: #3 \hfill Scribe: #4} }
+      \vspace{2mm}}
+   }
+   \end{center}
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+   \vspace*{4mm}
+}
+\renewcommand{\cite}[1]{[#1]}
+\def\beginrefs{\begin{list}%
+        {[\arabic{equation}]}{\usecounter{equation}
+         \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+         \setlength{\labelwidth}{1.6truecm}}}
+\def\endrefs{\end{list}}
+\def\bibentry#1{\item[\hbox{[#1]}]}
+
+\newcommand{\fig}[3]{
+			\vspace{#2}
+			\begin{center}
+			Figure \thelecnum.#1:~#3
+			\end{center}
+	}
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+% **** IF YOU WANT TO DEFINE ADDITIONAL MACROS FOR YOURSELF, PUT THEM HERE:
+
+\newcommand\E{\mathbb{E}}
+
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+\DeclarePairedDelimiter\anglebrac{\langle}{\rangle}
+
+\begin{document}
+\lecture{10}{Miscellaneous}{Faith Ellen}{Lily Li}
+
+\section{Randomized Algorithms}
+
+\begin{definition}
+An algorithm for randomized wait-free consensus must satisfy agreement and validity and before, but also randomized wait-free termination: for a non-faulty process, the expected number of steps is finite (regardless of the behavior of other processes).
+
+Where the expectation is over the sequence of random coin tosses. Let $R$ be a sufficiently long sequences of $\{0,1\}^*$ where the probability of $0$ is $\frac{1}{2}$ and $R_i$ is the $i$-th toss.
+
+Let $A$ be an algorithm, $S$ a scheduler, and $R$ a random sequence $R$. Fixing these three values yields and execution $\alpha_A(S,R)$. Then
+\[\mbox{expected step complexity of }A = \max_{S}\max_{p\in \{0,...,n\}} E_R[\mbox{number of steps by $p$ in $\alpha_{A}(S,R)$}]\]
+
+\[\mbox{expected work of }A = \max_{S}E_R[|\alpha_A(S,R)|]\]
+
+\textbf{Adaptive/strong adversary}: can see everything that has happened so far, including coin flips, but cannot predict future coin flips (coin flips are separate steps). It was shown that we have tight bounds: $\Theta(n^2)$ expected work complexity and $\Theta(n)$ expected step complexity for randomized consensus. 
+
+\textbf{Oblivious adversary}: fixes a sequence of process ids in advance and at each step, the next process in the sequence takes a step.
+
+In between these two extremes you have many different types of \textbf{weak adversaries}.
+\end{definition}
+
+\subsection{End-Zone Algorithm}
+This algorithm achieves $O(n^4)$ expected work against adaptive adversaries using $n+2$ registers. But it more natural to do expected $O(n^2)$ work against an adaptive adversary using $2$ registers and a counter with increment, decrement, and read. 
+
+Just do binary consensus for the time being. Let $R_0$ and $R_1$ be flags indicating the existence of the input value. Both flags are initialized to $0$. The counter $C$ is also initialized to $0$. See pseudo-code \ref{pseudocode:endzone}. 
+
+Observe that validity is quite easy to show. Suppose all the inputs are $0$. Then $R_1$ will always be $0$. Thus the third else-if statement will always be true and all the processes will push the counter past $-2n$. This execution has length $O(n)$.
+
+\begin{lemma}
+\label{lem:reachedendzone}
+If any process reads $\geq 2n$ from $C$, then all subsequent reads will never read $\leq n$. 
+\end{lemma}   
+\begin{proof}
+By contradiction. Consider an execution $\alpha$ that contains a $read(C)$ which returns a value $\geq 2n$. Let $q$ be the process which took this step. Let $\alpha_j$ be the first $read(C)$ which reads $\leq n$ following $\alpha_j$. Since the value of counter $C$ went from $\geq 2n$ down to $\leq n$, there must have been $> n$ decrement operations. This means that there exists a process which decrements twice. Take a look at the code. Observe that between any two decrements by the same process, there must be a $read(C)$. Such a $read(C)$ must return a value $\geq n + 1$ so the process should have incremented.   
+\end{proof}
+
+The lemma holds if you swap $\geq 2n$ for $\leq -2n$ and $\leq n$ for $\geq n$. 
+
+\begin{theorem}
+The expected work is $O(n^2)$.
+\end{theorem}
+\begin{proof}
+In order to make this proof work, we need to define the following value:
+\[U = C + (\mbox{\# processes poised to perform }inc(C)) - (\mbox{\# processes poised to perform  }dec(C)).\]
+Consider the steps in the algorithm that affects $U$: (1) if $read(C)$ return a value between $[n, 2n)$ and $(-2n, n]$ then we will get an $inc(C)$ and $dec(C)$ respectively. (2)$read(R_0)$ in line $8$ and $read(R_1)$ in line $10$ causes an $inc(C)$ and a $dec(C)$ respectively. (3) with probability $\frac{1}{2}$ the coin flip on line $13$ performs $inc(C)$ or $dec(C)$. 
+
+Also observe that there is a small constant $K$ such that among any sequence of $k$ consecutive steps by one process, at least one changes the value of $U$ (this is true since there are quite a few steps which affect $U$).
+\end{proof}
+
+\begin{lemma}
+If $U \geq 3n$ at some configuration $S$, then every process terminates when it next performs $read(C)$ if it has not yet terminated. This implies that the algorithm terminates in $O(n)$ additional steps. 
+\end{lemma}
+\begin{proof}
+Let $m$ be the number of processes poised to do $inc(C)$. Then $C \geq 3n-m$ in $S$. Observe that the $m$ processes will not decrement $C$ before next reading $C$. Further the other $n-m$ processes many each decrement $C$ at most once before reading $C$. Consider the first $read(C)$ after $S$. This read returns a values
+\[\geq (3n-m) - (n-m) \geq 2n.\]
+From Lemma \ref{lem:reachedendzone}, all processes will only increment. In total we will have at most $n-m$ decrements after $S$. Thus all reads performed after $S$ will return a values $\geq 2n$ and the process will terminate. 
+\end{proof}
+
+\begin{lemma}
+The expected number of steps in an execution until $|U| \geq 3n$ is in $O(n^2)$.
+\end{lemma}
+\begin{proof}
+Observe that $U$ starts at $0$ and the execution is essentially a random walk on the value of $U$ (generally it is better than a random walk because some steps deterministically increase the magnitude of $C$). There $\frac{4}{5}$ steps which don't modify $U$, but don't worry about those. Finally, by a result from probability theory $U$ reaches $3n$ or $-3n$ in expected $O(n^2)$ steps. 
+\end{proof}
+
+\begin{algorithm}[ht]
+	\caption{End-zone algorithm: code for $p_i$.}
+    \label{pseudocode:endzone}
+    \begin{algorithmic}[1]
+	\State $R_{x_1} \leftarrow 1$
+	\State $c_i \leftarrow read(C)$
+	\While{$|c_i| < 2n$}
+		\If{$c_i \geq n$}
+			\State $inc(C)$
+		\ElsIf{$c_i \leq -n$}
+			\State $dec(C)$
+		\ElsIf{$R_0 = 0$}
+			\State $inc(C)$
+		\ElsIf{$R_1 = 0$}
+			\State $dec(C)$
+		\Else
+			\State $f_i \leftarrow$ flips a coin
+			\If{$f_i = 1$}
+				\State $inc(C)$
+			\Else
+				\State $dec(C)$
+			\EndIf
+		\EndIf
+		$c_i \leftarrow read(C)$
+	\EndWhile
+	\State return $c_i \geq 2n$
+	\end{algorithmic}
+\end{algorithm}
+
+\subsection{Algorithm Against an Oblivious Adversary}
+The structure of the algorithm is as follows: we take the inputs and check for agreement. If we are successful, then output the value. Otherwise we will conciliate and check agreement again. 
+
+To facilitate the process we will define the Adopt-Commit object. This object supports operation $AdoptCOmmit(v)$. The result of this operation is either $(commit, v)$ or $(adopt, v)$ where $v$ is an input value. If we get $(commit, v)$ then we decide $v$ immediately. If we get $(adopt, v)$ then use use $v$ as the input to the next round. 
+
+Observe that the following properties are satisfied:
+\begin{enumerate}
+\item[Coherence:] if the output of some AdoptCommit operation is $(commit, v)$, then every output is either $(commit, v)$ or $(adopt,v)$.  
+\item[Convergence:] if all inputs are $v$ then all outputs are $(commit, v)$.
+\item[Wait-free Termination]
+\end{enumerate}
+
+The conciliation task requires: (1) validity, (2) probabilistic agreement - all outputs are the some with probability $\delta > 0$, and (3) wait-free termination.
+
+If follows that if the Adopt-Commit operation takes $A$ steps and conciliate takes $C$ steps then the expected step complexity is $O\left(\frac{C+A}{\delta}\right)$. 
+
+Lets implement the Adopt-Commit object! We need three shared registers $a[0]$, $a[1]$ (both initialized to $0$) and proposal (initialized to $\bot$). These will act as flags to ensure validity. Again, we are only going to concern ourselves with binary consensus.
+
+You should check that Algorithm \ref{pseudocode:adoptcommit} satisfies the three conditions above.
+
+\begin{algorithm}[ht]
+	\caption{Adopt-Commit object: code for $p_i$.}
+    \label{pseudocode:adoptcommit}
+    \begin{algorithmic}[1]
+    \State $AdoptCommit(v_i)$ by process $p_i$
+	\State $a[v_i] \leftarrow 1$.
+	\If{$proposal = \bot$}
+		\State $proposal \leftarrow v_i$
+	\Else
+		\State $v_i \leftarrow proposal$
+	\EndIf
+	\If{$a[1-v_i] = 0$}
+		\State return $(commit, v_i)$
+	\Else
+		\State return $(adopt, v_i)$
+	\EndIf
+	\end{algorithmic}
+\end{algorithm}
+
+How about conciliation? This time we will use one shared register $R$ initially set to $\bot$, and we assume an oblivious adversary. See the pseudo-code in Algorithm \ref{pseudocode:conciliation}.
+
+Lets do the analysis: we claim that once some process $p$ writes to $R$, the chance that any of the other $n-1$ processes write to $R$ before noticing that $R \neq \bot$ is at most $\frac{(n-1)}{2n}$. The easiest way to see that this is the case by considering the first write to $R$ by some process $p_i$. There can be at most $n-1$ other processes which can write to $R$, but they must all flip a coin first. By union bound the chance that some coin flips a head is just $\frac{n-1}{2n}$. So $\delta$ for conciliation is constant (that is good). Further the expected work and expected step complexity is $\Theta(n)$. 
+
+\begin{algorithm}[ht]
+	\caption{Conciliation: code for $p_i$.}
+    \label{pseudocode:conciliation}
+    \begin{algorithmic}[1]
+    \State $r_i \leftarrow read(R)$
+    \While{while $r_i = \bot$}
+    	\State $f_i \leftarrow $ flip biased coin ($\frac{1}{2n}$ heads)
+    	\If{$f_i$ gets heads}
+			\State $R \leftarrow x_i$	
+			\State return $x_i$
+		\Else
+			\State $r_i \leftarrow read(R_i)$
+    	\EndIf
+    \EndWhile
+    \State return $r_i$
+	\end{algorithmic}
+\end{algorithm}
+
+We can improve this algorithm to $\Theta(\log n)$ step complexity by making the probability of flipping a head $\frac{2^k}{2n}$ where $k = 0$ at the beginning and increments by one every time we flipped a tail. 
+\end{document}

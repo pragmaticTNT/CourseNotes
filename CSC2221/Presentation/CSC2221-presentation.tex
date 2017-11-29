@@ -1,0 +1,185 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Article Notes
+% LaTeX Template
+% Version 1.0 (1/10/15)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% Authors:
+% Vel (vel@latextemplates.com)
+% Christopher Eliot (christopher.eliot@hofstra.edu)
+% Anthony Dardis (anthony.dardis@hofstra.edu)
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[
+10pt, % Default font size is 10pt, can alternatively be 11pt or 12pt
+a4paper, % Alternatively letterpaper for US letter
+onecolumn, % Alternatively twocolumn
+% Alternatively landscape
+]{article}
+
+\input{structure.tex} % Input the file specifying the document layout and structure
+
+%----------------------------------------------------------------------------------------
+%	ARTICLE INFORMATION
+%----------------------------------------------------------------------------------------
+
+\articletitle{How to Elect a Leader Faster than a Tournament} % The title of the article
+\articlecitation{\cite{alistarh2015elect}} % The BibTeX citation key from your bibliography
+
+\datenotesstarted{November 21, 2017} % The date when these notes were first made
+\docdate{\datenotesstarted; rev. \today} % The date when the notes were lasted updated (automatically the current date)
+
+\docauthor{Lily Li} % Your name
+
+%----------------------------------------------------------------------------------------
+
+\begin{document}
+
+\pagestyle{myheadings} % Use custom headers
+\markright{\doctitle} % Place the article information into the header
+
+%----------------------------------------------------------------------------------------
+%	PRINT ARTICLE INFORMATION
+%----------------------------------------------------------------------------------------
+
+\thispagestyle{plain} % Plain formatting on the first page
+
+\printtitle % Print the title
+
+%----------------------------------------------------------------------------------------
+%	ARTICLE NOTES
+%----------------------------------------------------------------------------------------
+
+\section{Introduction}
+\paragraph{Problem Definition.} An algorithm which solves leader election among $n$ processes must satisfy: (1) termination - every process $p_i$ must eventually output $win$ or $lose$ and (2) unique winner - there is exactly one process which outputs $win$. Further, no process may lose before the eventual winner starts its execution and the algorithm must be linearizable; the first operation is $win$ and all subsequent operations is $lose$. In-class, we have a seen an leader election algorithm which builds a \emph{tournament tree} with $n$ leaves. The step and message complexities of this decades old algorithm are $\Theta(\log n)$ and $\Theta(n^2\log n)$ respectively. 
+
+\paragraph{Model.} We have a complete asynchronous message passing system with at most $f < \ceil{n/2}$ faulty processes. Further we assume a strong adversary which can  examine the systems state and the outcome of random coin flips adjusting the schedules of steps, message delivery events, and failures.  
+
+\paragraph{Results.} In this work by Alistarh et al. presented at PODC 2015, the authors present a leader election algorithm which requires $O(\log^*n)$ steps by each process and $O(n^2)$ point-to-point messages. They pair this with a lower bound of $\Omega(n^2)$ message, proving optimal message complexity.
+
+%------------------------------------------------
+
+\section{Leader Election Algorithm}
+In the code we will make use of the high-level protocol $\communicate$. Let $p$ be a procedure which consists of broadcasting a message and waiting for a response. $\communicate\anglebrac{p}$ will wait for at least $\ceil{n/2}+1$ responses before proceeding (this is reminiscent to what we did when we tried to simulate single-reader single-writer registers in a message passing system). We call a set of $\ceil{n/2}+1$ processes a \textbf{quorum} since these arise often in our analysis. A process can execute the following operations:
+\begin{enumerate}
+\item[$\broadcast(v)$:] process $p_i$ broadcasts value $v$ to all other processes (including itself). If process $p_j$ receives $\broadcast{v}$ from $p_i$, it updates $S_j[i] \leftarrow v$.
+\item[$\collect()$:] process $p_i$ sends a collect message to all other processes (including itself). If process $p_j$ receives $\collect()$ from $p_i$, it sends message $\anglebrac{S_j}$ to $p_i$. 
+\item[$\random(p)$:] (local operation) process $p_i$ receives $1$ with probability $p$ and $0$ otherwise. 
+\end{enumerate}
+
+What we want is an algorithm which iteratively reduces the number of participating processes. At each round processes flip a random coin and output $lose$ or $survive$ depending on the result. Surviving processes will try again in the next round. A na\"{i}ve implementation would fail since the adversary can schedule the ``losing'' processes first.
+
+\subsection{Poison Pill (Homogeneous)}
+See Algorithm \ref{pseudocode:homPP}. Process $p_i$ has two local variables: a vector $S_i$ of length $n$ which record the states of processes (with all entries initially set to $w$) and an $n\times n$ matrix $V_i$ storing the view as seen by other processes (initially empty). States can be any of $w$ (waiting), $c$ (commited), $0$ (lose), and $1$ (survive). A process $p_j$ is \textbf{active} from the perspective of $p_i$ if column $j$ in $V_i$ contains at least one entry of status $1$ or $c$ and no entries of status $0$.  
+\begin{algorithm}[ht]
+	\caption{Homogeneous Poison Pill: code for process $p_i$.}
+    \label{pseudocode:homPP}
+    \begin{algorithmic}[1]
+    \State Initialize $S_i[1...n] = [w, ... ,w]$ and $V_i[1...n][1...n] = \emptyset$
+	\State $S_i[i] \leftarrow c$
+	\State $\communicate\anglebrac{\broadcast(S[i])}$
+	\State $S_i[i] \leftarrow \random\left(\frac{1}{\sqrt{n}}\right)$
+	\State $\communicate\anglebrac{\broadcast(S_i[i])}$
+	\State $V_i \leftarrow \communicate\anglebrac{\collect()}$
+	\If{$S_i[i] = 0$ and $\exists k:$ $p_k$ is active}
+		\State return $0$
+	\EndIf
+	\State return $1$ 
+	\end{algorithmic}
+\end{algorithm}
+
+\begin{claim}
+If all processes return then some process outputs $1$.
+\end{claim}
+\begin{proof}
+Suppose for a contradiction that all processes output $0$. If a process receives $1$ upon executing $\random\left(\frac{1}{\sqrt{n}}\right)$, then it must output $1$ so all processes received $0$. Let process $p_i$ be the last to complete the $\broadcast$ operation on Line 5. When $p_i$'s broadcast operation finishes, the $0$ of every process gets stored by a quorum. Consider $V_i$ at the completion of Line 6. Every column must have one $0$-entry since the set of processes that stored $0$ must overlap with the set of processes which successfully sent their status vector to $p_i$. Thus $p_i$ must output $1$. 
+\end{proof}
+
+\begin{claim}
+The expected number of processes that return $1$ is $O(\sqrt{n})$.
+\end{claim}
+\begin{proof}
+Suppose $p_i$ received $1$ from its execution of $\random$ at $t_i$. Then all process which received $0$ at any time $\geq t_i$ must output $0$. Consider such a process $p_j$. Observe that at $t_i$, $S_i[i] = \top$ has been broadcast to a quorum. Thus the set of processes which received $S_i[i]$ and the set of processes which sends their status to $p_j$ upon its execution of $\collect()$ overlaps. $p_j$ will see that $p_i$ has $\top$ or $1$ and will return $0$. Now simply observe that the expected number of $1$s as well as the expected index for the first $1$ are both $\sqrt{n}$.  
+\end{proof}
+
+\subsection{Poison Pill (Heterogeneous)}
+It can be shown that there will be $\Omega(\sqrt{n})$ survivors at every round of the homogeneous algorithm --- the probability of getting $1$ is fixed. To improve this bound we need to change this probability. 
+\begin{algorithm}
+	\caption{Heterogeneous Poison Pill: code for process $p_i$.}
+    \label{pseudocode:hetPP}
+    \begin{algorithmic}[1]
+	\State $S_i[i] \leftarrow \{c, \{\}\}$
+	\State $\communicate\anglebrac{broadcast(S_i[i])}$
+	\State $V_i \leftarrow \communicate\anglebrac{\collect()}$
+	\State $t \leftarrow \{j: \exists k: V_i[k][j] \neq \bot\}$
+	\State $p \leftarrow \frac{\log |t|}{|t|}$ \# $p \leftarrow 1$ if $|t| = 1$
+	\State $S_i[i] \leftarrow \left\{\random(p), t\right\}$
+	\State $\communicate\anglebrac{\broadcast(S_i[i])}$
+	\State $V_i \leftarrow \communicate\anglebrac{\collect()}$
+	\If{$S_i[i][0] = 1$ and $\exists k:$ $p_k$ is active}
+		\State return $0$
+	\Else
+		\State return $1$
+	\EndIf
+	\State return $1$
+	\end{algorithmic}
+\end{algorithm}
+
+\subsection{Analysis}
+Now we just need to show that the expected number of processes which survive using the heterogeneous poison pill algorithm is $\Theta(\log n)$. 
+
+\begin{claim}
+\label{claim:closure} Let $S$ be the set of processes which flipped $0$ and survived and let $U$ be the union of all the elements that they found not waiting. Then for $i \in U$, every $j \in t_i$ is in $U$.   
+\end{claim}
+\begin{proof}
+Intuitively this should make sense as $U$ is pretty comprehensive (we are taking the union of a bunch of stuff). Since a process $p_i$ which flipped zero can only survive if is sees only other processes which lost, every $p \in U$ obtained $0$. There is some entry of the view $V_i$ corresponding to $p$ which has $0$. Further it also has the list associated with $p$. This list is taken into account during the union thus $p_i$ see all the elements in the list $t$ of $p$.
+\end{proof}
+
+\begin{claim}
+\label{claim:reproc}
+If processor $q$ completed the first broadcast call no later than $p$ completed its first propagate call, then $q$ will be included in the $l$ list of $p$.
+\end{claim}
+
+\begin{claim}
+\label{claim:mainflip0}
+The maximum expected number of processors that flip $0$ and survive is $O(\log n) + O(1)$.
+\end{claim}
+\begin{proof}
+Let $S$ be the set of $z$ processes. And $U$ be defined as above. By Claim \ref{claim:reproc} and Claim \ref{claim:closure}, it must be the case that if $p \in U$ and $q$ finished the first broadcast no later than $p$, then $q \in U$. Notice that if we order the processes by the time they finish the first broadcast, all processes in $U$ must come before the processes not in $U$. 
+
+Since $U$ forms a closed set and all processes in $U$ flipped $0$, the probability that each process flipped $0$ is at most $\left(1 - \frac{\log |U|}{|U|}\right)$. The probability for all processes in $U$ to flip $0$ is $\left(1 - \frac{\log |U|}{|U|}\right)^{|U|} = O\left(\frac{1}{|U|}\right)$. Since $z \in U$, This is $O\left(\frac{1}{z}\right)$.  
+\end{proof}
+
+\begin{claim}
+\label{claim:mainflip1}
+The maximum expected number of processors that flip $0$ and survive is $O(\log^2 n) + O(1)$.
+\end{claim}
+\begin{proof}
+Order the processes according to the time they finish their first broadcast. By property \ref{claim:reproc}, the process ordered first has $|t| \geq 1$, the process ordered second has $|t| \geq 2$ and so on. Since the probability of flipping $1$ decreases as $|t|$ increases, the best expectation achievable is
+\[1 + \sum_{l = 2}^{n} \frac{log|t|}{|t|} \in O(\log^2 n).\]
+\end{proof}
+%------------------------------------------------
+
+%\section{Message Complexity Lower Bound}
+
+%----------------------------------------------------------------------------------------
+%	BIBLIOGRAPHY
+%----------------------------------------------------------------------------------------
+
+\renewcommand{\refname}{Reference} % Change the default bibliography title
+
+\bibliography{bibliography} % Input your bibliography file
+
+%----------------------------------------------------------------------------------------
+
+\end{document}

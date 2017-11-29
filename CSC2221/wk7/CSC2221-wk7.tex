@@ -1,0 +1,312 @@
+%
+% This is a borrowed LaTeX template file for lecture notes for CS267,
+% Applications of Parallel Computing, UCBerkeley EECS Department.
+\documentclass[twoside]{article}
+\setlength{\oddsidemargin}{0.25 in}
+\setlength{\evensidemargin}{-0.25 in}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textwidth}{6.5 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+
+%
+% ADD PACKAGES here:
+%
+
+\usepackage{amsmath,amsfonts,amssymb, graphicx}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{color}
+\usepackage{comment}
+\usepackage{mathtools}
+
+%
+% The following commands set up the lecnum (lecture number)
+% counter and make various numbering schemes work relative
+% to the lecture number.
+%
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf CSC2221: Introduction to Distributed Computing
+	\hfill Fall 2017} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill Lecture #1: #2  \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { {\it Lecturer: #3 \hfill Scribe: #4} }
+      \vspace{2mm}}
+   }
+   \end{center}
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+   \vspace*{4mm}
+}
+\renewcommand{\cite}[1]{[#1]}
+\def\beginrefs{\begin{list}%
+        {[\arabic{equation}]}{\usecounter{equation}
+         \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+         \setlength{\labelwidth}{1.6truecm}}}
+\def\endrefs{\end{list}}
+\def\bibentry#1{\item[\hbox{[#1]}]}
+
+\newcommand{\fig}[3]{
+			\vspace{#2}
+			\begin{center}
+			Figure \thelecnum.#1:~#3
+			\end{center}
+	}
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+% **** IF YOU WANT TO DEFINE ADDITIONAL MACROS FOR YOURSELF, PUT THEM HERE:
+
+\newcommand\E{\mathbb{E}}
+
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+\DeclarePairedDelimiter\anglebrac{\langle}{\rangle}
+
+\begin{document}
+\lecture{7}{Implementation of Primitives}{Faith Ellen}{Lily Li}
+
+\section{Multi-reader Registers (AW 10.1)}
+\begin{theorem}
+\label{thm:multireadsinglewrite}
+(10.3 Multi-reader Single-writer Register from Single-reader Single-writer Registers.) In any wait-free simulation of a single-writer multi-reader register from any number of single-writer single-reader registers, at least one reader must write. (As shown below, the restriction is actually stronger.)
+\end{theorem}
+\begin{proof}
+We proceed by contradiction and suppose that there exists a simulation for register $R$ where no process writes. Let $p_w$ be the writer and $p_1$, $p_2$ be two readers. Assume that $p_w$ wants to write a $1$ into $R$. $p_w$ performs some sequence low-level writes $w_1, ..., w_k$ to a set of registers $R_1$ read only by $R_1$ and a set of registers $R_2$ read only by $R_2$. Consider what happens if there was a read by $p_1$ and a read by $p_2$ between low-level writes. Initially these reads must return $0$ --- $p_w$ have not started reading yet. At the end both reads must return $1$ --- $p_w$ finished writing. Somewhere in the middle there exists two indices $j_1$ and $j_2$ such that the read by $p_1$ between $w_{j_1}$ returns $1$ (while all previous reads have read $0$) and similarly for $p_2$. Observe that $j_1 \neq j_2$ since $w_{j_1}$ and $w_{j_2}$ are writes to registers in $R_1$ and $R_2$ respectively and are distinct. WLOG assume that $j_1 < j_2$ then schedule a read by $p_1$ before a read by $p_2$ within the interval $w_{j_1}$, $w_{j_1 + 1}$. Then $p_1$ reads a $1$ and then $p_2$ reads a $0$ but the read by $p_1$ occurred before the read by $p_2$.  
+\end{proof}
+
+The solution? Sequence numbers (or equivalently, timestamps).
+
+\section{Multi-reader Register (AW 10.2.2)}
+Implementation of a multi-reader single-writer register from single-reader single-writer registers (AW 10.2.2). One naive way would be to use a collection of single-reader registers one per reader so that $val[i]$ can be read by $p_i$. See Algorithm \ref{pseudocode:multireader}. Unfortunately this implementation is not linearizable (can you see why? Hint: write $1$ between two complete reads which have different values).
+
+\begin{algorithm}
+	\caption{Implementation of Multi-reader Single-writer}
+    \label{pseudocode:multireader}
+    \begin{algorithmic}[1]
+	\State $WRITE(R, v)$
+	\For{all readers $p_i$}
+		\State $write(val[i], v)$
+	\EndFor
+	\State
+	\State $READ(R)$ by $p_i$
+	\State return $val[i]$
+	\end{algorithmic}
+\end{algorithm}
+
+\begin{theorem}
+In any implementation of a MRSW register from SRSW registers, all but one process must write.
+\end{theorem}
+\begin{proof}
+Consider solo execution of $WRITE(R, 1)$ by $p_w$ starting from initial configuration $R = 0$. Consider the view from another processor $p_i$: $C_0 s_1C_1 \cdots C_{j_i} \cdots s_k C_k$. Obviously reads from $C_0$ return $0$ and reading from $C_k$ returns a $1$. Note we cannot have the situation where read from $C_{i}$ return $1$ and read from $C_{i+1}$ returns $0$ (why?). So there exists some step $s_{j_i}$ such that $C_{j_i -1}$ reads $0$ and $C_{j_i+1}$ reads $1$. 
+
+Suppose for two processors $p_i \neq p_i'$ that read without writing... (see above). 
+\end{proof}
+
+From the above algorithm we know that every reader except one must \emph{write}. Here is algorithm we are going to develop: when $p_w$ writes, it writes the value along with a sequence number $val[i]$ (initially, $(0,0)$ for all $i$).
+
+\begin{algorithm}
+	\caption{Implementation of Multi-reader Single-writer V2}
+    \label{pseudocode:multireaderv2}
+    \begin{algorithmic}[1]
+	\State $WRITE(R, v)$
+	\State $seq \leftarrow seq + 1$
+	\For{$i$ from $1$ to $n$}
+		\State $write(val[i], (v, seq))$
+	\EndFor
+	\State
+	\State $READ(R)$
+	\State $(v, s) \leftarrow read(val[i])$
+	\For{for all $i' \neq i$}
+		\State $(v', s') \leftarrow read(report[i', i])$
+		\If{$s' > s$}
+			\State $s\leftarrow s'$
+			\State $v\leftarrow s'$
+		\EndIf
+	\EndFor
+	\For{all $i' \neq i$ do}
+		\State $write(report[i,i'], (v, s))$	
+	\EndFor
+	\end{algorithmic}
+\end{algorithm}
+
+For each pair $(i, i')$ where $i \neq i'$ there is a SRSW register $report[i, i']$ (first index writer, second is reader) in which $p_i$ report the largest sequence number it has seen together with its associated value (initially $(0,0)$).
+
+Next we need to show that this algorithm is Linearizable. We need some lemmas
+
+\begin{lemma}
+(10.4) If $op_1$ finished before $op_2$ begins then $op_1$ occurs before $op_2$ in out Linearization $\pi$. 
+\end{lemma}
+\begin{proof}
+Using the observations below lets consider the four cases for $op_1$ and $op_2$ for some admissible execution $\alpha$. First consider if both $op_1$ and $op_2$ are writes, then they are linearized by definition. Next consider a write $w$ that follows a read $r$ (with timestamp $T$) in $\alpha$ but was placed after $w$ in a linearization $\pi$. It must be the case that the write $w'$ which generated $T$ occurred after $w$. This implies that $r$ occurred before $w'$ but this is a contradiction. Next consider if a write $w$ precedes a read $r$ but was placed after $r$. Since the times are strictly increasing $r$ must be placed after $w$. Finally consider two read operations $r$ and $r'$. If the two jobs have different timestamps, the one with the smaller timestamp must have been generated first. If the timestamps are the same then we order interms of increasing starting times. 
+
+Yeah, please reread this proof. But look at the big idea: we are going to construct a linearization of the operations. Namely we will look at the sequence numbers! Writes obviously come one after the other and reads will be grouped by the sequence number. You should have some consistent (but not necessarily unique) ordering for all read with the same sequence number. 
+\end{proof}
+
+Further make the following observation (1) all writes have strictly increasing sequence number and (2) all reads have monotonically increasing sequence number. 
+
+\begin{theorem}
+(10.5) There is a wait-free implementation of MRSW register from $O(n^2)$ SRSW registers in which each read and write are performed in $O(n)$ steps. 
+\end{theorem}
+
+\section{Multi-reader Multi-writer Register (AW 10.2.3)}
+From the our construction from previously we now have access to multi-reader single-writer registers. Let us see what needs to be done in order to turn this into a multi-reader multi-writer registers. The key idea is to use atomic-snapshots (atomic snapshots are great, they get around the pesky order business of using $collects$). 
+
+\begin{algorithm}
+	\caption{Implementation of Multi-reader Multi-writer}
+    \label{pseudocode:multiwriter}
+    \begin{algorithmic}[1]
+	\State $WRITE(R, v)$
+	\State $v \leftarrow scan(s_1, ..., s_n)$
+	\State $t \leftarrow \max{v_i, t_s: 0 \leq i \leq n-1}$
+	\State $update(s_i, (x, t+1))$
+	\State
+	\State $READ(R)$
+	\State $v \leftarrow scan(s_1, ..., s_n)$
+	\State return $v$
+	\end{algorithmic}
+\end{algorithm}
+
+Suppose you were a bit more ambitious and you wanted to use collect and write instead of just using a atomic-snapshot. Can you linearize the previous Algorithm \ref{pseudocode:multiwriter}, if you had $collect$ instead of $scan$ and $write$ instead of $update$? Yes (of course the answer is yes), you would do it in the order of timestamps for $WRITE$s and $READ$s with timestamps and the order they finish. 
+
+Here is the formal argument: suppose $op_1$ finishes before $op_2$ begins. If $op_2$ is a $WRITE$, it must have larger timestamp than $op_1$ so is linearized after $op_1$. If $op_2$ is a $READ$ then two cases: (1) $op_1$ is a $WRITE$ then $op_2$ lin. after $op_1$ since $op_2$ can only read a $\geq$ timestamp than $op_1$ generated (2) $op_1$ is a $READ$, $op_2$ can only read a timestamp which is $\geq$ the timestamp read by $op_1$ thus it must be linearized after $op_1$.
+
+How about a lower bound proof next?
+\begin{theorem}
+Any such implementation has $\Omega(n)$ step complexity.
+\end{theorem}
+\begin{proof}
+In particular we are going to find a problem $P$ which can be solved in $O(1)$ steps using MRMW registers, and prove it takes $\Omega(n)$ steps using MRSW registers. We will use \emph{Approximate Agreement} (see below).
+\end{proof}
+
+\begin{example}
+Each process $p_i$ has a private input $x_i$ if it doesn't crash, it must output value $y_i$. Further all processes are assumed to know an accuracy parameter $\epsilon$. The solution must satisfy
+\begin{enumerate}
+\item[$\epsilon$-Agreement:] all output values are within $\epsilon$ of each other.
+\item[Validity:] all output values must be between the largest and smallest input values.
+\end{enumerate}
+
+We claim that Algorithm \ref{pseudocode:approxagree} is an algorithm for Approximate Agreement. Why does validity hold? (pretty straight forward: note $m_i = \min\{v_j: v_j \neq \bot\} \geq \{x_0, ..., x_{n-1}\}$ and $M_i = \max\{v_j: v_j\neq \bot\} \leq \{x_0, ..., x_{n-1}\}$ so $y_i$ works for all $i$) Why does $\epsilon$-Agreement hold? (more complicated, but really if you think about it, it makes sense).
+
+\begin{algorithm}
+	\caption{Implementation of $\epsilon$-Approximate Agreement}
+    \label{pseudocode:approxagree}
+    \begin{algorithmic}[1]
+	\State $m \leq x_0, ..., x_{n-1} \leq M$
+	\State $\epsilon = \frac{M-m}{2}$
+	\State $X[0, ..., n-1]$ each entry initially $\bot$ \# $p_i$ can write to $X[i]$
+	\State	
+	\State $X[i] \leftarrow write(x_i)$
+	\State $V \leftarrow collect(X)$
+	\State $m_i \leftarrow \min\{v_j: v_j \neq \bot\}$
+	\State $M_i \leftarrow \max\{v_j: v_j \neq \bot\}$
+	\State $y_i \leftarrow \frac{m_i+M_i}{2}$
+	\State return $y_i$
+	\end{algorithmic}
+\end{algorithm}
+
+Notice here that out Algorithm \ref{pseudocode:approxagree} is for a particular value of $\epsilon$. What if we wanted $\epsilon$ to be smaller? (Supposing we are beginning with $M = 1$ and $m = 0$.) As always, with this sort of thing, iterating the procedure will allow you to halve the interval (you would just need a couple of collect objects, one for each iteration).
+\end{example}
+
+\begin{theorem}
+For all $\epsilon < 1$, in every obstruction-free algorithm for $\epsilon$ approximate agreement using only MRSW registers, every process takes $\geq n-1$ steps in a solo execution starting from the initial configuration $C_0$ in which the input values of all processes are $0$ ($m = 0$, $M = 1$). 
+
+Thus worse-case step complexity of any wait-free algorithm is $\Omega(n)$.
+\end{theorem}
+\begin{proof}
+Suppose for a contradiction that $p_i$ takes $< n-1$ steps in its solo-execution from $C_0$. By validity, $p_i$ must output $0$. Let $\alpha$ be the history of its execution. There must be some process $p_j$, $i\neq j$, in which $p_i$ did not read $p_j$'s SWMR register. 
+
+Let $C_1$ be the configuration in which the input to all processes is $1$. By validity, everyone, in-particular $p_j$, needs to output a $1$. Let $\beta$ be the history here.
+
+Consider any configuration $C$ in which $p_i$ has input $0$ and $p_j$ has input $1$. Observe that $C_0 \stackrel{p_i}{\sim} C$ and $C_2 \stackrel{p_j}{\sim} C$. Can you finish the reset of the argument?
+
+Let $x_0, ..., x_{n-1} \in \{0,1\}$ and $\epsilon = \frac{1}{2}$. Use two MWMR registers $W[0]$ and $W[1]$ both initially set to $0$. The algorithm for each process $p_i$ is in Algorithm \ref{pseudocode:approxagreeMWMR}.
+\begin{algorithm}
+	\caption{Implementation of Approximate Agreement with MWMR Registers: code for process $p_i$}
+    \label{pseudocode:approxagreeMWMR}
+    \begin{algorithmic}[1]
+	\State $WRITE(W[x_i], 1)$
+	\If{$READ(W[1-x_i]) = 1$}
+		\State $y_i \leftarrow \frac{1}{2}$
+	\Else
+		\State $y_i \leftarrow x_i$
+	\EndIf
+	\State return $y_i$
+	\end{algorithmic}
+\end{algorithm} 
+
+Again let us show that this algorithm works. First consider validity: if all processes have input $v$, then everyone outputs $v$. Please go through the agreement argument on your own.  
+\end{proof}
+
+\section{Renaming}
+Our goal is to give each process a distinct name from $\{1, ..., m\}$ or $\{0, ..., m-1\}$ where $m \geq n$ the number of processes. There is only one operation: $GetName$. When a process performs $GetName$ it gets a name in $\{1, ..., m\}$ which is not held by any other process. The special case of \textbf{1-Shot Renaming} indicates that a process performs $GetName$ at most once. When a process performs $RelName$ its name is released and can be used by another process. In \textbf{Long-Lived Renaming} $GetName$ can only be performed by a process with no name. $RelName$ can only be performed by a process that has a name.
+
+\begin{algorithm}
+	\caption{Implementation of Renaming}
+    \label{pseudocode:renaming}
+    \begin{algorithmic}[1]
+	\State $m = n$	
+	\State $GetName()$ \#Using Fetch and Increment (for 1-Shot Renaming) 
+	\State return $Fetch\&Increment(F)$ \#Does not support $RelName()$
+	\State
+	\State $GetName()$ \#Using Array of Test\&Set Objects $A[1, ..., n]$ where each entry is initially $0$
+	\For{$i$ from $1$ to $n$}
+		\If{$Test\&Set(A[i]) = 1)$}
+			\State return $i$
+		\EndIf	
+	\EndFor
+	\State
+	\State $RelName()$ \#By process with name $i$
+	\State $reset(A[i])$	
+	\State
+	\State $GetName()$ \#Using Registers!
+	\State $X$ is register holding original name; $y \in \{T, F\}$ \#Code for process with ID $i$
+	\State $WRITE(X, i)$
+	\If{$y = T$ then go right}
+		\State $WRITE(Y, T)$
+	\EndIf
+	\If{$X = i$}
+		\State capture the splitter
+	\Else
+		\State go left
+	\EndIf	
+	\end{algorithmic}
+\end{algorithm}  
+
+Lets see why Algorithm \ref{pseudocode:renaming} works. We show that it is impossible that in a reachable configuration a process $p$ is in iteration $i$ of $GetName$ but $A[i] = \cdots = A[n] = 1$.
+
+We say that a process $p$ is in \textbf{location} $i$ if $p$ has name $i$ or is in iteration $i$ of $GetName$ i.e. about to perform $Test\&Set(A[i])$. If $p$ has no name then we say that $p$ is in location $0$. Consider the invariant: if a process is in location $i \geq 1$ then there is at least $i-1$ other processes in location $< i$ (proof of this invariant by induction; please go through the details).  
+
+(Doable if $m > 2n-1$, no if $m < 2n-2$ and it depends on number theoretic properties when $m = 2n - 2$ --- this was someone's PhD!) Lets do 1-Shot Renaming where $m = \frac{n(n_1)}{2}$. Uses $m$ \textbf{splitters} (these can be constructed using two registers). Properties: if $k$ process enter the splitter then at most one captures the splitter and at mot $k-1$ go left and at most $k-1$ go right (if one process goes into a splitter, it must be captured). Then here is the renaming algorithm. Big idea: Um... there is no pseudo-code, just a picture. Image a tree with splitters as nodes with height $n$ and $i+1$ on level $i$.
+
+\section{Homework}
+Assume that $x_0, ..., x_{n-1} \in [0,1]$ and $0 < \epsilon < 1$. Come up with an algorithm with $O\left(\log_2\left(\frac{1}{\epsilon}\right)\right)$ step complexity. How about an algorithm with $O\left(\log_2\left(\frac{\max\{|x_0|, ..., |x_{n-1}|\}}{\epsilon}\right)\right)$ step complexity?
+\end{document}

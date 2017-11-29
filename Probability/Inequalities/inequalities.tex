@@ -1,0 +1,141 @@
+%
+% This is a borrowed LaTeX template file for lecture notes for CS267,
+% Applications of Parallel Computing, UCBerkeley EECS Department.
+\documentclass[twoside]{article}
+\setlength{\oddsidemargin}{0.25 in}
+\setlength{\evensidemargin}{-0.25 in}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textwidth}{6.5 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+
+%
+% ADD PACKAGES here:
+%
+
+\usepackage{amsmath,amsfonts,amssymb, graphicx}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{color}
+\usepackage{comment}
+\usepackage{mathtools}
+
+%
+% The following commands set up the lecnum (lecture number)
+% counter and make various numbering schemes work relative
+% to the lecture number.
+%
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf Introduction to Probability Theory
+	\hfill MSC} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill Lecture #1: #2  \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { {\it Lecturer: #3 \hfill Scribe: #4} }
+      \vspace{2mm}}
+   }
+   \end{center}
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+   \vspace*{4mm}
+}
+\renewcommand{\cite}[1]{[#1]}
+\def\beginrefs{\begin{list}%
+        {[\arabic{equation}]}{\usecounter{equation}
+         \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+         \setlength{\labelwidth}{1.6truecm}}}
+\def\endrefs{\end{list}}
+\def\bibentry#1{\item[\hbox{[#1]}]}
+
+\newcommand{\fig}[3]{
+			\vspace{#2}
+			\begin{center}
+			Figure \thelecnum.#1:~#3
+			\end{center}
+	}
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+% **** IF YOU WANT TO DEFINE ADDITIONAL MACROS FOR YOURSELF, PUT THEM HERE:
+
+\newcommand\Prob{\mathsf{Pr}}
+
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+\DeclarePairedDelimiter\anglebrac{\langle}{\rangle}
+\DeclarePairedDelimiter\norm{\parallel}{\parallel}
+
+\begin{document}
+\lecture{1}{Inequalities}{Internet}{Lily Li}
+
+Here we will cover a few good-to-know inequalities. There is an associated list of many more inequalities, but the following should be foremost in your mind at all times.
+
+\section{Cauchy Schwartz}
+The most common form of the Cauchy Schwartz inequality that you have encountered is mostly likely:
+\[\left(\sum_{i=1}^{n}a_ib_i\right)^2 \leq \left(\sum_{i=1}^{n}a_i^2\right)\cdot\left(\sum_{i=1}^{n}b_i^2\right)\]
+for sequences $a = \{a_1, ..., a_n\}$ and $b = \{b_1, ..., b_n\}$ with equality when $a_i$. Observe that if we consider these sequences as vectors we have the equivalent inequality: $\norm{a\cdot b}^2 \leq \norm{a}^2\cdot\norm{b}^2$. If you prefer a more probability theoretic formulation try something like:
+\[E(X,Y) \leq E(X^2)\cdot E(Y^2).\]
+Observe that if $X$ and $Y$ are linearly independent then we have equality. (An equivalent statement of the above is to note that $COV(X,Y) \leq 1$ where $COV$ is the covariance).
+
+\section{Jensen}
+Jensen's inequality involves convex functions $g$. In particular it states:
+\[E(g(x)) \geq g(E(x)).\]
+The best way to see this is on a picture. See Figure \ref{fig:jensen}. Consider the point $E(x)$ on the $x$-axis and draw the tangent like to $g(E(x))$. This tangent line $L$ has the form $y = a + bx$ and is coincident to the $g(x)$ at $x$ coordinate $E(x)$. Since $g$ is a convex function we have that the $L$ is below $g$ so 
+\begin{align*}
+g(x) &\geq a + bx\\
+E(g(x)) &\geq E(a + bx)\\
+&= a + b \cdot E(x) &\mbox{by linearity of expectations}\\
+&= g(E(x)) &\mbox{since $L$ is coincident with $g$ at E(x)}
+\end{align*}
+
+\begin{figure}[ht]
+\centering
+	\includegraphics{ipe/jensen.eps}
+\caption{Consider the above $g$ and the interpretation of $g(E(X))$ and $E(g(X))$.}
+\label{fig:jensen}
+\end{figure}
+
+
+\section{Markov}
+The following are two very rough but useful probability theoretic inequalities. Markov's inequality states: 
+\[\Prob\left[|X| \geq a\right] \leq \frac{E(|X|)}{a}.\]
+Before we dive into the --- admitted really easy --- proof, you should think of the intuition for this in-equality. Imagine 100 people. At most $50$, or $\frac{1}{2}$, of the people are twice the average age. Similarly, at most $\frac{1}{3}$ of the people are at most three times the average and so forth.
+
+The proof uses the fundamental bridge between probability and expectations, and it is: $\Prob[|X| \geq a] = E(I_{|X|\geq a})$. This says that the probability that $|X| \geq a$ is equal to the expectation of the indicator random variable for $|X| \geq a$. Now observe that $a \cdot I_{|X| \geq a} \leq |X|$ (since indicator random variables can only be $0$ or $1$ consider both cases: if $I_{|X| \geq a} = 0$ then the LHS equals zero; conversely if $I_{|X|\geq a} = 1$ then $a \cdot 1 \leq |X|$). Applying the expectation function to both sides of the inequality gives you Markov's inequality.
+
+\section{Chebyschev}
+Chebyschev's inequality states:
+\[\Prob[|X-\mu| \geq a] \leq \frac{Var(X)}{a^2}\]
+and can be proved from Markov's inequality. By squaring $|X-\mu| \geq a$ we obtain $(X-\mu)^2 \geq a^2$ (this is fine since $a$ is non-negative). Next apply Markov's inequality to obtain
+\[\Prob\left[(X-\mu)^2 \geq a^2\right] \leq \frac{E\left((X-\mu)^2\right)}{a^2}.\]
+Finally, it suffices to notice that $Var(X) = E\left((X-\mu)^2\right)$. Another more intuitive way to write this inequality is to replace $a$ with $c \cdot \sigma$ where $\sigma$ is the standard deviation. Then we have
+\[\Prob\left[(X-\mu)^2 \geq c\cdot \sigma\right] \leq \frac{1}{c^2}.\]
+You should read this as: there is less than $\frac{1}{c^2}$ of the people more than $c$ standard deviations from the mean (if you compare this to your normal distribution, you see this inequality is indeed quite weak).
+\end{document}

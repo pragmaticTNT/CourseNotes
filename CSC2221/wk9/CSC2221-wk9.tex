@@ -1,0 +1,281 @@
+%
+% This is a borrowed LaTeX template file for lecture notes for CS267,
+% Applications of Parallel Computing, UCBerkeley EECS Department.
+\documentclass[twoside]{article}
+\setlength{\oddsidemargin}{0.25 in}
+\setlength{\evensidemargin}{-0.25 in}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textwidth}{6.5 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+
+%
+% ADD PACKAGES here:
+%
+
+\usepackage{amsmath,amsfonts,amssymb, graphicx}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{color}
+\usepackage{comment}
+\usepackage{mathtools}
+
+%
+% The following commands set up the lecnum (lecture number)
+% counter and make various numbering schemes work relative
+% to the lecture number.
+%
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf CSC2221: Introduction to Distributed Computing
+	\hfill Fall 2017} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill Lecture #1: #2  \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { {\it Lecturer: #3 \hfill Scribe: #4} }
+      \vspace{2mm}}
+   }
+   \end{center}
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+   \vspace*{4mm}
+}
+\renewcommand{\cite}[1]{[#1]}
+\def\beginrefs{\begin{list}%
+        {[\arabic{equation}]}{\usecounter{equation}
+         \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+         \setlength{\labelwidth}{1.6truecm}}}
+\def\endrefs{\end{list}}
+\def\bibentry#1{\item[\hbox{[#1]}]}
+
+\newcommand{\fig}[3]{
+			\vspace{#2}
+			\begin{center}
+			Figure \thelecnum.#1:~#3
+			\end{center}
+	}
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+% **** IF YOU WANT TO DEFINE ADDITIONAL MACROS FOR YOURSELF, PUT THEM HERE:
+
+\newcommand\E{\mathbb{E}}
+
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+\DeclarePairedDelimiter\anglebrac{\langle}{\rangle}
+
+\begin{document}
+\lecture{9}{Mutual Exclusion}{Faith Ellen}{Lily Li}
+\section{Definitions}
+\textbf{Mutual exclusion} concerns a group of processes that share a critical resource. The program of a process is partitioned into the following sections.
+
+\begin{definition}
+If the process don't care about the resource, it is in the \textbf{remainder section}. After getting an input event $entry_i$, the process enter the \textbf{entry section}. When the process is granted the resource, $crit_i$, an output event occurs and we enter the \textbf{critical section}. Once the process is done, we have an exit event $exit_i$ and enter the \textbf{exit section}. Upon exiting the protocol we get a $rem_i$ to go back to the \textbf{remainder section}. Each section is actually a set of operations (could be quite simple).
+\end{definition}
+
+Consider an admissible execution: assume that all processes initially in the remainder section. Further assume that no process crashes in the critical section (for all $p_i$ if $p_i$ enters the critical section, eventually it will leave). $p_i$ only receives $exit_i$ when it is in the critical section and only receives $entry_i$ if $p_i$ is in the remainder section. Either $p_i$ takes an infinite number of steps or it is in the remainder section after taking its last step (read: only crash in the remainder section).
+
+Mutual exclusion algorithm consists of code for the entry and exit sections; such an algorithm must satisfy:
+\begin{enumerate}
+\item[Mutual Exclusion:] two ore more processes are never simultaneously in the critical section.
+\item[Bounded Exit:] a process finishes the exit protocol in a bounded number of steps.
+\item[No Deadlock:] if some process is in the entry section and no process is in the critical section then some process will enter the critical section.
+\end{enumerate}
+
+\section{Mutual Exclusion Using Test\&Set}
+(Straight Forward): [Entry Section] test and set the object. [Exit Section] reset the test and set object. It is easy to see that this satisfies the bounded exit property.
+
+\begin{algorithm}
+	\caption{Simple implementation of mutex: code for $p_i$.}
+    \label{pseudocode:mutex}
+    \begin{algorithmic}[1]
+	\State $\rightarrow entry_i$
+	\State $x_i = 1$
+	\While{$x_i = 1$}
+		\State $x_i \leftarrow T\&S(v)$
+	\EndWhile
+	\State $crit_i$
+	\State
+	\State $\rightarrow exit_i$
+	\State $reset(v)$
+	\State $rem_i$
+	\end{algorithmic}
+\end{algorithm}
+
+\begin{definition}
+A process becomes \textbf{critical} if it is about to enter the critical section (about to perform $crit_i$) or just before it enters the exit section (about to perform $exit_i$). Here a process is critical if it performs a T\&S and gets $0$ or performs a reset. 
+\end{definition} 
+
+\begin{lemma}
+The above straight forward algorithm satisfies mutual exclusion.
+\end{lemma}
+\begin{proof}
+Suppose for a contradiction that there is an admissible execution of the algorithm in which two or more processes are critical. Let $C$ be the first such configuration and let $p_i$ and $p_j$ be critical. Let $C'$ be the configuration just before $C$ in which one process, say $p_j$ is critical. Then we know that $p_i$ must have performed a T\&S and received $0$. When $p_j$ entered the critical section it changed the T\&S object to $1$, thus there must be some other process $p_k$ which changed the T\&S object to 0 before $p_i$ performed its T\&S. This is a contradiction since $p_k$ and $p_j$ must both be in the critical section, but $p_j$ and $p_i$ was the first just occurrence. 
+\end{proof}
+
+\begin{lemma}
+The above straight forward algorithm satisfies no deadlock.
+\end{lemma}
+\begin{proof}
+Observe that no process is critical (recall what this means) if and only if $v = 0$. This can be proved by induction using the mutual exclusion property. Thus if some process is in the entry section, it will receive $0$ from the T\&S call and enter the critical section. 
+\end{proof}
+
+The problem with the algorithm is starvation. Before we fix this problem, lets introduce the following condition:
+
+\begin{definition}
+\textbf{No lockout:} (starvation freedom) if some processes is in the entry section then that process will eventually enter the critical section.  
+\end{definition}
+
+\section{Mutex with no Lockout}
+Make use of a queue $Q$. See pseudo-code \ref{pseudocode:mutexnolockout}.
+\begin{algorithm}
+	\caption{No lockout implementation of mutex using a queue $Q$: code for $p_i$.}
+    \label{pseudocode:mutexnolockout}
+    \begin{algorithmic}[1]
+    \State $\rightarrow entry_i$
+	\State $enqueue(Q, i)$
+	\State $x_i \leftarrow Head(Q)$
+	\While{$x_i \neq i$}
+		\State $x_i \leftarrow Head(Q)$
+	\EndWhile
+	\State $crit_i$
+	\State
+	\State $\rightarrow exit_i$
+	\State $dequeue(Q)$
+	\State $rem_i$
+	\end{algorithmic}
+\end{algorithm}
+
+Yes, there are more issues namely: a queue is a bit too much to ask for. Thus we must specify our implementation of a queue. But your job is actually a bit simpler than implementing a general queue. Note: (1) entries of the queue are bounded size (length of a process ID) and (2) the length of the $q$ is at most $n$. You can use a Fetch\&Increment object.
+
+\begin{algorithm}
+	\caption{No lockout implementation of mutex using Fetch\&Increment object $F$ and register $R$: code for $p_i$.}
+    \label{pseudocode:mutexFNI}
+    \begin{algorithmic}[1]
+    \State $\rightarrow entry_i$
+	\State $x_i \leftarrow Fetch\&Increment(F)$
+	\State $v_i \leftarrow R$
+	\While{$x_i \neq v_i$}
+		\State $v_i \leftarrow R$
+	\EndWhile
+	\State $crit_i$
+	\State
+	\State $\rightarrow exit_i$
+	\State $R \leftarrow x_i + 1 \mod i$
+	\State $rem_i$
+	\end{algorithmic}
+\end{algorithm} 
+
+\section{Mutex with Registers}
+We begin with two processes. The general idea is to determine if the other process is in the critical section or not.
+
+\begin{algorithm}
+	\caption{(Peterson's Algorithm): mutex for two processes using registers: code for $p_i$.}
+    \label{pseudocode:mutex2R}
+    \begin{algorithmic}[1]
+    \State Let $f_0$ and $f_1$ be single writer registers; one for each process. Further let $X$ be a multi-writer register.
+    \State $\rightarrow entry_i$
+	\State $f_i \leftarrow 1$
+	\State $X \leftarrow i$
+	\State $v_i \leftarrow read(X)$
+	\While{$read(f_{1-i}) \neq 0$ and $v_i \neq 1-i$}
+		\State $v_i \leftarrow read(X)$
+	\EndWhile
+	\State $crit_i$
+	\State
+	\State $\rightarrow exit_i$
+	\State $f_i \leftarrow 0$
+	\State $rem_i$
+	\end{algorithmic}
+\end{algorithm}
+
+\begin{lemma}
+Peterson's algorithm satisfies mutual exclusion.
+\end{lemma}
+\begin{proof}
+Suppose there is a configuration $C$ such that $p_0$ and $p_1$ are both in the critical section. Further suppose WLOG suppose $p_1$ wrote to $X$ last before $C$. The order of operation is: $p_0$ write $1$ to $f_0$, $p_0$ wrote $0$ to $X$, $p_1$ wrote $1$ to $X$, and $p_1$ reads $f_0$ and $X$. Note that $p_1$ read $1$ from $f_0$ and $1$ from $X$ so it will not enter the critical section. This is a contradiction. 
+\end{proof}
+
+\begin{lemma}
+\label{lem:petnodeadlock}
+Peterson's algorithm has no deadlock.
+\end{lemma}
+\begin{proof}
+Suppose there is an admissible execution with a configuration $C$ such that at least one process is in the entry section in $C$, but from $C$ onwards no process enters the critical section. Consider the possible cases:
+\begin{enumerate}
+\item[Case 1:] suppose only $p_i$ is in the entry section. After a finite number of steps $p_{1-i}$ must end up in the exit section and set $f_{1-i}$ to be zero. This allows $p_i$ to enter the critical section ($p_i$ must continue to take steps). This is a contradiction.
+\item[Case 2:] both $p_0$ and $p_1$ are in the entry section. Eventually both process have to write to their respective flag registers and write to $X$. Suppose $p_0$ was the last to write to $X$. $p_1$ (who is still taking steps in the entry section) will enter the critical section. This is a contradiction.
+\end{enumerate}
+\end{proof}
+
+\begin{lemma}
+Peterson's algorithm has no lockout.
+\end{lemma}
+\begin{proof}
+Suppose for a contradiction there exists an infinite admissible execution such that $p_i$ is in the entry section after some configuration $C$ onwards. Since we have no deadlock $p_{1-i}$ must be in the critical section after a finite number of steps. Eventually $p_{1-i}$ will write $1-i$ to $X$. Once $p_i$ sees this value for $X$ it will enter the critical section.   
+\end{proof}
+
+\section{Tournament Algorithm}
+We will use a tournament tree. The leaves of the tree is the set of processes. For the entry section: each pair of processes uses the two process mutex to go up one level of the tree. Eventually we get to the top of the tree. The process at the top will enter the critical section. For the exit section: go down the tree and perform the exit section for the two process mutex. 
+
+\section{A Lower Bound}
+\begin{definition}
+A process $p$ \textbf{covers} a register $r$ in configuration $C$ if $p$ writes to $r$ in its next allocated step. 
+
+Let $C$ be a configuration where $P = \{p_0, ..., p_{r-1}\}$ covers all $r$ registers. A \textbf{block write} by $p_0, ..., p_{r-1}$ is a sequence of $r$ consecutive steps by $p_0, ..., p_{r-1}$ where each process performs a write, let this sequence of write be execution $\beta$. Consider another set of process $Q$ such that $P \cup Q \neq \emptyset$. Then for operation $\gamma$ by $Q$, $C\beta \stackrel{\sim}{p_i} C\gamma\beta$ for all $p_i \notin Q$. 
+
+A \textbf{quiescent configuration} is one where all processes are in the remainder section.
+\end{definition}
+
+\begin{theorem}
+Any algorithm for mutex with $n \geq 2$ processes that uses only registers uses at least $n$ registers (size of registers don't matter).
+\end{theorem}
+\begin{proof}
+(By covering argument). Essentially what we are going to do is iteratively build up a set of distinct registers covered by the processes. The theorem follows from Lemma \ref{lem:lbquiescent} by setting $k = n$.   
+\end{proof}
+
+\begin{lemma}
+\label{lem:lbwritetodiff}
+Suppose $C$ is a configuration in which $p_i$ is in the remainder section. Let $\alpha$ be a finite history by process $p_i$ starting from configuration $C$ such that $p_i$ is in the critical section in configuration $C\alpha$. Let $R$ be the set of registers which are covered in the configuration $C$. Then, during $\alpha$, process $p_i$ writes to some register that is not in $R$. 
+\end{lemma}
+\begin{proof}
+Suppose that during $\alpha$ process $p_i$ only writes to registers in $R$. Then $C\beta \stackrel{\sim}{q} C\alpha\beta$ for all processes $q \neq p_i$ where $\beta$ is a block write to $R$ starting from $C$. We will find an $p_i$ free execution $\gamma$ such that there is some process $p_j$ in the critical section in configuration $C\beta\gamma$. The idea is that either there is already a process in the critical section in $C\beta$ (in which case $\gamma$ is empty) or the adversary can schedule a process so that it eventually ends up in the critical section. 
+
+Let the process in the critical section in $C\beta\gamma$ be $p_j$ with $i \neq j$. Observe that $C\beta\gamma \stackrel{\sim}{p_j} C\alpha\beta\gamma$. Thus in the configuration $C\alpha\beta\gamma$ we have two processes $p_i$ and $p_j$ both in the critical section violating mutual exclusion.
+\end{proof}
+
+\begin{lemma}
+\label{lem:lbquiescent}
+From any quiescent configuration, for all $k = 1, ..., n$ there are reachable configurations $C$ and $D$ such that $D$ is quiescent, each register has the same value in $C$ and $D$, $p_0, ..., p_{k-1}$ cover $k$ different registers in $C$ and $C \stackrel{\sim}{q} D$ for all $q \in \{q_{k}, ..., q_{n-1}\}$. 
+\end{lemma}
+\begin{proof}
+By induction on $k$. Suppose $Q$ is a quiescent configuration. Consider some solo execution $\alpha$ by $p_0$. By Lemma \ref{lem:lbwritetodiff}, $p_0$ writes to some register. Let $\alpha'$ be the largest prefix of $\alpha$ which contains no writes. Let $C = Q\alpha'$ and $D = Q$. Thus the base case holds. Assume the claim holds for $1\leq k < n$...
+\end{proof}
+\end{document}

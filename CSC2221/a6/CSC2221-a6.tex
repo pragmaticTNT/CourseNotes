@@ -24,7 +24,7 @@
 \newcommand\updateF{\textsc{update}}
 \newcommand\scanF{\textsc{scan}}
 \newcommand\COLLECT{\textsc{COLLECT}}
-\newcommand\READ{\textsc{READ}}
+\newcommand\readF{\textsc{read}}
 
 % Use these for theorems, lemmas, proofs, etc.
 \newtheorem{theorem}{Theorem}
@@ -48,7 +48,7 @@
 \section*{Assignment 6}
 % ===> START ASSIGNMENT
 \begin{claim}
-The following (Algorithm \ref{pseudocode:multiwritersnapshot}) is a linearizable, obstruction-free implementation of a multi-writer snapshot object. Here $R$ is a multi-writer register and $S$ is an array of $m$ multi-writer registers. Explain why the object is not non-blocking.
+Algorithm \ref{pseudocode:multiwritersnapshot} is a linearizable, obstruction-free implementation of a multi-writer snapshot object. Here $R$ is a multi-writer register and $S$ is an array of $m$ multi-writer registers. The multi-writer snapshot object described in Algorithm \ref{pseudocode:multiwritersnapshot} is not non-blocking.
 
 \begin{algorithm}
 	\caption{Operations for the multi-writer snapshot object.}
@@ -59,17 +59,55 @@ The following (Algorithm \ref{pseudocode:multiwritersnapshot}) is a linearizable
 	\State $S[j] \leftarrow \writeF(v)$
 	\State return
 	\State
-	\State $\scanF$ by processor $p_i$:
+	\State $\scanF()$ by processor $p_i$:
 	\Do 
 		\State $R \leftarrow \writeF(i)$
 		\State $c \leftarrow \COLLECT(S)$
-	\doWhile{$\READ(R) = i$}
+	\doWhile{$\readF(R) \neq i$}
 	\State return $c$
     \end{algorithmic}
 \end{algorithm}
 \end{claim}
 \begin{proof}
+Lemma \ref{lem:linearization} shows a linearization of the update and scan operations of Algorithm \ref{pseudocode:multiwritersnapshot}. Lemma \ref{lem:obsfree} shows that the multi-writer snapshot object is obstruction-free. Lemma \ref{lem:notnonblock} shows that the object is \emph{not} non-blocking by presenting a configuration in which no process can finish its operation in a finite number its own steps.
+\end{proof}
 
+\begin{lemma}
+\label{lem:linearization}
+The implementation of a multi-writer snapshot object in Algorithm \ref{pseudocode:multiwritersnapshot} is linearizable.
+\end{lemma}
+\begin{proof}
+Let $s$ be the schedule of a set of operations on the multi-writer snapshot object. Since $R$ is a multi-writer register, the sequence of writes to $R$ is linearizable. Let $\pi_R$ be the linearization of the low-level write operations to $R$ in the execution of $s$. Our linearization $\pi$ of $s$ sets the linearization point of each update and scan operation at the point of their last write operation to $R$. Note that the linearization point of every operation occurs within its interval of invocation and response. 
+
+We consider the following cases to show that $\pi$ preserves the order of $\updateF$ and $\scanF$ operations. Let $\sigma_1$ and $\sigma_2$ be two operations such that $\sigma_1$ ended before $\sigma_2$ began and let $\pi(\sigma_1)$ and $\pi(\sigma_2)$ be their respective linearization points under $\pi$.
+\begin{enumerate}
+\item Let $\sigma_1$ and $\sigma_2$ both be $\updateF$ operations. Suppose for a contradiction that $\pi(\sigma_1) > \pi(\sigma_2)$. The write-to-$R$ of $\sigma_1$ must have taken place after the write-to-$R$ of $\sigma_2$. This is a contradiction since $\sigma_1$ terminated before $\sigma_2$ (and by extension the write-to-$R$ of $\sigma_2$) began. 
+\item Suppose $\sigma_1$ and $\sigma_2$ are both $\scanF$ operations. If $\pi(\sigma_1) > \pi(\sigma_2)$ then the last write of $\sigma_2$ occurs before the last write-to-$R$ of $\sigma_1$. This is impossible as $\sigma_1$ ended before the start of $\sigma_2$.
+\item Suppose $\sigma_1$ is an $\updateF$ operation while $\sigma_2$ is a $\scanF$ operation. Suppose for a contradiction that $\pi(\sigma_1) > \pi(\sigma_2)$. Again, this order of the linearization points implies a non-empty intersection between the execution intervals of $\sigma_1$ and $\sigma_2$. This is a contradiction since $\sigma_1$ terminated before the start of $\sigma_2$. 
+\item If $\sigma_1$ is as $\scanF$ operation while $\sigma_2$ is an $\updateF$ operation we still cannot have $\pi(\sigma_1) > \pi(\sigma_2)$ by the same reasoning as the above.  
+\end{enumerate}
+\end{proof}
+
+\begin{lemma}
+\label{lem:obsfree}
+The implementation of a multi-writer snapshot object in Algorithm \ref{pseudocode:multiwritersnapshot} is obstruction-free.
+\end{lemma}
+\begin{proof}
+It is easy to see that the $\updateF$ operation is obstruction-free since it only consists of two write operations to obstruction-free multi-writer registers. Next consider the solo-execution of some process $p_i$ during a $\scanF$ operation. $p_i$ writes $i$ to $R$ then performs a $\COLLECT$ operation on $S$ and stores the result in $c$. Then $p_i$ reads register $R$. Since no other processor has written to $R$, the value in $R$ is still $i$. Thus $p_i$ exists the while-loop and terminates after returning $c$. 
+\end{proof}
+
+\begin{lemma}
+\label{lem:notnonblock}
+The implementation of a multi-writer snapshot object in Algorithm \ref{pseudocode:multiwritersnapshot} is not non-blocking.
+\end{lemma}
+\begin{proof}
+Let $p_1$ and $p_2$ be two processes sharing such a multi-writer snapshot object. The initial value in $R$ is $0$ and the initial value in $S$ is $\anglebrac{0,0}$. Suppose both $p_1$ and $p_2$ initiate a $\scanF$ operation and consider the following sequence of low-level $\readF$ and $\writeF$ operations where $op_i$ is an operation performed by process $p_i$ (ignore the $\COLLECT$ operations since they do not interact with $R$).
+\[\writeF_1(1), \writeF_2(2), \readF_1().\] 
+Since $p_2$ was the most recent process to write to $R$, $\readF_1()$ will return $2$ and $p_1$ will perform another iteration of the while-loop. Then, if we have
+\[\writeF_1(1), \readF_2(),\]
+$\readF_2()$ will return $1$ since $p_1$ was the most recent process to write to $R$ so $p_2$ will also perform another iteration of the while-loop. The sequence can be extended indefinitely by repeating
+\[\writeF_2(2), \readF_1(), \writeF_1(1), \readF_2().\] 
+Neither process can finish within a finite number of its own steps so the multi-writer snapshot object described in Algorithm \ref{pseudocode:multiwritersnapshot} is not non-blocking.
 \end{proof}
 % ===> END ASSIGNMENT
 \end{document}
