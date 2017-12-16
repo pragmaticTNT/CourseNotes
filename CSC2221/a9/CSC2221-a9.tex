@@ -51,7 +51,7 @@ Consider a variant of the mutual exclusion problem which satisfies the following
 \end{enumerate}
 
 \paragraph{P1.} Give an algorithm for this problem using any objects of bounded size. You may use objects what were not defined in class provided they are clearly defined. Prove the algorithm is correct. 
-\paragraph{Algorithm.} We will make use of the Read-Modify-Write registers as described on page 66 of the Attiya text book. In particular, a Read-Modify-Write register $R$ has one operation $\rmw$ which takes as input the register $R$ and a function $f$. In one atomic operation the process reads in the current value $v$ of $R$, computes $f(v)$, and writes $f(v)$ to $R$. The original value of $v$ of $R$ is returned. For this problem, let $R$ take on values $\{0,1,2\}$ and be initialized to $0$. The functions $inc$ and $dec$ be defined as follows:
+\paragraph{Algorithm.} We will use the Read-Modify-Write registers described on page 66 of the Attiya text book. In particular, a Read-Modify-Write register $R$ has one operation $\rmw$ which takes as input the register $R$ and a function $f$. In one atomic operation the process reads in the current value $v$ of $R$, computes $f(v)$, and writes $f(v)$ to $R$. The original value $v$ of $R$ is returned. For this problem, let $R$ take on values in $\{0,1,2\}$ and be initialized to $0$. The functions $inc$ and $dec$ are:
 \[inc(v) = \begin{cases}
 2 &\mbox{if } v = 2\\
 v+1 &\mbox{otherwise}
@@ -61,7 +61,7 @@ dec(v) = \begin{cases}
 v-1 &\mbox{otherwise}
 \end{cases}\] 
 
-A process $p_i$ in the entry section will execute $\rmw(R, inc)$ and write the result into a local variable $v_i$. If $v_i < 2$ then $p_i$ enters the critical section. Otherwise $p_i$ tries $\rmw(R, inc)$ again. Once $p_i$ enters the exit section it will execute $\rmw(R, dec)$ once, send $rem_i$, and enter the remainder section. Next we will prove that this algorithm is correct.
+A process $p_i$ in the entry section will execute $\rmw(R, inc)$ and write the result into a local variable $v_i$. If $v_i < 2$ then $p_i$ enters the critical section. Otherwise $p_i$ tries $\rmw(R, inc)$ again. When $p_i$ enters the exit section it will execute $\rmw(R, dec)$ once, send $rem_i$, and enter the remainder section. Next we will prove that this algorithm is correct.
 
 \begin{claim}
 During an admissible execution of the algorithm, at most two processes are in the critical section at the same time.
@@ -75,7 +75,7 @@ Suppose for a contradiction there is an admissible execution where three or more
 If there is a process in the trying section and at most one process in the critical section, then some process enters the critical section without waiting.
 \end{claim}
 \begin{proof}
-We will show that the number of processes which have just executed $\rmw(R, inc)$ and received a value less than two, are in the critical section, and are just about to execute $\rmw(R, dec)$ is equal to the value of $R$. The proof is by induction using the modified mutual exclusion property above. The property holds at the beginning since $R$ is initialized to $0$ and no process is in any of the above states. If process $p_i$ executed $\rmw(R, inc)$ and received $v_i < 2$, then there were fewer than two process in the above three state by the induction hypotheses. $p_i$'s $\rmw$ incremented $R$ and $p_i$ is now in one of the three state. If $p_i$ is in one of the three states then $R > 0$ by the inductive hypothesis. After $p_i$ executed $\rmw(R, dec)$, $R$ decreases by one and $p_i$ is no longer in one of the three states. The truth of the claim follows from the truth of the above statement. 
+We will show that the number of processes which have just executed $\rmw(R, inc)$ and received a value less than two, are in the critical section, or are just about to execute $\rmw(R, dec)$ is equal to the value of $R$. The proof is by induction using the modified mutual exclusion property above. The property holds at the beginning since $R$ is initialized to $0$ and no process is in any of the above states. If process $p_i$ executed $\rmw(R, inc)$ and received $v_i < 2$, then there were fewer than two process in the above three state by the induction hypotheses. $p_i$'s $\rmw$ incremented $R$ and $p_i$ is now in one of the state (executed $\rmw(R,inc)$ and received a value less than two). If $p_i$ is in one of the three states then $R > 0$ by the inductive hypothesis. After $p_i$ executed $\rmw(R, dec)$, $R$ decreases by one and $p_i$ is no longer in one of the three states. The truth of the claim follows from the truth of the above statement. 
 \end{proof} 
 
 \paragraph{P2.} Give an algorithm for this problem using only registers. Prove that your algorithm is correct.
@@ -119,7 +119,7 @@ The general structure of the algorithm is the same. Process $p_i$ sets $Choose[i
 During an admissible execution of the algorithm, at most two processes are in the critical section at the same time.
 \end{claim}
 \begin{proof}
-Suppose $p_i$ and $p_j$ are in the critical section. We will show that for all processes $p_k$ such that $Number[k] \neq \anglebrac{0,0}$ (some process which is in the entry section) must satisfy $Number[k] > Number[i]$ and $Number[k] > Number[j]$. W.l.o.g suppose that $Number[i] < Number[j]$. Since process $p_j$ entered the critical section, it must have finished the for loop. In particular, $p_j$ must have waited for $p_i$ to finish choosing a number and observed that $Number[i] < Number[j]$. There are two cases to consider. If $skip_j \geq 0$ then $p_j$ must wait and cannot enter the critical section. Thus $skip_j = -1$ before considering index $i$ then $skip_j = i$ afterwards. If $k < i$ it must be the case that $Number[k] > Number[j]$ since $skip_j \neq k$. Otherwise $k > i$. $p_j$ waited for $p_k$ to choose a number and must have observed that $Number[k] > Number[j]$ before entering the critical section. Thus $Number[k] > Number[j] > Number[i]$ as required. 
+Suppose $p_i$ and $p_j$ are in the critical section. We will show that for all processes $p_k$ such that $Number[k] \neq \anglebrac{0,0}$ (some process which is in the entry section) must satisfy $Number[k] > Number[i]$ and $Number[k] > Number[j]$. W.l.o.g suppose that $Number[i] < Number[j]$. Since process $p_j$ entered the critical section, it must have finished the for loop. In particular, $p_j$ must have waited for $p_i$ to finish choosing a number and observed that $Number[i] < Number[j]$. There are two cases to consider. If $skip_j \geq 0$ then $p_j$ must wait and cannot enter the critical section. Thus $skip_j = -1$ before $p_j$ considered index $i$ and $skip_j = i$ afterwards. If $k < i$ it must be the case that $Number[k] > Number[j]$ since $skip_j \neq k$. Otherwise $k > i$. $p_j$ waited for $p_k$ to choose a number and must have observed that $Number[k] > Number[j]$ before entering the critical section. Thus $Number[k] > Number[j] > Number[i]$ as required. 
 
 From the above, when two processes are in the critical section, all processes in the entry section will see two smaller tickets so will not enter the critical section.   
 \end{proof}
@@ -129,7 +129,7 @@ From the above, when two processes are in the critical section, all processes in
 If there is a process in the trying section and at most one process in the critical section, then some process enters the critical section without waiting.
 \end{claim}
 \begin{proof}
-Let $p_j$ be the process in the critical section. Consider the process $p_i$ with the smallest ticket currently in the entry section. We claim that $p_i$ will complete the for loop and enter the critical section. Suppose $p_i$ sees a process $p_k$ ($k \neq j$) such that $Number[j] \neq \anglebrac{0,0}$ and $Number[j] < Number[i]$. $p_k$ cannot be in the entry section by assumption and $p_k$ cannot be in the critical section since $p_i$ is the only process in the critical section. Thus $p_k$ must be in the exit section. In finitely many steps $p_k$ will set $Number[j]$ to be $\anglebrac{0,0}$. Thus $p_i$ will only remain in the for-loop for finitely many steps and will enter the critical section.
+Let $p_j$ be the process in the critical section. Consider the process $p_i$ with the smallest ticket currently in the entry section. We claim that $p_i$ will complete the for loop and enter the critical section. Suppose $p_i$ sees a process $p_k$ ($k \neq j$) such that $Number[k] \neq \anglebrac{0,0}$ and $Number[k] < Number[i]$. $p_k$ cannot be in the entry section by assumption and $p_k$ cannot be in the critical section since $p_i$ is the only process in the critical section. Thus $p_k$ must be in the exit section. In finitely many steps $p_k$ will set $Number[k]$ to be $\anglebrac{0,0}$. Thus $p_i$ will only remain in the for-loop for finitely many steps and will enter the critical section.
 \end{proof} 
 
 % ===> END ASSIGNMENT

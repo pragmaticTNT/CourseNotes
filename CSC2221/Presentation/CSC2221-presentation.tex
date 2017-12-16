@@ -22,7 +22,7 @@
 
 \documentclass[
 10pt, % Default font size is 10pt, can alternatively be 11pt or 12pt
-a4paper, % Alternatively letterpaper for US letter
+letterpaper, % Alternatively letterpaper for US letter
 onecolumn, % Alternatively twocolumn
 % Alternatively landscape
 ]{article}
@@ -60,17 +60,44 @@ onecolumn, % Alternatively twocolumn
 %	ARTICLE NOTES
 %----------------------------------------------------------------------------------------
 
+\section{Initial Board Configuration}
+\paragraph{Problem Definition.} An algorithm which solves leader election among $n$ processes must satisfy: (1) termination - every non-faulty process $p_i$ must eventually output $win$ or $lose$ and (2) unique winner - only one process may output $win$. Further, no process may lose before the eventual winner starts its execution. 
+
+\paragraph{Model.} A complete asynchronous message passing system with at most $f < \ceil{n/2}$ faulty processes. The randomized algorithm we will presents works against a strong(adaptive) adversary. 
+
+%------------------------------------------------
+
 \section{Introduction}
-\paragraph{Problem Definition.} An algorithm which solves leader election among $n$ processes must satisfy: (1) termination - every process $p_i$ must eventually output $win$ or $lose$ and (2) unique winner - there is exactly one process which outputs $win$. Further, no process may lose before the eventual winner starts its execution and the algorithm must be linearizable; the first operation is $win$ and all subsequent operations is $lose$. In-class, we have a seen an leader election algorithm which builds a \emph{tournament tree} with $n$ leaves. The step and message complexities of this decades old algorithm are $\Theta(\log n)$ and $\Theta(n^2\log n)$ respectively. 
+Today I will present ``How to Elect a Leader Faster than a Tournament'' by Alistarh et al. (\emph{Gelashvili, and Vladu}) which appeared in the proceeding of PODC 2015. 
 
-\paragraph{Model.} We have a complete asynchronous message passing system with at most $f < \ceil{n/2}$ faulty processes. Further we assume a strong adversary which can  examine the systems state and the outcome of random coin flips adjusting the schedules of steps, message delivery events, and failures.  
+\textcolor{blue}{\emph{Move to the left board with the prepared material.}}
 
-\paragraph{Results.} In this work by Alistarh et al. presented at PODC 2015, the authors present a leader election algorithm which requires $O(\log^*n)$ steps by each process and $O(n^2)$ point-to-point messages. They pair this with a lower bound of $\Omega(n^2)$ message, proving optimal message complexity.
+The problem is define as follows:
+\textcolor{blue}{\emph{Read material on ``Problem Definition''.}}
+
+To ensure that operations are linearizable, the first operation is $win$ and all subsequent operations are $lose$, and the order of the non-overlapping operations is respected. Observe that this problem is equivalent to implementing a \emph{Test-and-Set} object. The \emph{winner} is analogous to the process which receives $0$ from the $Test\&Set$ call and the \emph{losers} are analogous to the processes which receives $1$ afterwards. Hopefully everyone remembers our discussion of $Test\&Set$ objects earlier in the semester.    
+
+Our model is:
+\textcolor{blue}{\emph{Read material on ``Model''.}}
+
+To appreciate the results obtained in this paper, we first survey related work. \textcolor{red}{\emph{Change Slide.}} The best known previous algorithm, by Afek et al. in '92, makes use of a \emph{tournament tree}. In-class, we have a seen \emph{tournament trees} in the context of bounded mutual exclusion. The $n$ processes are the leaves of the tree. Processes compete at each internal nodes and the survivor proceeds up the tree. The \emph{winner} (resp. process which gets to enter the critical section) is the survivor at the root node. This algorithm has $O(\log n)$ step complexity and uses $O(n\log n)$ registers. In the context of a message passing system, we can use the ABD algorithm to simulate registers with $O(n)$ overhead, so the tournament tree has $O(n^2\log n)$ message complexity. 
+
+\textcolor{red}{\emph{Change Slide.}} The randomized algorithm presented in this paper makes significant improvements to the expected step and message complexities. Each process is expected to take $O(\log^*n)$ step and expected to send $O(n^2)$ point-to-point messages. \textcolor{red}{\emph{Change Slide.}} The authors also proved a lower bound of $\Omega(n^2)$ required messages for this problem, so the algorithm also has optimal message complexity.
 
 %------------------------------------------------
 
 \section{Leader Election Algorithm}
-In the code we will make use of the high-level protocol $\communicate$. Let $p$ be a procedure which consists of broadcasting a message and waiting for a response. $\communicate\anglebrac{p}$ will wait for at least $\ceil{n/2}+1$ responses before proceeding (this is reminiscent to what we did when we tried to simulate single-reader single-writer registers in a message passing system). We call a set of $\ceil{n/2}+1$ processes a \textbf{quorum} since these arise often in our analysis. A process can execute the following operations:
+
+\subsection{Intuition}
+Before we look at the code for the algorithm, lets try to get a idea of what it wants to do at a high-level. \textcolor{red}{\emph{Change Slide.}} The algorithm works in phases. At each phase we must ensure that \emph{there is at least one survivor}. During a phase, a process $p_i$ flips a biased bit and decides whether to $survive$ (continue to the next phase) or $lose$ (drop out of contention). If $p_i$ gets $1$, then it survives. If $p_i$ gets $0$ then it must make sure that some other process will survive before $losing$. Thus if $p_i$ observes that some $p_j$ flipped a $1$  then it is safe in the knowledge that someone will $survive$ to the next phase and can $lose$. Otherwise, if $p_i$ only observes processes which flipped $0$, it is not sure if they will choose to $lose$ or $survive$. To ensure that some process survives to the next phase, $p_i$ must survive even though it flipped $0$.
+
+Ideally we want many processes to drop out of contention at every phase, but a strong adversary can tamper with a naive implementation of the above idea. In particular, the adversary watch all the bit flips and schedule those processes which flipped $0$ first. Then all the processes must survive (those which flipped $0$ will only see other processes which flipped $0$ and will $survive$ and those which flipped $1$ will always survive). One of the main ideas in this algorithm, called the Poison Pill Technique, will ensure that this does not occur.
+
+\subsection{Local Variables and Communication Primitives}
+\textcolor{red}{\emph{Change Slide.}} \textcolor{blue}{\emph{Move to board bottom left.}} A process $p_i$ has two local variables: a vector $S_i$ of length $n$ which records the states of all observed processes and an $n\times n$ matrix $V_i$ storing the view as seen by other processes. States can be any of $w$ (waiting), $c$ (committed), $0$ (lose), and $1$ (survive). All entries of $S_i$ are initialized to $w$ and all entries of $V_i$ are empty. A process $p_j$ is \textbf{active} from the perspective of $p_i$ if column $j$ in $V_i$ contains at least one entry of status $1$ or $c$ and no entries of status $0$.  
+
+\textcolor{red}{\emph{Change Slide.}} The following are the communication primitives we will use in the algorithm. $\communicate$ is a high-level protocol which takes a procedure $p$ which broadcasts a message and waits for a response. $\communicate\anglebrac{p}$ will execute $p$ and wait for at least $\ceil{n/2}+1$ responses before proceeding. \emph{This is reminiscent to what we did when we simulated single-reader single-writer registers in a message passing system}. Possible procedures $p$ include: \textcolor{blue}{\emph{read off $\broadcast(v)$ and $\collect()$ from the slide.}} \textcolor{red}{\emph{Change Slide.}} Further we define the method $\random$ as \textcolor{blue}{\emph{read off $\random(r)$ from the slide.}}
+\begin{comment}
 \begin{enumerate}
 \item[$\broadcast(v)$:] process $p_i$ broadcasts value $v$ to all other processes (including itself). If process $p_j$ receives $\broadcast{v}$ from $p_i$, it updates $S_j[i] \leftarrow v$.
 \item[$\collect()$:] process $p_i$ sends a collect message to all other processes (including itself). If process $p_j$ receives $\collect()$ from $p_i$, it sends message $\anglebrac{S_j}$ to $p_i$. 
@@ -78,16 +105,20 @@ In the code we will make use of the high-level protocol $\communicate$. Let $p$ 
 \end{enumerate}
 
 What we want is an algorithm which iteratively reduces the number of participating processes. At each round processes flip a random coin and output $lose$ or $survive$ depending on the result. Surviving processes will try again in the next round. A na\"{i}ve implementation would fail since the adversary can schedule the ``losing'' processes first.
+\end{comment}
 
-\subsection{Poison Pill (Homogeneous)}
-See Algorithm \ref{pseudocode:homPP}. Process $p_i$ has two local variables: a vector $S_i$ of length $n$ which record the states of processes (with all entries initially set to $w$) and an $n\times n$ matrix $V_i$ storing the view as seen by other processes (initially empty). States can be any of $w$ (waiting), $c$ (commited), $0$ (lose), and $1$ (survive). A process $p_j$ is \textbf{active} from the perspective of $p_i$ if column $j$ in $V_i$ contains at least one entry of status $1$ or $c$ and no entries of status $0$.  
+We call a set of $\geq \ceil{n/2}+1$ processes a \textbf{quorum}. \textcolor{blue}{\emph{Add the definition of quorum to the board.}} They will arise frequently in our analysis.  
+
+\subsection{Poison Pill (Simple)}
+\textcolor{red}{\emph{Change Slide.}} Here is the algorithm for the poison pill algorithm (\emph{see Algorithm \ref{pseudocode:homPP}}). This code is executed by each process at every phase to determine whether it should $survive$ or $lose$ the current phase. \textcolor{blue}{\emph{Go through the code line by line.}} To analyze the step complexity of the algorithm we need to prove two claims. \textcolor{red}{\emph{Change Slide.}}
+
 \begin{algorithm}[ht]
-	\caption{Homogeneous Poison Pill: code for process $p_i$.}
+	\caption{Poison Pill: code for process $p_i$ during one phase.}
     \label{pseudocode:homPP}
     \begin{algorithmic}[1]
     \State Initialize $S_i[1...n] = [w, ... ,w]$ and $V_i[1...n][1...n] = \emptyset$
 	\State $S_i[i] \leftarrow c$
-	\State $\communicate\anglebrac{\broadcast(S[i])}$
+	\State $\communicate\anglebrac{\broadcast(S_i[i])}$
 	\State $S_i[i] \leftarrow \random\left(\frac{1}{\sqrt{n}}\right)$
 	\State $\communicate\anglebrac{\broadcast(S_i[i])}$
 	\State $V_i \leftarrow \communicate\anglebrac{\collect()}$
@@ -102,16 +133,45 @@ See Algorithm \ref{pseudocode:homPP}. Process $p_i$ has two local variables: a v
 If all processes return then some process outputs $1$.
 \end{claim}
 \begin{proof}
-Suppose for a contradiction that all processes output $0$. If a process receives $1$ upon executing $\random\left(\frac{1}{\sqrt{n}}\right)$, then it must output $1$ so all processes received $0$. Let process $p_i$ be the last to complete the $\broadcast$ operation on Line 5. When $p_i$'s broadcast operation finishes, the $0$ of every process gets stored by a quorum. Consider $V_i$ at the completion of Line 6. Every column must have one $0$-entry since the set of processes that stored $0$ must overlap with the set of processes which successfully sent their status vector to $p_i$. Thus $p_i$ must output $1$. 
+\textcolor{red}{\emph{(c)}} Suppose for a contradiction that all processes output $0$. If a process receives $1$ from $\random\left(\frac{1}{\sqrt{n}}\right)$, then it must output $1$ so all processes received $0$. Let process $p_i$ be the last to complete the $\broadcast$ operation on Line 5. When $p_i$'s broadcast operation finishes, the $0$ of every process gets stored by a quorum. Consider $V_i$ at the completion of Line 6. Every column must have one $0$-entry since the quorum that stored $0$ must overlap with the quorum which successfully sent their status vector to $p_i$. Thus $p_i$ must output $1$. 
+\end{proof}
+
+\begin{lemma}
+\label{lem:firstone}
+If a process received $1$ from its execution of $\random$ at $t$. Then all process which received $0$ from $\random$ at any time $\geq t$ must output $0$. 
+\end{lemma}
+\begin{proof}
+Suppose $p_i$ received $1$ from its execution of $\random$ at $t$ and $p_j$ received $0$ at any time $\geq t$. Observe the $\communicate$ of $S_i[i] = c$ on Line 3 has finished by $t$. Thus the quorum which received $S_i[i]$ and the quorum which sent their status to $p_j$ upon its execution of $\collect()$ on Line 6 overlaps. $p_j$ will see that $p_i$ is active and will return $0$. 
 \end{proof}
 
 \begin{claim}
+\label{claim:expected}
 The expected number of processes that return $1$ is $O(\sqrt{n})$.
 \end{claim}
 \begin{proof}
-Suppose $p_i$ received $1$ from its execution of $\random$ at $t_i$. Then all process which received $0$ at any time $\geq t_i$ must output $0$. Consider such a process $p_j$. Observe that at $t_i$, $S_i[i] = \top$ has been broadcast to a quorum. Thus the set of processes which received $S_i[i]$ and the set of processes which sends their status to $p_j$ upon its execution of $\collect()$ overlaps. $p_j$ will see that $p_i$ has $\top$ or $1$ and will return $0$. Now simply observe that the expected number of $1$s as well as the expected index for the first $1$ are both $\sqrt{n}$.  
+The expected number of $1$s is $\sqrt{n}$. All these processes will survive. The expected number of trails before the first $1$ is flipped is also $\sqrt{n}$. By Lemma \ref{lem:firstone}, at most $\sqrt{n}$ processes which flipped $0$ will survive.  
 \end{proof}
 
+By Claim \ref{claim:expected}, $O(\sqrt{n})$ processes are expected to survive each phase. Thus by a careful argument (which we can go through if there is time) there are $O(\log \log n)$ expected phases. 
+
+%------------------------------------------------
+
+\section{Improvements}
+Observe that this is not the $O(\log^* n)$ step complexity that we claimed for the algorithm at the beginning. The issue is with our choice of $r$ (probability of flipping 1). In this simple version of the algorithm that we have presented, this value is fixed. It can be shown that if we must fix $r$ then $O(\sqrt{n})$ is the best expected number of survivors we can achieve. Instead what we need is the probability to change dynamically throughout a phase. Intuitively, we want the $r$ to be high at the beginning. When a process gets a 1 and broadcasts its value, all subsequent processes which flip a 0 can $lose$. So as more and more processes become active we want to decrease $p$ so more processes receive 0.
+
+By implementing this idea in the complete form of Poison Pill, the expected number of processes to survive at each phase drops to $O(\log n)$.   
+
+%------------------------------------------------
+
+\section{Conclusion and Recap}
+\textcolor{red}{\emph{(c)}} To recap what we have discussed:  \textcolor{blue}{\emph{Talk about the main ideas of the Poison Pill Technique.}} \textcolor{red}{\emph{(c)}} Using these ideas, the authors developed a randomized algorithm for the Leader Election problem (or alternatively, $Test\&Set$ in a message passing model) with expected $O(\log^* n)$ step complexity and $O(n^2)$ message complexity. \textcolor{red}{\emph{(c)}} We did not get an opportunity to talk about this today, but they also applied their algorithm to the renaming problem \textcolor{blue}{\emph{read results obtained for the renaming problem.}}  
+
+%------------------------------------------------
+
+%\section{Message Complexity Lower Bound?}
+
+
+\begin{comment}
 \subsection{Poison Pill (Heterogeneous)}
 It can be shown that there will be $\Omega(\sqrt{n})$ survivors at every round of the homogeneous algorithm --- the probability of getting $1$ is fixed. To improve this bound we need to change this probability. 
 \begin{algorithm}
@@ -168,10 +228,7 @@ The maximum expected number of processors that flip $0$ and survive is $O(\log^2
 Order the processes according to the time they finish their first broadcast. By property \ref{claim:reproc}, the process ordered first has $|t| \geq 1$, the process ordered second has $|t| \geq 2$ and so on. Since the probability of flipping $1$ decreases as $|t|$ increases, the best expectation achievable is
 \[1 + \sum_{l = 2}^{n} \frac{log|t|}{|t|} \in O(\log^2 n).\]
 \end{proof}
-%------------------------------------------------
-
-%\section{Message Complexity Lower Bound}
-
+\end{comment}
 %----------------------------------------------------------------------------------------
 %	BIBLIOGRAPHY
 %----------------------------------------------------------------------------------------

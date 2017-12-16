@@ -1,0 +1,119 @@
+\documentclass[11pt]{article}
+
+% ===> PACKAGES
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{color}
+\usepackage{comment}
+
+\usepackage{graphicx}
+\usepackage{epstopdf}
+	\epstopdfsetup{update}
+
+\usepackage{fancyhdr}
+\usepackage{mathtools}
+\usepackage[margin=1in]{geometry}
+\usepackage{thmtools}
+
+% ===> PARAMETERS
+\pagestyle{fancy}
+
+% ===> MACROS
+\setlength{\parindent}{0em}
+\setlength{\parskip}{1em}
+
+%	\def\macrosName{Fill in the content of the macros and use \textit{\\macrosName} whenever necessary}
+\newcommand\N{\mathbb{N}}
+\newcommand\Q{\mathbb{Q}}
+\newcommand\R{\mathbb{R}}
+\newcommand\Z{\mathbb{Z}}
+\newcommand\M{\mathcal{M}}
+\newcommand\F{\mathcal{F}}
+\newcommand\E{\mathbb{E}}
+\newcommand\Prob{\mathsf{Pr}}
+\newcommand\AlgA{\mathcal{A}}
+\newcommand\AlgB{\mathcal{B}}
+
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{problem}{Problem}
+\newtheorem{solution}[theorem]{Solution}
+\declaretheoremstyle[%
+  spaceabove=-1em,%
+  spacebelow=2em,%
+  headfont=\normalfont\itshape,%
+  postheadspace=1em,%
+  qed=\qedsymbol%
+]{mystyle} 
+\declaretheorem[name={Proof},style=mystyle,unnumbered,
+]{prf}
+
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+\DeclarePairedDelimiter\anglebrac{\langle}{\rangle}
+
+\begin{document}
+
+\lhead{CSC 2420}
+\chead{Lily Li: 1000858244}
+\rhead{\today}
+
+\section*{Assignment 3}
+% ===> START ASSIGNMENT
+
+\subsection*{Problem 1. On-line Algorithm to Greedy On-line Algorithm.}
+\emph{Solution.} Let the on-line inputs be $u_1, ..., u_n$. We will convert an on-line algorithm $\AlgA$ to a greedy on-line algorithm $\AlgB$ as follows: $\AlgB$ randomly chooses an order $\sigma$ on the fixed vertices of $V$. On input $u_i$, $\AlgB$ runs $\AlgA$ on inputs $u_1, ..., u_i$. Suppose $\AlgA$ matches $u_i$ to $v_i$. If $v_i$ is not currently matched by $\AlgB$, then matched $u_i$ to $v_i$. Otherwise match $u_i$ to an available neighbor $v$ with smallest $\sigma(v)$. Further, if $\AlgA$ does not match $u_i$, $\AlgB$ matches $u_i$ to an available neighbor $v$ with smallest $\sigma(v)$.
+
+Let $M_{\AlgA}$ be the matching produced by algorithm $\AlgA$ and $M_{\AlgB}$ be the matching produced by the greedy algorithm $\AlgB$. We will show that $|M_{\AlgA}| \leq |M_{\AlgB}|$ by transforming $M_{\AlgB}$ into a matching which contains $M_{\AlgA}$. Let $(u_i, v_j)$ be an edge with smallest index $i$ which is in $M_{\AlgA}$ and not in $M_{\AlgB}$. There must exist a matching $(u_k, v_j)$ in $M_{\AlgB}$ otherwise $\AlgB$ would have added edge $(u_i, v_j)$. Observe that $k < i$ since the edge $(u_k, v_j)$ was already added when $\AlgB$ considered $u_i$. $u_k$ cannot be matched by $\AlgA$ since $u_i$ is the vertex with smallest index whose matching edge differed in $M_{\AlgA}$ and $M_{\AlgB}$. Thus we can remove $(u_k, v_j)$ and add $(u_i, v_j)$ to $M_{\AlgB}$ without changing the number of edges in $M_{\AlgB}$. After finitely many such modifications, $M_{\AlgA} \subseteq M_{\AlgB}$ so $\AlgB$ has at least the same approximation ratio as $\AlgA$.
+
+Upon further inspection, it seems unnecessary to fix an order on $V$, but doing so does not hurt.
+
+\subsection*{Problem 2. $\epsilon$-Approximating Median.}
+\emph{Solution.} Let $X_1, ..., X_m$ be i.i.d. random variables in $\{0,1\}$ where $X_i$ indicates whether or not the input at index $i$ was sampled. Let 
+\[X_{L} = \sum_{i:a_i \leq m/2-\epsilon m} X_i \qquad\mbox{ and }\qquad X_{H} = \sum_{i:a_i \geq m/2+\epsilon m} X_i.\]
+We will use the Chernoff bound to bound the probability that more than half of the sampled inputs are in $S_L$ or more than half of the sampled inputs are in $S_H$. First observe that $E[X_L] = E[X_H] = t\cdot \left(\frac{1}{2} - \epsilon \right)$ and $t\cdot\left(1 + \frac{2\epsilon}{1-2\epsilon}\right)\cdot\left(\frac{1}{2} - \epsilon \right) = \frac{t}{2}$. Let $\gamma = \frac{2\epsilon}{1-2\epsilon}$.
+\begin{align*}
+\Pr\left[X_{L} \geq \frac{t}{2}\right] = \Pr\left[X_{L} \geq t\left(1 + \gamma\right)\cdot\left(\frac{1}{2} - \epsilon \right)\right] \leq e^{-\frac{\gamma^2\cdot t\left(\frac{1}{2} - \epsilon \right)}{3}}. 
+\end{align*}
+Further note that $\Pr[X_L \geq t/2] = \Pr[X_S \geq t/2]$. The probability that the algorithm does not return the $\epsilon$-median is: $\left(1-\Pr[X_L \geq t/2]\right)\cdot \left(1-\Pr[X_S \geq t/2]\right) = (1-P)^2$ where $P = \Pr[X_L \geq t/2] = \Pr[X_S \geq t/2]$. Since we want this value to be greater than $1-\delta$: 
+\begin{align*}
+(1-P)^2 = \left(1-e^{-\frac{\left(\frac{2\epsilon}{1-2\epsilon}\right)^2\cdot t\left(\frac{1}{2} - \epsilon \right)}{3}}\right)^2 &\geq 1-\delta\\
+1-\sqrt{1-\delta} & \geq e^{-\frac{\left(\frac{2\epsilon}{1-2\epsilon}\right)^2\cdot t\left(\frac{1}{2} - \epsilon \right)}{3}}\\
+\ln\left(1-\sqrt{1-\delta}\right) & \geq -\frac{\left(\frac{2\epsilon}{1-2\epsilon}\right)^2\cdot t\left(\frac{1}{2} - \epsilon \right)}{3}\\
+\left(\frac{2\epsilon}{1-2\epsilon}\right)^2\cdot t\left(\frac{1}{2} - \epsilon \right) &\geq 3\ln\left(\frac{1}{1-\sqrt{1-\delta}}\right)\\
+t &\geq \frac{3(1-2\epsilon)}{2\epsilon^2}\cdot\ln\left(\frac{1}{1-\sqrt{1-\delta}}\right)\\
+\end{align*}
+serves as a bound for $t$.
+
+\subsection*{Problem 3. Graph Connectivity.}
+\begin{enumerate}
+\item If a graph is $\epsilon$-far from being connected, it has at least $\epsilon m+1$ connected components.
+\begin{proof}
+A graph is $\epsilon$-far from being connected if we need to add at least $\epsilon m$ edges before the graph becomes connected. Suppose for a contradiction, that graph $G$ is $\epsilon$-far but has $k < \epsilon m + 1$ components $C_1, ..., C_k$. We can connect $G$ by adding edges $e_1, ..., e_{k-1}$ where $e_i$ connects components $C_{i}$ and $C_{i+1}$. Since $k-1 < \epsilon m$, $G$ is not $\epsilon$-far.
+\end{proof}
+\item If a graph is $\epsilon$-far from being connected, then at least $\frac{\epsilon m}{2}$ connected components have size at most $\frac{4}{\epsilon d}$.
+\begin{proof}
+Since $\sum_{v \in V} deg(v) = 2m$, the average degree $d=\frac{2m}{n}$. Suppose for a contradiction that there are $t < \frac{\epsilon m}{2}$ connected components of size at most $\frac{4}{\epsilon d}$. By part 1 we know that there are at least $\epsilon m + 1$ components, so there must be at least $\epsilon m + 1 - t$ components of size $> \frac{4}{\epsilon d}$. The total number of vertices in all the components is more than
+\begin{align*}
+\left( \epsilon m + 1 - t \right)\cdot\left(\frac{4}{\epsilon d}\right) + t &= \left( \epsilon m + 1 - t \right)\cdot\left(\frac{2n}{\epsilon m}\right) + t\\
+&= 2n + \frac{2n}{\epsilon m} - \frac{2nt}{\epsilon m} + t\\
+&\geq 2n - \frac{2nt}{\epsilon m}\\
+&> n
+\end{align*}
+This is a contradiction so the claim must hold.
+\end{proof}
+\item The algorithm is indeed a valid connectivity tester.
+\begin{proof}
+If $G$ is connected, then the algorithm will always be able to discover $s$ vertices no matter where it starts. Thus the algorithm will always return `Yes'. 
+
+If $G$ is $\epsilon$-far from being connected, then $G$ must have at least $\epsilon m + 1$ connected components by part 1 and at least $\frac{\epsilon m}{2}$ of these components are ``small'' (size at most $\frac{4}{\epsilon d}$ where $d$ is the average degree) by part 2. If the algorithm choses any vertex in a small component, then it will be unable to find $s$ distinct vertices and will return `No'. It remains to show that if we sample $\Theta\left(\frac{1}{\epsilon d}\right)$ vertices at random the probability of picking a vertex in a small component is greater than $\frac{2}{3}$. We will sample $\frac{3}{\epsilon d} = \frac{3n}{2\epsilon m} \in \Theta\left(\frac{1}{\epsilon d}\right)$ vertices. Observe that the probability of picking a vertex in a small component is at least $\frac{\epsilon m}{2n}$. Let $k = \frac{2n}{\epsilon m}$. Then the probability that none of the vertices we picked are in small components is 
+\[\left(1 - \frac{1}{k}\right)^{\frac{3}{2k}} = \left(\left(1 - \frac{1}{k}\right)^k\right)^{\frac{3}{2}}.\]
+As $\epsilon \rightarrow 0$, $k \rightarrow \infty$ so we can approximate $\left(1 - \frac{1}{k}\right)^k$ by $\frac{1}{e}$. Thus the probability that at least one vertex is in a small components is $1 - \left(\frac{1}{e}\right)^{\frac{3}{2}} \approx 0.776 > \frac{2}{3}$.
+\end{proof}
+\end{enumerate}
+% ===> END ASSIGNMENT
+\end{document}

@@ -1,0 +1,178 @@
+%
+% This is a borrowed LaTeX template file for lecture notes for CS267,
+% Applications of Parallel Computing, UCBerkeley EECS Department.
+\documentclass[twoside]{article}
+\setlength{\oddsidemargin}{0.25 in}
+\setlength{\evensidemargin}{-0.25 in}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textwidth}{6.5 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+
+%
+% ADD PACKAGES here:
+%
+
+\usepackage{amsmath,amsfonts,amssymb, graphicx}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{color}
+\usepackage{comment}
+\usepackage{mathtools}
+
+%
+% The following commands set up the lecnum (lecture number)
+% counter and make various numbering schemes work relative
+% to the lecture number.
+%
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf CSC2221: Introduction to Distributed Computing
+	\hfill Fall 2017} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill Lecture #1: #2  \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { {\it Lecturer: #3 \hfill Scribe: #4} }
+      \vspace{2mm}}
+   }
+   \end{center}
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+   \vspace*{4mm}
+}
+\renewcommand{\cite}[1]{[#1]}
+\def\beginrefs{\begin{list}%
+        {[\arabic{equation}]}{\usecounter{equation}
+         \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+         \setlength{\labelwidth}{1.6truecm}}}
+\def\endrefs{\end{list}}
+\def\bibentry#1{\item[\hbox{[#1]}]}
+
+\newcommand{\fig}[3]{
+			\vspace{#2}
+			\begin{center}
+			Figure \thelecnum.#1:~#3
+			\end{center}
+	}
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+% **** IF YOU WANT TO DEFINE ADDITIONAL MACROS FOR YOURSELF, PUT THEM HERE:
+
+\newcommand\E{\mathbb{E}}
+
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+\DeclarePairedDelimiter\anglebrac{\langle}{\rangle}
+
+\begin{document}
+\lecture{11}{Presentation}{Multiple}{Lily Li}
+
+\section{A Randomized Concurrent Algorithm for Disjoint Set Union}
+\begin{enumerate}
+\item Speaker: Eric Di Tomasso
+\item Summary: an extension of Tarjan's talk on Disjoint Set Union. Data structure consists of operations $Unite$, $SameSet$, and $Find$. Processes are given priority (this is used in later analysis). The analysis gives a probability for the number of ancestors of each process. 
+\item What did I like: it is quite ambitious to go through the material that took Tarjan an hour to cover.  
+\item Easy to understand: definition of operations and algorithms.
+\item Hard to understand: analysis (but this is due to the nature of the material covered).
+\item Improvements: give some intuition of how the proof works. Some audience members might find it difficult to follow along with the equations, but might be able to ground their understanding if they had some intuition as to what was going on.
+\end{enumerate}
+
+\section{An Optimal Multi-Writer Snapshot Algorithm}
+\begin{enumerate}
+\item Speaker: Renjie Liao
+\item Summary: Three settings for the snapshot objects: single updater single scanner, multi-updater single scanner, multi-updater and multiple updater. This implementation is linearizable: linearization points are $X = false$ for scanner and $A[i] = v$ for updater. Multiple new instructions were introduced: Load-Linked, Stored Conditional, Validates. 
+\item What did I like: the color coded time line provides a good visualization of the low-level operations that are occurring. Further it was a really good idea to keep the algorithm up on a separate slide. It was useful to refer to it when I was confused.
+\item Easy to Understand: the algorithm for a single-updater single scanner was still quite straight forward (there were only two functions $update$ and $scan$ reminiscent to the snapshot objects shown in-class). 
+\item Hard to understand: what was the purpose of the reorder of the for-loop on slide 10? It would be preferable if you explain the motivation for this. 
+\item Improvements: the code became more complex as we move through the settings and the font got smaller. Please increase the font size (or maybe simplify the code using pseudo-code conventions). Motivate the newly introduced function. What purpose do these functions serve? (This might have been one of the counter-examples, but stating it explicitly would have helped with comprehension).
+\end{enumerate}
+
+\section{The Computability of Relaxed Data Structures: Queues and Stacks as Examples}
+\begin{enumerate}
+\item Speaker: Zejun (Thomas) Yu
+\item Summary: focus on the queue data structure. Computability is measure by consensus number and data structure is relaxed (in terms of the queue, need output oldest element). Generalize the definition of a queue to $Q[a,b,c]$ which represent possible inserts, possible removals and possible head reads. There is quite a bit of nuance when increasing/decreasing the values of $a$, $b$, and $c$. 
+\item What did I like: examples! Seeing how the queues differ for different values of $a$, $b$, and $c$ was quite useful for understanding.
+\item Easy to Understand: the examples of $queue[a,b,c]$ for fixed $a$, $b$, and $c$. 
+\item Hard to understand: the last proof. I got lost trying to remember what you were proving. 
+\item Improvements: test laptop before hand to avoid technical difficulties. In this presentation in particular, it would be nice to get a ``road-map'' of the topics covered (the second half of the presentation was dominated by the consensus number proof and it overwhelms the results shown previously). Further, keep what you are proving on the board.
+\end{enumerate}
+
+\section{Simple and Optimal Randomizes Fault-Tolerant Rumor Spreading}
+\begin{enumerate}
+\item Speaker: Ruijie Deng
+\item Summary: broadcast problem in complete graph with $f$ processes which can initially crash. Whispering and gossip-based protocols. In the fault-free case it is easy to see why we only need $O(\log n)$ rounds (only one message is passed in  each round between processes). The GP algorithm proceeds by a divide and conquer-like procedure . There is also a randomized version of the GP algorithm.  
+\item What did I like: the results of the paper are interesting. 
+\item Easy to Understand: the problem and model definition.
+\item Hard to understand: the steps of the GP algorithm. 
+\item Improvements: please speak up (the tea kettle was quite loud)! Maybe add some picture (like what you did with the tree notation) to illustrate what is going on during the complexity analysis. It is a lot easier understand circles with arrows than lists of numbers. 
+\end{enumerate}
+
+\section{Deterministic Leader Election Takes $\Theta(D + \log n)$ Bit Rounds}
+\begin{enumerate}
+\item Speaker: Wenyuan
+\item Summary: Synchronous message passing model, but the benefit here is that the bit complexity is $O(1)$. Apparently this is because there is only seven different ways you can change your identifier. By the way all process modify their identifier by appending its length. During the algorithm, at each step its talks to its neighbors  and modifiers its identifier slightly to be some sort of prefix. 
+\item What did I like: the idea of the paper were quite interesting.
+\item Easy to Understand: main definitions and the updates once I remembered that the identifiers were modified.
+\item Hard to understand: initially, when you started talking about the updates, it was really unclear as to how this contributed to solving the leader election at all.
+\item Improvements: please give some intuition for the notation (page 5 \~ 6). It would have been helpful to know why you needed to pad the identifier to the length before you started talking about how to update the $Z_u$'s. Further it might help to put the useful notation and remarks on the board when you talked about the updates just so we had something to refer to.
+\end{enumerate}
+
+\section{Distributed Detection of Cycles}
+\begin{enumerate}
+\item Speaker: Zehui (Joyce) Zhou
+\item Summary: Using the CONJEST model. Detection cycles using property testing (one sided error). There are two phases: in the first phase, everyone decides on an edge. In the next phase you want to check if the edge belong to some $C_k$. You want to broadcast all edge disjoint paths, being careful to pick particular paths since the number of paths you are allowed to send along is constant. 
+\item What did I like: examples! Also, the way you presented the algorithm gave me a good intuition of was going on.
+\item Easy to understand: the way the algorithm choose paths to forward. (Thanks, the pictures were really helpful!)
+\item Hard to understand: the complexity proof for the algorithm. There are several symbols and I was somewhat lost as to what they all represented. Further, I thought you were using bit-complexity, so it was unclear how the claim related to that.
+\item Improvements: add slide numbers and (this might be a personal preference) don't use the power-point templates (you can squeeze in more information if you don't use their standard headers).
+\end{enumerate}
+
+\section{A Simple Deterministic Distributed MST Algorithm with Near-Optimal Time and Message Complexity}
+\begin{enumerate}
+\item Speaker: Mengye Ren 
+\item Summary: The CONJEST model. There are three phases: build a forest, build a BFS, and use the BFS to assist with merging. There were also several algorithms presented: Pipeline MST, GHS (based on Boruvka's Algorithm), and their combination. The eventual algorithm has high message complexity because of the Pipeline MST. If instead we use another technique to merge the the components then you get better message complexity. Eventually we get $O(\sqrt{n}\log n)$ time complexity and $O(m + n\log n\log ^* n)$ message complexity.   
+\item What did I like: ``road-map'' at the beginning of the presentation and the chart that you filled out during the presentation. This is good for keeping track of the partial results you covered throughout the presentation. 
+\item Easy to understand: generally, I thought the entire presentation is quite well done and easy to understand. 
+\item Hard to understand: nothing of note. 
+\item Improvements: again, the presentation is quite well done. Just a small thing: please add the reference page to the presentation (this is particularly useful here since several papers were mentioned and it was not entirely clear which was the one you read)! 
+\end{enumerate}
+
+\begin{comment}
+\section{}
+\begin{enumerate}
+\item Speaker:
+\item Summary: 
+\item What did I like: 
+\item Easy to understand:
+\item Hard to understand:
+\item Improvements:
+\end{enumerate}
+\end{comment}
+\end{document}
