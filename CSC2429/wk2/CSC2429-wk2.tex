@@ -1,0 +1,151 @@
+\input{../Template/structure.tex}
+
+\begin{document}
+\lecture{2}{Proof System and Algorithms for LP}{Toni Pitassi}{Lily Li}
+
+\section{Sherali Adams}
+\subsection{Review LP}
+Consider this as a sound and complete proof system for deriving or refuting a set of linear inequalities over $\R^n$. As always an LP is defined as 
+\begin{align*}
+\max \mathbf{c}^Tx \qquad \mbox{ over }\R\\
+\mbox{Subject to: }A\mathbf{x} \leq \mathbf{b}
+\end{align*}
+The decision version of this problem asks if the feasible region of the LP is empty.
+
+\begin{lemma}
+(Farkas' Lemma.) A set $\{A\mathbf{x} \leq \mathbf{b}\}$ is unsatisfiable over $\R$ if and only if there exists $\mathbf{y} \geq 0$ such that $\mathbf{y}^T A = 0$ and $\mathbf{y}^T\mathbf{b} = -1$. 
+\end{lemma}
+
+Farkas' Lemma should be viewed as a soundness and completeness proof of the decision version and the $y^T$ can be seen as a linear combination of the rows of of $A$ which add to $-1$.
+
+\subsection{Duality}
+(Considered a form of implicational completeness). We want to show that each feasible solution of the dual produces an upper bound of the primal objective function. Consider any $\mathbf{y}^T \geq 0$ such that $\mathbf{y}^TA \geq \mathbf{c}^T$. Then for any feasible solution $\mathbf{x}$ of the primal $A\mathbf{x} \leq \mathbf{b}$, 
+\[\mathbf{c}^T \leq \mathbf{y}^TA\mathbf{x} \leq \mathbf{y}^T\mathbf{b}\]
+where $\mathbf{c}^T\mathbf{x}$ is exactly the primal objective function. Thus we say that $\mathbf{y}$ \emph{witnesses} the upper bound $\mathbf{b}^T\mathbf{y}$.
+
+To see how tight this bound is, we consider following primal and dual LP problems:
+\begin{align*}
+&\mbox{(P) Primal:} &\mbox{(D) Dual:}\\
+&\max \mathbf{c}^T\mathbf{x} &\min \mathbf{b}^T\mathbf{y}\\
+&\mbox{Such that: } A\mathbf{x} \leq \mathbf{b} &A^T \mathbf{y} \geq \mathbf{c}\\
+&\mathbf{x} \geq 0 &\mathbf{y} \geq 0
+\end{align*}
+
+\begin{theorem}
+(Duality of LP.) \emph{This is implied by Farkas' Lemma.} For an $LP$ with primal solution $P$ and dual solution $D$, exactly of the following is true:
+\begin{enumerate}
+\item Neither (P) nor (D) has a feasible solution.
+\item (P) has arbitrarily large solutions and (D) is unsatisfiable.
+\item (P) is unsatisfiable and (D) has an arbitrarily small solution.
+\item Both (P) and (D) have optimal solutions $\mathbf{x}^*$ and $\mathbf{y}^*$. Further $\mathbf{c}^T\mathbf{x}^* = \mathbf{b}^T\mathbf{y}^*$
+\end{enumerate}
+\end{theorem}
+
+In the decision version an LP refutation is just the $\mathbf{y}$ from Farkas' Lemma.
+
+An LP ``derivation" of \[\{A\mathbf{x} \leq \mathbf{b}, \mathbf{x} \geq 0\} \implies \mathbf{c}^T\mathbf{x} \leq \mathbf{c_0}\]
+is a $\mathbf{y}^* \geq 0$ such that $(\mathbf{y}^*)^T\mathbf{b} = \mathbf{c_0}$. 
+
+It is known that LP is in $\ClassP$. The satisfiability of an LP is in $\ClassNP$ since we can just guess a $\mathbf{x}$. Further Farkas' lemma shows that the problem is in $\ClasscoNP$ since we can just guess a $\mathbf{y}$ (there are problems which are in $\ClassP \cap \ClassNP$ but not known to be in $\ClassP$, e.g. factoring and graph isomorphism, but these are uncommon). In 1979 Khachiyan use the Ellipsoid Algorithm to show that $LP \in \ClassP$.    
+
+\subsection{SA Introduction}
+SA is a sound, lift and project proof system that ``tightens" the LP solution to a good approximation of the IP. SA can be interpretations: as (1) LP tightening, solutions to the extended degree $d$ SA LP pseudo-distribution, and as a proof or refutation system.  
+
+\subsection{SA Degree $d$ Tightening}
+When viewed as LP tightening in degree $d$, we do the following:
+\begin{itemize}
+\item Add new variables to represent all degree $\leq d$ terms.
+\item \emph{Lift} the polytope from $n$ dimensions to $n^{o(d)}$ dimensions.
+\item Project back to $x_1, ..., x_n$ preserves all $0,1$ solutions (and may remove some fractional solutions).
+\end{itemize}
+
+More formally, let the original LP be 
+\[A\mathbf{x} \geq \mathbf{b} \mbox{, and let } \mathbf{1} \geq \mathbf{0}, \mathbf{0} \leq \mathbf{x} \leq \mathbf{1}.\] 
+We add new variables:
+\[y_S \forall S \subseteq [n], |S| \leq d.\]
+And new constraints (junta) for all subsets $U, V \subset [n]$ with $U \cap \emptyset$ and $|U \cup V| \leq d$:
+\[\prod_{i \in U}x_i \cdot \prod_{j \in V}(1 - x_j) \cdot (\mathbf{a}^T\mathbf{x} - \mathbf{b}) \geq 0 \]
+for all rows $\mathbf{a}$ of $A$, for all $U, V$.
+
+When we translate the above constrains into linear equalities using the new $y_S$ variables and the multi-linear inequalities $x_i^2 = x_i$ we obtain:
+\begin{align*}
+y_{\emptyset} &= 1\\
+y_{i} &= x_i\\
+0 &\leq y_{S} \leq 1\\
+\sum_{V' \subseteq V} (-1)^{|V'|} &\cdot \left(\sum_{i = 1}^n a_i y_{U \cup V' \cup \{i\}} - \mathbf{b}y_{U \cup V'}\right) \geq 0
+\end{align*}
+for all rows $\mathbf{a}$ of $A$.
+
+Further, since we have trivially $\mathbf{1} \geq \mathbf{0}$ as an initial constraint, we can add
+\[\prod_{i \in U}x_i \prod_{j \in V}(1-x_j) \geq 0\]
+which translates to 
+\[\sum_{V' \subseteq V}(-1)^{|V'|}\cdot \left(y_{U \cup V'}\right) \geq 0\]
+
+Now we need to defined a pseudo-distribution for a degree $d$ SA LP (this is a real distribution over sets variables of degree at most $d$ and might not work else-where). Let $\Hcal = \{A\mathbf{x} - \mathbf{b} \geq \mathbf{0}, \mathbf{x} \geq \mathbf{0}, \mathbf{1} \geq \mathbf{0}\}$. $\Ecal_{d}(\Hcal)$ is a set of linear functionals $E: \R[x_1, ..., x_n]_d \rightarrow \R$ such that $\forall E \in \Ecal_{d}(\Hcal)$:
+\begin{enumerate}
+\item $E(1) = 1$
+\item $E(Q) \geq 0$ for all non-negative junta $Q$ with $\degree(Q) \leq d$. 
+\item $E(PQ) \geq 0$ for $P \in \Hcal$, and non-negative junta $Q$ with $\degree(PQ) \leq d$ where a non-negative junta is of the form:
+\[\alpha \cdot \prod_{i \in U}x_i \prod_{j \in V}(1-x_j)\]
+for non-negative coefficient $\alpha$ and $S \cup T = \emptyset$. \emph{This is quite useful to show that what you have is actually a a probability distribution (recall the marginals).}
+\end{enumerate}
+
+Essentially you should interpret each $E \in \Ecal_d(\Hcal)$ as a \emph{pseudo-distribution} for the feasible (maybe? my words here) region of $\Hcal$. Further, feasible solutions to the degree-$d$ SA polytope are exactly the degree-$d$ \emph{pseudo-distributions}.
+
+Consider any feasible solution $\alpha$. For each variable $y_S$,$\alpha(y_S)$ is the value in $[0,1]$ assigned to $y_S$ such that all the linear constraints are satisfied.
+
+The corresponding pseudo-distribution $E_{\alpha}$ which assigns values to degree-$d$ polynomials is defined in the obvious way.
+\begin{example}
+Suppose we have $d = 3$ and the polynomial $f = -x_1x_2x_4 + x_7 - 3x_1x_8$, then
+\[E_{\alpha}[f] = -\alpha(y_{1,2,4} + \alpha(y_{7}) -3\alpha(y_{1,8}).\]
+\end{example}
+It so happens that the degree-$d$ SA linear constraints exactly enforce the properties of the pseudo-distribution (what $E_{\alpha}$ does is assign a $[0,1]$ value to every set of $\leq d$ of the original variables such that the marginal distributions of each subset $S' \subset S$ is equal to the distribution assigned to each entry of $S'$). 
+
+\subsection{Equivalent view as a Refutation System}
+Let $\Fcal$ be a set of polynomial equalities of the form $x_i^2 - x_i = 0$ (this set is actually quite important, why?). Let $\Hcal$ be a set of polynomial inequalities $\{A\mathbf{x} - \mathbf{b} \geq 0$, $1 \geq \mathbf{x} \geq 0$, and $\mathbf{1} \geq \mathbf{0}\}$ our original inequalities. A degree-$d$ SA derivation of $-1$ from $\Fcal$ and $\Hcal$ --- witnessing that no feasible solutions exists --- is a set of polynomials $(g_1, ..., g_m, p_1, ..., p_l)$ such that
+ 
+\begin{enumerate}
+\item $\sum_{j=1}^{m} g_jf_j + \sum_{i = 1}^{l}p_ih_i = -1$
+\item The $p_i$'s are non-negative linear combinations of juntas $p_i = \alpha_1Q_1 + \cdots + \alpha_mQ_m$ (the $Q$'s are the juntas), $h_i \in \Hcal$, $f_j \in \Fcal$, and $g_j$ are arbitrary polynomials --- since the $f_j$'s evaluate to 0. 
+\item $\max\{\degree(g_jf_j), \degree(p_ih_i)\} = d$.
+\end{enumerate}
+
+\subsection{SA as a Derivation System}
+SA as a derivation system is almost exactly like SA as a refutation system except that the sum of the product of the polynomials $g_jf_j$ and $p_ih_i$ is some other polynomial $f$ which we wish to derive.
+
+\begin{lemma}
+Let $\{A\mathbf{x} - b \geq 0, 1 \geq 0, \mathbf{x} \geq 0\} = \Hcal$. Then the degree-$d$ SA LP has no feasible solution if and only if there is a degree-$d$ SA refutation of $\Hcal$.
+\end{lemma}
+\begin{proof}
+Let the SA refutation be a sett of polynomials as above. The SA LP has a feasible solution $\mathbf{x}^*$, then we can plug in $\mathbf{x}^*$ into the set of polynomials and evaluate. Since $\mathbf{x}^*$ is feasible the LHS of each inequality will be positive so it is impossible to obtain a sum equal to $-1$. 
+
+Conversely if the SA LP has no feasible solution we can translate it into a refutation of $\Hcal$ as defined in the ``SA as a Refutation System" section.
+\end{proof} 
+
+\begin{example}
+We are going to apply SA on the maximum independent set problem with the graph $G = C_7$. If you just formulate the standard LP as:
+
+\begin{align*}
+\mbox{Maximize: } &\sum_{i=1}^{7} x_i\\
+\mbox{Subject to: } &x_{i} + x_{i+1} \leq 1\\
+\mbox{ and } &0 \leq x_i \leq 1  \mbox{ for } 1 \leq i \leq 7
+\end{align*}
+
+you would get a fractional optimum value of $3.5$. Lifting to $d = 2$ introduces the following constraints:
+
+\begin{align*}
+x_1(x_1 + x_2) \leq x_1 &\implies y_{1,2} \leq 0\\
+(1-x_1)(x_2 + x_3) \leq 1 - x_1 &\implies y_{2} + y_{3} - y_{1,2} - y_{1,3} \leq 1 - y_{1}\\
+x_1(x_3 + x_4) \leq x_1 &\implies y_{1,3} + y_{1,4} \leq y_{1}\\
+(1-x_1)(x_4 + x_5) \leq 1 - x_1 &\implies y_{4} + y_{5} - y_{1,4} - y_{1,5} \leq 1 - y_{1}\\
+x_1(x_5 + x_6) \leq x_1 &\implies y_{1,5} + y_{1,6} \leq y_{1}\\
+(1-x_1)(x_6 + x_7) \leq 1 - x_1 &\implies y_{6} + y_{7} - y_{1,6} - y_{1,7} \leq 1 - y_{1}\\
+x_1(x_1 + x_7) \leq x_1 &\implies y_{1,7} \leq 0\\
+\end{align*}
+
+(as well as other constraints, but these are all the ones we need to consider). Running the LP here would produce the answer $3$ (which is optimal).
+\end{example}
+
+%\section{Cutting Planes}
+
+\end{document}

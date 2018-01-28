@@ -1,0 +1,42 @@
+\input{../Template/structure.tex}
+
+\begin{document}
+\lecture{3}{SA and SOS}{Toni Pitassi}{Lily Li}
+
+\section{SA Review}
+Recall: Each feasible solution $\alpha$ to the degree-$d$ SA LP corresponds to a linear functional $E_{\alpha}: [x_1, ..., x_n]_d \rightarrow \R$. These functionals are the \emph{pseudo-distributions}. The set of all such functions is $\Ecal_d(\Hcal)$ where $\Hcal = \{A\mathbf{x} - \mathbf{b} \geq 0, 1 \geq \mathbf{x} \geq 0, 1 \geq 0\}$ are our original inequalities (which are linear). 
+
+\begin{lemma}
+$\Hcal = \{A\mathbf{x} - \mathbf{b} \geq 0, 1 \geq \mathbf{x} \geq 0, 1 \geq 0\}$ and $\Fcal$ as before. Then 
+\[\min \{E(P): E \in \Ecal_d(\Hcal)\}\]
+equals $\max\{c_0: \mbox{there is a degree-$d$ SA derivation of $P \geq c_0$ from }\Hcal, \Fcal\}$.
+\end{lemma}
+
+\subsection{How hard is it to find SA proofs?}
+If the LP is infeasible then we can find a SA refutation of degree-$d$ 
+
+\subsection{Proof Systems/ LP tightening related to SA}
+\begin{enumerate}
+\item Dynamic SA ($LS_d$): normal SA is a one shot system. The dynamic variant takes the original LP, lifts to degree-$d$, then project down to your original dimension. If you did not get the solution that you want yet, add some of the higher degree inequalities to your original set and repeat.
+\item Nullsatz (polynomial calculus, PC): over any field, not just $\R$, were we only allow equalities. Consider the $k$-CNF $F = C_1 \land \cdots \land C_m$ over $x_1, ..., x_n$. We will convert each clause $C_i$ to an equality as follow (an example will suffice):
+\[x_1 \lor \bar{x_2} \lor x_3 \implies (1-x_1)x_2(1-x_3) = 0\]
+and including $x^2_i - x_i = 0$. Observe that the only way the polynomial would \emph{not} be satisfied is if the clause is false. 
+
+There is a dynamic variant of Nullsatz. 
+\item Cutting Planes: this is \emph{not} a lift and project system (unlike SA and Nullsatz). The rules are
+\begin{enumerate}
+\item Add non-negative linear combinations of previously derived inequalities.
+\item Perform division with rounding. That is, for
+\[\sum_{i=1}^{n}a_ix_i \geq a_0\]
+where $a_1, ..., a_n$ \emph{is} divisible by $k$ and $a_0$ is not, we can derive the inequality:
+\[\sum_{i=1}^{n} \frac{a_i}{k}x_i \geq \ceil{a_0/k}.\]
+\end{enumerate}
+It is unknown if this system is automatizable, but this is widely used in optimization applications for solving LP.
+\end{enumerate} 
+
+\section{SOS}
+\begin{The Basics}
+We want to start with a quadratic integer program and relax it to an SDP program (this is going to be a generalization of degree-$d$ SA, denoted $SA_d$).
+
+
+\end{document}

@@ -1,0 +1,105 @@
+\input{../Template/structure.tex}
+
+\begin{document}
+\lecture{1}{Introductions}{Toni Pitassi}{Lily Li}
+
+\section{Administration}
+Similar courses include: Boak Barak and Steurer/Kothari. Notes for the the Barak and Steurer lectures that tie into these notes will be adding in \textcolor{blue}{blue}. Notes from the Massico Lauria lectures will be added in \textcolor{red}{red}. Choice between two assignments or an assignment and one presentation.
+
+\section{Introductions Proper}
+\begin{definition}
+A \textbf{proof system} is a \emph{non-deterministic} procedure for generating a family of algorithms. These can be used to \emph{rule out} approaches for solving problem using certain systems e.g. SA or SOS. 
+\end{definition}
+
+What is an \emph{extended formulation}? This is a large class of linear programs. There is a clever reduction that reduces this to SA (thus SA results are lower bounds for the LPs). 
+
+The point of a proof complexity \emph{upper bound} is to produce efficient algorithms.
+
+\subsection{Motivating Examples} 
+\begin{example}
+$\MaxSAT$: given $f = c_1 \land \cdots \land c_m$ which is a 3CNF formula over the variables $x_1, ..., x_n$. Assign $x_i \in \{0,1\}$ to maximize the number of satisfied clauses.
+
+Consider the integer program formulation: let the variables be $x_1, ..., x_n$ and $c_1, ..., c_m$. We want $\max \sum c_i$ where $c_i$ is set to $1$ if it is satisfied. Each clause gets turned into a formula in the usual way. If $c_1 = x_1 \land \lnot x_2 \land x_3$ then $c_1$ becomes the system 
+\[x_1 + (1-x_2) + x_3 \geq c_1\]
+where $x_i, c_j \in \{0,1\}$. The standard approach is to relax the LP to an IP and solve the LP (of course you add the constraints $x_i, c_j \in [0,1]$). 
+\end{example}
+
+How does the $FRACT OPT$ compare to the integral $OPT$? If $f$ is an exact 3CNF and $f$ is unsatisfiable then $OPT \geq \frac{7}{8}m$, where $m$ is the number of clauses. To see this remark that if every triple of terms appeared in the formula $f$ then one out of every eight clauses must be false; general formulas might have fewer clauses and thus fewer false clauses. Unfortunately, if we run the fraction algorithm, $FRACT OPT = m$ by choosing each $x_i = \frac{1}{2}$ (this allows each $c_i = 1$). Generally 
+\[FRACT OPT \geq OPT \geq \rd(FRACT OPT)\]
+and we compare the quality of our rounded by
+\[\frac{\rd(FRACT OPT)}{OPT} = \frac{\rd(FRACT OPT)}{FRACT OPT} \cdot\frac{FRACT OPT}{OPT} \geq K\]
+for some constant $K$ and usually this is done by showing that $\frac{\rd(FRACT OPT)}{FRACT OPT} \geq K$. \textcolor{red}{Given a integer program and its relaxation, the ratio
+\[\frac{OPT}{FRAC}\]
+is the \textbf{integrality gap} of the relaxation.} 
+
+\begin{example}
+$\MaxCUT$: given a weighted graph $G = (V,E)$ with weight function $w$ find a cut $S$ which induces the largest edge set. 
+
+The natural formulation here is a quadratic program: let the variables be $y_i$ for every vertex $v_1, ..., v_n$ then 
+\[\max \frac{1}{2}\sum_{i < j}w_{i,j}(1 - y_iy_j)\]
+where $y_i \in \{-1,1\}$ for $i \in [n]$. Let the optimum value of this program be $\opt(G)$. We attempt to write down a semidefinite program whose value is an \emph{upper bound} on $\opt(G)$. 
+
+Here comes that crazy semi-definite relaxation: replace each $y_i$ by a vector $\mathbf{u}_i \in S^{n-1} = \{\mathbf{x} \in \R^n: \norm{\mathbf{x}} = 1\}$ --- read: the unit sphere in $n-1$ dimensions. Our semi-definite relaxation becomes:
+\begin{align}
+\label{form:vectorform}
+\mbox{Maximize} &\qquad\frac{1}{2}\sum_{i < j} w_{i,j}(1 - \mathbf{u}_i^T\mathbf{u}_j)\\
+\mbox{Subject to} &\qquad\mathbf{u}_i \in S^{n-1}, \quad i \in [n]
+\end{align}
+Note to convert $y_i$ into a vector $\mathbf{u}_i$ it suffices to write $\mathbf{u}_i = (0, ..., 0, y_i)$. Further observe that every solution to the original optimization problem is a solution to our relaxation (the relaxation could contain other solutions as well). We need one more substitution to get to our actual semi-definite program, namely $x_{i,j} = \mathbf{u}_i^T \mathbf{u}_j$. The system now becomes
+\begin{align}
+\label{form:semidefform}
+\mbox{Maximize} &\qquad\frac{1}{2}\sum_{i < j} w_{i,j}(1 - x_{i,j})\\
+\mbox{Subject to} &\qquad x_{i,i} = 1 \quad i \in [n] \mbox{ and }  X \succeq 0.
+\end{align}
+This works because $X$ can be written as $X = U^TU$ where $\mathbf{u}_i$ is the $i^{\text{th}}$ column of $U$. Thus every solution to \ref{form:vectorform} is a solution of \ref{form:semidefform} and vice versa (there is some nuance here regarding the constraints). Then the optimum values of the semidefinite program $\SDP(G) \geq \opt(G)$ and we can find the optimum matrix $X^* \succeq 0$ with $x_{i,i}^* = 1$ for all $i \in [n]$ satisfying 
+\[\sum_{i < j} w_{i,j}(1 - x_{i,j}^*) \geq \SDP(G) - \epsilon\]
+for every $\epsilon > 0$ in polynomial time (don't ask how... I don't know yet). We find the \emph{Cholesky factorization} of $X^*$ into $(U^*)^TU^*$ and take the columns of $U^*$ to be an almost-optimal solution to the vector problem.
+
+Finally we need to round the vector solutions to get a feasible integer valued solution. Do this by exploiting the geometry of the $\mathbf{u}_i$'s. Since $\mathbf{u}_i \in S^{n-1}$ we will \emph{randomly} pick a vector $\mathbf{p} \in S^{n-1}$ and use the normal to $\mathbf{p}$ to divide the plane into two halves. If $\mathbf{u}_i$ is in one half then round $\mathbf{u}_i$ to $1$ otherwise round $\mathbf{u}_i$ to $-1$. 
+
+The reason why this works relies on a somewhat cryptic probability argument. After taking an appropriate derivative you find that the expected number of cut edges is at least $0.878\opt(G)$. 
+
+\textcolor{blue}{An alternative formulation of the max-cut problem for an $n$-vertex graph $G$ is as the following degree two polynomial $f_G(x)$ where $\mathbf{x}$ is a cut:
+\[f_G(x) = \sum_{e_{i,j} \in E} (x_i - x_j)^2.\]
+By choosing $x_i \in \{0,1\}$ --- thus choosing $\mathbf{x} \in \{0,1\}^n$ --- we effectively get to choose the partition. Deciding if $c - f_G(\mathbf{x}) \geq 0$ for all $\mathbf{x}$ is the same as deciding if the maximum cut of $G$ is greater than $c$.}  
+\end{example}
+
+\textcolor{blue}{The above is a special cases of the problem we want to consider. These \emph{non-negativity over the hyper-cube} problems ask: Given a low-degree polynomial $f:\{0,1\}^n \rightarrow \R$, decided if $f \geq 0$ over the hyper-cube or if there exists a point $\mathbf{x} \in \{0,1\}^n$ such that $f(x) < 0$. 
+}
+
+\textcolor{blue}{
+\begin{definition}
+The \textbf{sum-of-squares algorithm}, when restricted to the above special cases, takes as input the polynomial $f$ and outputs either (1) a proof that $f(\mathbf{x}) \geq 0$ for all $\mathbf{x}$ or (2) a collection of objects which represent points $\mathbf{x}$ such that $f(\mathbf{x}) < 0$. 
+\end{definition}
+An appropriate certificate is the following:
+\begin{definition}
+A degree-$d$ \textbf{sum-of-squares certificate} (of non-negativity) for $f: \{0,1\}^n \rightarrow \R$ is a set of polynomials $g_1, ..., g_r: \{0,1\}^n \rightarrow \R$ of degree $\leq \frac{d}{2}$ for some $r \in \N$ such that 
+\[f(\mathbf{x}) = g_1^2(\mathbf{x}) + \cdots + g_r^2(\mathbf{x})\]
+for every $\mathbf{x} \in \{0,1\}^n$. This set of polynomials is a \emph{degree-$d$ sos proof} of the inequality $f \geq 0$.   
+\end{definition}
+}
+
+\subsection{Resolution}
+Think of this as a system which \emph{tightens} linear programs. But first: proof system basics!
+
+\begin{definition}
+A \textbf{proof system} takes as input a set of constraints (CSP) over $x_1, ..., x_n$ usually $x_i \in \{0,1\}$ or $\{-1, 1\}$ (sometimes $x_i \in \F, \R_{\geq 0}$) and then 
+\[\Pf(y) \rightarrow F\]
+that is the proof system takes as a proof (string) $y$ and outputs what $y$ is a proof of, namely $F$ (generally we think of these are unsatisfiable CSPs). We want our algorithm to run in polynomial time and the proof to be complete and sound. 
+\end{definition}
+
+\begin{definition}
+A proof system $\Pf$ is \textbf{polynomially-automatizable} if there for all $n$ sufficiently large there exists an algorithm $A$ such that $A(F)$ --- $F$ is $KCNF$ in $n$ variables --- outputs a valid $\Pf$-proof (that is: $\Pf(A(F)) = F$) and such that the running time of $A$ is polynomial in the size of the shortest $\Pf$-proof of $F$.
+\end{definition}
+
+\subsubsection{Basics}
+Resolution is a refutation based proof system which operates on CNF (with variables which take values $\{0,1\}$). You take clauses and resolve new clauses. If you ever get the empty clause then the initial CNF formula is unsatisfiable. You could have a decision tree or DAG versions, but these are actually truth tables which quit early.  
+
+The way you want to think about this is as follows: replace each $\{0,1\}$ valued $x_i$ with fractional $0 \leq x_i \leq 1$. The constraints are extended when we derive new clauses, and this shrinks the size of the poly-tope containing all the feasible solutions. 
+
+In-terms of automizability, a tree-resolution proofs can be found in time $n^{\log(\mbox{size of the shortest proof})}$ where size is the size of the resolution tree. There is a BenSasson-Wigderson theorem that helps you show the above. 
+
+\begin{example}
+Consider a 3CNF formula over $x_1, ..., x_n$ and you want to decide if $F$ is satisfiable or not. Surprisingly the above resolution technique bets the brute-force approach.
+\end{example} 
+\end{document}

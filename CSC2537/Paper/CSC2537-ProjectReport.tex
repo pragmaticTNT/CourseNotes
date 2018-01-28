@@ -1,0 +1,183 @@
+\documentclass{sigchi}
+
+% Use this command to override the default ACM copyright statement
+% (e.g. for preprints).  Consult the conference website for the
+% camera-ready copyright statement.
+
+%% EXAMPLE BEGIN -- HOW TO OVERRIDE THE DEFAULT COPYRIGHT STRIP -- (July 22, 2013 - Paul Baumann)
+% \toappear{Permission to make digital or hard copies of all or part of this work for personal or classroom use is      granted without fee provided that copies are not made or distributed for profit or commercial advantage and that copies bear this notice and the full citation on the first page. Copyrights for components of this work owned by others than ACM must be honored. Abstracting with credit is permitted. To copy otherwise, or republish, to post on servers or to redistribute to lists, requires prior specific permission and/or a fee. Request permissions from permissions@acm.org. \\
+% {\emph{CHI'14}}, April 26--May 1, 2014, Toronto, Canada. \\
+% Copyright \copyright~2014 ACM ISBN/14/04...\$15.00. \\
+% DOI string from ACM form confirmation}
+%% EXAMPLE END -- HOW TO OVERRIDE THE DEFAULT COPYRIGHT STRIP -- (July 22, 2013 - Paul Baumann)
+
+% Arabic page numbers for submission.  Remove this line to eliminate
+% page numbers for the camera ready copy
+% \pagenumbering{arabic}
+
+% Load basic packages
+\usepackage{balance}  % to better equalize the last page
+\usepackage{graphics} % for EPS, load graphicx instead 
+\usepackage[T1]{fontenc}
+\usepackage{txfonts}
+\usepackage{mathptmx}
+\usepackage[pdftex]{hyperref}
+\usepackage{color}
+\usepackage{booktabs}
+\usepackage{textcomp}
+% Some optional stuff you might like/need.
+\usepackage{microtype} % Improved Tracking and Kerning
+% \usepackage[all]{hypcap}  % Fixes bug in hyperref caption linking
+\usepackage{ccicons}  % Cite your images correctly!
+% \usepackage[utf8]{inputenc} % for a UTF8 editor only
+
+% If you want to use todo notes, marginpars etc. during creation of your draft document, you
+% have to enable the "chi_draft" option for the document class. To do this, change the very first
+% line to: "\documentclass[chi_draft]{sigchi}". You can then place todo notes by using the "\todo{...}"
+% command. Make sure to disable the draft option again before submitting your final document.
+\usepackage{todonotes}
+
+% Paper metadata (use plain text, for PDF inclusion and later
+% re-using, if desired).  Use \emtpyauthor when submitting for review
+% so you remain anonymous.
+\def\plaintitle{Edge Omission Techniques for Visualization of Dense Directed Graphs}
+\def\plainauthor{First Author, Second Author, Third Author,
+  Fourth Author, Fifth Author, Sixth Author}
+\def\emptyauthor{}
+\def\plainkeywords{Lossy compression; graph visualization; hardness reductions.}
+\def\plaingeneralterms{Documentation, Standardization}
+
+% llt: Define a global style for URLs, rather that the default one
+\makeatletter
+\def\url@leostyle{%
+  \@ifundefined{selectfont}{
+    \def\UrlFont{\sf}
+  }{
+    \def\UrlFont{\small\bf\ttfamily}
+  }}
+\makeatother
+\urlstyle{leo}
+
+% To make various LaTeX processors do the right thing with page size.
+\def\pprw{8.5in}
+\def\pprh{11in}
+\special{papersize=\pprw,\pprh}
+\setlength{\paperwidth}{\pprw}
+\setlength{\paperheight}{\pprh}
+\setlength{\pdfpagewidth}{\pprw}
+\setlength{\pdfpageheight}{\pprh}
+
+% Make sure hyperref comes last of your loaded packages, to give it a
+% fighting chance of not being over-written, since its job is to
+% redefine many LaTeX commands.
+\definecolor{linkColor}{RGB}{6,125,233}
+\hypersetup{%
+  pdftitle={\plaintitle},
+% Use \plainauthor for final version.
+%  pdfauthor={\plainauthor},
+  pdfauthor={\emptyauthor},
+  pdfkeywords={\plainkeywords},
+  bookmarksnumbered,
+  pdfstartview={FitH},
+  colorlinks,
+  citecolor=black,
+  filecolor=black,
+  linkcolor=black,
+  urlcolor=linkColor,
+  breaklinks=true,
+}
+
+% create a shortcut
+% \newcommand\tabhead[1]{\small\textbf{#1}}
+\newcommand\ClassP{\mathsf{P}}
+\newcommand\ClassNP{\mathsf{NP}}
+\newcommand\SAT{\mathsf{SAT}}
+
+% Remove box for the copyright information
+\makeatletter
+\def\@copyrightspace{\relax}
+\makeatother
+
+% End of preamble. Here it comes the document.
+\begin{document}
+
+\title{\plaintitle}
+
+\numberofauthors{1}
+\author{%
+  \alignauthor{Lily Li\\
+    \affaddr{University of Toronto}\\
+    \affaddr{Toronto, Ontario}\\
+    \email{xinyuan@cs.toronto.edu}}\\
+}
+
+\maketitle
+
+\begin{abstract}
+  To be added later.
+\end{abstract}
+
+\category{H.5.2}{User Interfaces}{Graphical user interfaces (GUI)}
+
+\keywords{\plainkeywords}
+
+\section{Introduction}
+In 1971 Stephen Cook showed that satisfiability  ($\SAT$) is an $\ClassNP$-complete problem. In 1972, Richard Karp showed that twenty one other problems are also $\ClassNP$-complete by a polynomial time reduction to $\SAT$. Unlike $\SAT$, the problems that Karp showed ``hard" came from a variety of disciplines and often had natural descriptions. Encouraged by Karp's results, there was a flurry of research showing that many other problems in many other fields are also $\ClassNP$-Hard.
+
+In 2002 Michael Garey and David Johnson publish \emph{Computer and Intractability: a Guild to the Theory of $\ClassNP$-Completeness} \cite{garey2002computers} in which they collected more than 300 $\ClassNP$-Completeness proofs both from the literature and from their own research. Even today, this seminal work is often the goto reference manual for computer scientists trying to prove that their particular problem is $\ClassNP$-hard.
+
+Enthusiasm for such reductions have diminished since then due to the difficulty in proving or disproving $\ClassP = \ClassNP$ and the shifting interest of the field. Even so, many problems that computer scientists encounter today are still $\ClassNP$-Hard. Showing this to be the case is a useful first step for legitimizing the use of approximation algorithms and heuristic approaches.
+
+The strategy for proving that a tricky decision problem $B$ is $\ClassNP$-Hard has not change since Karp's time. One must find an $\ClassNP$-complete problem $A$ and show a polynomial reduction $A \leq_{p} B$ such that $YES$-instance of $A$ map to $YES$-instance of $B$ and $NO$-instances of $A$ map to $NO$-instance of $B$. To this end it is often useful to have a wide variety of problems which may serve as $A$. Unfortunately, most collections of $\ClassNP$-Complete problems have not been kept up-to-date and are uniformly arranged in a list-like structure. This layout makes it difficult to see relationship between problems in different fields with similar reductions.
+
+We propose updating the way this collection of $\ClassNP$-Hard problems is represented. Using techniques for visualizing dense directed graphs, we hope to display these reduction more naturally as a graph. Since some problems such as $3\SAT$, partition, and vertex cover are often used for reductions, they may appear as nodes with high degree in the graph. Thus it maybe necessary to \emph{delete} (in addition to compress) edges to make the overall representation readable to the user. 
+
+We will investigate how this \emph{lossy} compression impacts the usability of the graph and if the proximity and color of nodes can be used to replace or imply adjacency relationships.
+
+\begin{comment}
+Graphs play a significant role in visualizing diverse and significant systems. Social networks, dependency diagrams, and genealogy fit naturally into this paradigm of nodes and edges. With the influx of data, it become increasingly useful to develop techniques to render large graphs more readable.  
+
+Proposed techniques include: edge compression, node grouping, altering the underlying structure of the graph, and sparsifying points of interest. In all of the above, the content of the graph is unaltered. Edges and vertices in the graph are still visible, though they maybe bundled together or moved apart. This is known as \emph{lossless compression}. Such techniques attempt to reduce the user's mental load by aggregating related components --- whether this be edges or nodes --- and applying a topological transformation to the graph to so to emphasize general patterns.
+
+We explore another, more drastic, method for visualizing dense graphs by hiding all edges on the primary level of the visualization. Relationships between nodes typically represented by edges will instead be implied by proximity and color. Negative space in the graph will be used to imply distance or dis-similarity between nodes. This exploration will take place by using different two dimensional shapes to fill the plane. Some shapes (e.g. triangles and hexagons) tile the plane and can be used express content compactly. Conversely, other shapes (e.g. circles) cannot fit as tightly but gaps between adjacent nodes can be used to convey meaning. 
+
+This is not to say, there will be no edges at all. On the secondary layer of the graph --- which will appear when the user selects a node --- will display a subset of relevant edges. We will investigate the distribution of edges to the primary and secondary layers as well as the appropriate number to display. 
+
+This research is motivated by the graph of hardness reductions in the class of $\ClassNP$-complete problems. There are several problems that are often used for the reductions such as $3\SAT$, partition, three dimensional matching, vertex cover, and the like. If we were to add a directed edge from all problems shown $\ClassNP$ 
+\end{comment}
+
+\section{Related Work}
+In addition to the book by Garey and Johnson, the Wikipedia page (\url{https://en.wikipedia.org/wiki/List_of_NP-complete_problems}) and \emph{A compendium of $\ClassNP$ optimization problems} (\url{http://www.nada.kth.se/~viggo/wwwcompendium/}) edited by Peirluigi Crescenzi and Viggo Kann represent typical collections of $\ClassNP$-complete problems. Of the three, the Wikipedia page is the most active, with discussion entries as recent as 2016, but it is also the least comprehensive. Problems are listed on one page and are grouped under a few general headings. Clicking on a problem brings the user to the relevant Wikipedia page which can range wildly in the quantity and quality of the content. The \emph{Compendium} was last edited in 2005, but organizes the problems in a more thorough manner. The landing page features a comprehensive list of categories and sub-categories. Clicking on a category or subcategory brings the user to the list of associated problem. Each problem includes a few standard descriptors including: instance, solution, and comments. 
+
+Previous work in the HCI literature we plan to review include:
+\begin{enumerate}
+\item \emph{On finding graph clustering with maximum modularity.} \cite{brandes2007finding}
+\item \emph{Edge Compression Techniques for Visualization of Dense Directed Graphs.} \cite{dwyer2013edge}
+\item \emph{Drawing graphs using modular decomposition.} \cite{papadopoulos2005drawing}
+\item \emph{Linear-time modular decomposition of directed graphs.} \cite{mcconnell2005linear}
+\end{enumerate}
+
+\section{Method}
+We hope to present the collection of $\ClassNP$-Hard problems as a graph on an interactive web-page. Problems will be represented as nodes. The color, size, and shape of a node will be used to convey the problem's category, frequency of use, and other features. The proximity of the problem will be used to represent the \emph{reduction} relationship. Further, we hope to incorporate a robust search function to find relevant problems based on the key words used in its statement and description.   
+
+\section{Biography}
+I am a new (Fall 2017) masters student in the theory group. My purpose for taking this class is two fold: (1) I want to get some experience designing a website and I will feel more motivated to do so in conjunction with the project and (2) this project (visualizing the set of $\ClassNP$-Hard reductions) is something I had wanted to do for awhile and might help me when I need to show a problem is $\ClassNP$-Hard.
+
+\begin{figure}
+\centering
+  \includegraphics[width=0.9\columnwidth]{figures/Theory5}
+  \caption{My portrait.}~
+  \label{fig:photograph}
+\end{figure}
+
+% REFERENCES FORMAT
+% References must be the same font size as other body text.
+\bibliographystyle{SIGCHI-Reference-Format}
+\bibliography{bibliography}
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
