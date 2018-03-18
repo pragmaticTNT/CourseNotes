@@ -1,0 +1,23 @@
+\input{../Template/structure.tex}
+
+\begin{document}
+\lecture{4}{SOS}{Toni Pitassi}{Lily Li}
+
+\section{SOS}
+First lets consider some simple polynomials such as $f: \{0,1\}^n \rightarrow \R$ over the boolean hyper-cube for $x_1, ..., x_n$. It turns out that: $f$ is non-negative if and only if $f$ has a SOS certificate (what you want to consider here is the function $\sqrt{f}$ and find the unique multinomial $g$ such that $g = \sqrt{f}$ over the boolean hyper-cube). 
+
+\subsection{SOS Certificates for PSD Matrices}
+\begin{lemma}
+Let $f: \R[x_1, ..., x_n] \rightarrow \R$ be a degree $2d$ polynomial. Let $\mathbf{z}$ be a vector of degree $\leq d$ monomials i.e. $\mathbf{z} = [1, x_1, ..., x_n, x_1^2, x_2^2, ...]$. Then $f$ is a sum-of-squares if and only if there exists $Q \succeq 0$ such that $f(\mathbf{x}) = \mathbf{z}^TQ\mathbf{z}$. 	 
+\end{lemma}
+
+If we were to take $f: \{0,1\}^n \rightarrow \R$, then the degree needs to go up to $n$. To see why this is we will show that $\SAT$ is solvable in this paradigm. Let $F = C_1 \land \cdots \land C_m$ be an unsatisfiable $k$-CNF formula over $x_1, ..., x_n$. Where we are choose $F$ to be a random collection of $\sim 10n$ equations modulo $2$ or a random $3$-CNF with $\sim 10n$ clauses or $F$ could be the particular family of modulo 2 equations coming from a 3-regular expander with an odd number of vertices (for some reason you want the expansion factor to be large).
+
+\begin{theorem}
+For $n$ sufficiently large, $\{g_n\}$ a degree $3$ expander graphs and let $F_n$ be the Tseitin $3$-CNF on $g_n$ (which is unsatisfiable) then any SOS certificate for $P_f$ has degree $\Omega(n)$, where $P_f: \{0,1\}^n \rightarrow \R$. 
+\end{theorem} 
+
+\subsection{Positivestellensatz}
+Recall from the results of Hilbert's $17^{\text{th}}$ problem 
+
+\end{document}

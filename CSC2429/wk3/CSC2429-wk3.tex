@@ -13,16 +13,41 @@ equals $\max\{c_0: \mbox{there is a degree-$d$ SA derivation of $P \geq c_0$ fro
 \end{lemma}
 
 \subsection{How hard is it to find SA proofs?}
-If the LP is infeasible then we can find a SA refutation of degree-$d$ 
+If the LP is infeasible then we can find a SA refutation of degree-$d$ in time $n^{o(d)}$ since we can make a system of $n^d$ linear equations in the coefficients and solve.
+
+If the degree $d$ SA LP has a feasible solution solving the $n^{o(d)}$ linear constraints takes time  $poly(d)$.  
+
+There was also a comment about size automatizability, but it is not clear what the notes are trying to say there.
 
 \subsection{Proof Systems/ LP tightening related to SA}
 \begin{enumerate}
-\item Dynamic SA ($LS_d$): normal SA is a one shot system. The dynamic variant takes the original LP, lifts to degree-$d$, then project down to your original dimension. If you did not get the solution that you want yet, add some of the higher degree inequalities to your original set and repeat.
-\item Nullsatz (polynomial calculus, PC): over any field, not just $\R$, were we only allow equalities. Consider the $k$-CNF $F = C_1 \land \cdots \land C_m$ over $x_1, ..., x_n$. We will convert each clause $C_i$ to an equality as follow (an example will suffice):
-\[x_1 \lor \bar{x_2} \lor x_3 \implies (1-x_1)x_2(1-x_3) = 0\]
-and including $x^2_i - x_i = 0$. Observe that the only way the polynomial would \emph{not} be satisfied is if the clause is false. 
+\item Dynamic SA ($LS_d$ which stands for Lovasz-Schrijver Lift and Project SA): normal SA is a one shot system. The dynamic variant takes the original LP, lifts to degree-$d$, then project down to your original dimension. If you did not get the solution that you want yet, add some of the higher degree inequalities to your original set and repeat.
 
-There is a dynamic variant of Nullsatz. 
+Formally a proof is a sequence of $P_1 \geq 0, P_2 \geq 0, ...$ where $P_i \geq 0$ is an axiom, a given inequality, or derived by an inference. We say:
+\[p_1 \geq 0 \cdots p_m \geq 0 \vdash^{H}_{D} P \geq 0\]
+which means that $P_1 \geq 0 \cdots P_m \geq 0$ \emph{derive} $P \geq 0$.
+
+Given $P_1 \geq 0, ..., P_m \geq 0$ as initial inequalities and $x_i^2 - x_i \geq 0$ as axioms an \textbf{inference} is a set $\{Q_i\}$ of non-negative juntas with
+\[Q_0 + P_1Q_1 + \cdots + P_mQ_m = P.\]
+This is a derivation of $P \geq 0$. If we draw the derivation DAG, we get a start since this is a one-shot proof system. If instead we apply inference rules repeatedly, we would be able to prove linear inequalities that SA of lower degree can prove.
+\item Nullsatz (polynomial calculus, PC): over any field, not just $\R$, were we only allow equalities. Suppose we have polynomial equalities $P_1 = 0, ..., P_m = 0$ (which correspond to the pair of inequalities $P_i \geq 0$ and $P_i \leq 0$) as well as $x_i^2 - x_i = 0$. Let
+\[\sum P_iQ_i + \sum(x_i^2 - x_i)R_i = P\]
+where $Q_i$, $R_i$ are arbitrary polynomials. When we want to derive $P = 0$.
+
+When applying Nullstellensatz for unsatisfiable CNF we can consider the $k$-CNF $F = C_1 \land \cdots \land C_m$ over $x_1, ..., x_n$ and convert each clause $C_i$ to an equality as follows (an example will suffice):
+\[x_1 \lor \bar{x_2} \lor x_3 \implies (1-x_1)x_2(1-x_3) = 0.\]
+Observe that the only way the polynomial would \emph{not} be satisfied is if the clause is false. 
+
+\begin{theorem}
+If $f = C_1 \land \cdots \land C_m$ has a degree $d$ Nullstellensatz refutation, then it has a degree $d$ SA refutation.
+\end{theorem}
+
+\begin{theorem}
+There are unsatisfiable $k$-CNFs that have small degree SA refutations but no small degree Nullstellensatz refutation. 
+\end{theorem}
+
+\textcolor{red}{From the above, it seems as though SA is strictly stronger than Nullstellensatz, but I am not sure if this is the case. Some proof systems can be incomparable.} A degree-$d$ Nullstellensatz proof can be found in time $n^{o(d)}$ since we have a linear system of $n^{o(d)}$ equations and variables. 
+\item PC (Polynomial Calculus): this is the dynamic variant of Nullstellensatz. 
 \item Cutting Planes: this is \emph{not} a lift and project system (unlike SA and Nullsatz). The rules are
 \begin{enumerate}
 \item Add non-negative linear combinations of previously derived inequalities.
@@ -35,8 +60,40 @@ It is unknown if this system is automatizable, but this is widely used in optimi
 \end{enumerate} 
 
 \section{SOS}
-\begin{The Basics}
+\subsection{The Basics}
 We want to start with a quadratic integer program and relax it to an SDP program (this is going to be a generalization of degree-$d$ SA, denoted $SA_d$).
 
+Let as take only vectors over $\R$, where vectors $\mathbf{u}, \mathbf{v}$ are column vectors, $\mathbf{u}^T\mathbf{v} = \anglebrac{\mathbf{u}, \mathbf{v}}$ is a scalar, $\mathbf{u}\mathbf{{v}^T} = \mathbf{u} \otimes \mathbf{v}$ is a tensor product. 
+
+Note: 
+\[\mathbf{x}^TA \mathbf{x} = (\mathbf{x}\otimes\mathbf{x}) \cdot A\]
+where $\cdot$ is the dot product of the columns of the matrices as vectors. Further 
+\[\trace(AB) = \trace(BA)\]
+and if $A, B$ are symmetric then 
+\[\trace(AB) = A \cdot B\]
+where the matrix dot product $A \cdot B = a_{1,1}b_{1,1} + \cdots + a_{n,n}b_{n,n}$ which views $A$ and $B$ as vectors.
+
+Here are some norms you should be familiar with: $\norm{\mathbf{v}}_p = \left(\sum_{i=1}^{n}|v_i|^p\right)^{\frac{1}{p}}$ and $\norm{\mathbf{v}}_{\infty} = \max_{i \in [n]}|v_i|$. If $A, B$ are matrices with entries $A_{i,j}$ and $B_{i,j}$ then the Kronecker product of $A, B$, denoted $A \otimes B$ is a matrix with entries $(A \otimes B)_{ii,jj} = A_{i,j}B_{i,j}$. Further $A^{\otimes k} = A \otimes \cdots \otimes A$ $k$ times. 
+
+If $A, B$ are square matrices then $\deter(AB) = \deter(A)\cdot\deter(B)$. Further with triangular matrices the determinant is just the product of the diagonal entries.
+
+\begin{theorem}
+If $A$ is an $n\times n$ matrix then the sum of the eigenvalues of $A$ is equal to $\trace(A)$ and the product of the eigenvalues is equal to $\deter(A)$.
+\end{theorem}
+
+\subsection{PSD Matrices}
+\begin{theorem}
+Let $A$ be an $n \times n$ symmetric matrix. Then the following are all equal:
+\begin{enumerate}
+\item $A \succeq 0$ ($A$ is PSD)
+\item All eigenvalues of $A$ are non-negative
+\item The determinant of all upper left sub-matrices of $A$ is non-negative (this requires $A$ to be symmetric to work)
+\item The quadratic polynomial $P_{A}(x) = \sum A_{i,j}x_ix_j$ is a SOS i.e.
+\[\exists L_1, ..., L_n: P_{A} = \sum_{i}(L_i)^2\]
+where each $L_i$ is linear.
+\item $A = U^TU$ where $U$ is upper triangular (Cholesky decomposition)  
+\item There are correlated random variables $x_1, ..., x_m$ such that for all $i, j$, $\E[x_ix_j] = A_{i,j}$ and $x_i$ is has distribution approximately $\gaussian(0,A_{i,j})$ \textcolor{red}{the approximately is really quite suspicious...}
+\end{enumerate}
+\end{theorem}
 
 \end{document}

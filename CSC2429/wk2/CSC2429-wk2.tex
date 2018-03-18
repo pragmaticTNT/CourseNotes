@@ -62,7 +62,7 @@ When viewed as LP tightening in degree $d$, we do the following:
 More formally, let the original LP be 
 \[A\mathbf{x} \geq \mathbf{b} \mbox{, and let } \mathbf{1} \geq \mathbf{0}, \mathbf{0} \leq \mathbf{x} \leq \mathbf{1}.\] 
 We add new variables:
-\[y_S \forall S \subseteq [n], |S| \leq d.\]
+\[y_S: \qquad\forall S \subseteq [n], |S| \leq d.\]
 And new constraints (junta) for all subsets $U, V \subset [n]$ with $U \cap \emptyset$ and $|U \cup V| \leq d$:
 \[\prod_{i \in U}x_i \cdot \prod_{j \in V}(1 - x_j) \cdot (\mathbf{a}^T\mathbf{x} - \mathbf{b}) \geq 0 \]
 for all rows $\mathbf{a}$ of $A$, for all $U, V$.
@@ -87,7 +87,7 @@ Now we need to defined a pseudo-distribution for a degree $d$ SA LP (this is a r
 \item $E(Q) \geq 0$ for all non-negative junta $Q$ with $\degree(Q) \leq d$. 
 \item $E(PQ) \geq 0$ for $P \in \Hcal$, and non-negative junta $Q$ with $\degree(PQ) \leq d$ where a non-negative junta is of the form:
 \[\alpha \cdot \prod_{i \in U}x_i \prod_{j \in V}(1-x_j)\]
-for non-negative coefficient $\alpha$ and $S \cup T = \emptyset$. \emph{This is quite useful to show that what you have is actually a a probability distribution (recall the marginals).}
+for non-negative coefficient $\alpha$ and $U \cup V = \emptyset$. \emph{This is quite useful to show that what you have is actually a a probability distribution (recall the marginals).}
 \end{enumerate}
 
 Essentially you should interpret each $E \in \Ecal_d(\Hcal)$ as a \emph{pseudo-distribution} for the feasible (maybe? my words here) region of $\Hcal$. Further, feasible solutions to the degree-$d$ SA polytope are exactly the degree-$d$ \emph{pseudo-distributions}.
@@ -97,7 +97,7 @@ Consider any feasible solution $\alpha$. For each variable $y_S$,$\alpha(y_S)$ i
 The corresponding pseudo-distribution $E_{\alpha}$ which assigns values to degree-$d$ polynomials is defined in the obvious way.
 \begin{example}
 Suppose we have $d = 3$ and the polynomial $f = -x_1x_2x_4 + x_7 - 3x_1x_8$, then
-\[E_{\alpha}[f] = -\alpha(y_{1,2,4} + \alpha(y_{7}) -3\alpha(y_{1,8}).\]
+\[E_{\alpha}[f] = -\alpha(y_{1,2,4}) + \alpha(y_{7}) -3\alpha(y_{1,8}).\]
 \end{example}
 It so happens that the degree-$d$ SA linear constraints exactly enforce the properties of the pseudo-distribution (what $E_{\alpha}$ does is assign a $[0,1]$ value to every set of $\leq d$ of the original variables such that the marginal distributions of each subset $S' \subset S$ is equal to the distribution assigned to each entry of $S'$). 
 
