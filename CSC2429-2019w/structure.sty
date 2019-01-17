@@ -1,0 +1,95 @@
+\usepackage[english]{babel}
+\usepackage{amsfonts, amsmath, amssymb, amsthm}
+\usepackage{bbold}
+\usepackage{color}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+	\geometry{margin=1in}
+\usepackage{graphicx}
+\usepackage{epstopdf}
+	\epstopdfsetup{update}
+\usepackage{comment}
+\usepackage{fullpage}
+\usepackage{hyperref}
+\usepackage{mathtools}
+\usepackage{thmtools}
+\usepackage{tikz}
+\usetikzlibrary{arrows, automata, fit, positioning}
+
+%% ===> Page Settings <===
+\setlength{\parindent}{0em}
+\setlength{\parskip}{0.5em}
+%% ===> End Page Settings <===
+
+%% ===> Theorem Type Definitions <===
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{conjecture}[theorem]{Conjecture}
+%% ===> END Theorem Type Definitions <===
+
+%% ===> Deliminaters <===
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+\DeclarePairedDelimiter\anglebrac{\langle}{\rangle}
+\DeclarePairedDelimiter\norm{\lVert}{\rVert}
+%% ===> END Deliminaters <===
+
+%% ===> Math Operators <===
+%% ---> General <---
+\DeclareMathOperator*{\round}{rd}
+\DeclareMathOperator*{\yes}{\mathsf{YES}}
+\DeclareMathOperator*{\no}{\mathsf{NO}}
+\newcommand{\ind}[1]{\mathbb{#1}}
+%% ---> Logic <---
+\DeclareMathOperator{\xor}{\oplus}
+\DeclareMathOperator*{\false}{\mathsf{FALSE}}
+\DeclareMathOperator*{\true}{\mathsf{TRUE}}
+%% ---> Complexity <---
+\newcommand\class[1]{\mathsf{#1}}
+\DeclareMathOperator*{\poly}{poly}	% As in running-time NOT complexity class
+\DeclareMathOperator*{\circuitsize}{\mathcal{C}}
+\DeclareMathOperator*{\leafsize}{\mathcal{L}}
+\DeclareMathOperator*{\depth}{depth}
+%% ---> Probability <---
+\DeclareMathOperator*{\expected}{\mathbb{E}}
+\DeclareMathOperator*{\var}{Var}
+\newcommand\distrib[1]{\mathcal{#1}}
+\newcommand\mm[1]{\mathbf{#1}}	% Bolded capitals are MATRICES
+\newcommand\vv[1]{\mathbf{#1}}	% Bolded lowercases are VECTORS
+%% ===> End Math Operators <===
+
+%% ===> Macros <===
+\newcommand\NN{\mathbb{N}}
+\newcommand\ZZ{\mathbb{Z}}
+\newcommand\QQ{\mathbb{Q}}
+\newcommand\RR{\mathbb{R}}
+\newcommand\CC{\mathbb{C}}
+%% ===> END Macros <===
+
+% ===> Command Definitions <===
+% ---> usage: \fig{NAME}{SCALE}{CAPTION}
+\newcommand\fig[3]{
+	\begin{figure}[ht]
+		\centering
+		\includegraphics[scale=#2]{figures/#1}
+		\caption{#3}
+		\label{fig:#1}
+	\end{figure}
+}	
+% ---> usage: \makeheader{LECTURE-DATE}{LECTURE-NUM}{LECTURE-TITLE}{SCRIBE-NAME}
+\newcommand\makeheader[4]{
+	\fbox{\parbox{\textwidth}{CSC2429 / MAT1304: Circuit Complexity 
+			\hfill #1%
+			\begin{center}\LARGE 
+				Lecture #2: #3
+			\end{center}
+			{\em Instructor: Benjamin Rossman
+				\hfill
+				Scribe: #4}
+		}}	
+}
+%% ===> END Command Definitions <===

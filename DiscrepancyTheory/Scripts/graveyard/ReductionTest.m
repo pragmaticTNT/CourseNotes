@@ -1,34 +1,45 @@
-nTrial = 20;
+nTrial = 1;
 n = 5;
+
 for i = 1:nTrial
-    A = naesatInstance(n);
+    %A = naesatInstance(n);
+    
+    A = [
+    1, 0, 0, 1, 1;
+    0, 1, 0, -1, 1;
+    -1, 1, 0, -1, 0;
+    -1, -1, 0, 0, -1;
+     0, -1, 1, 0, 1;
+     0, 0, 1, -1, -1;
+     0, 1, -1, 1, 0;
+     1, 0, 0, -1, -1;
+     0, -1, 1, 1, 0;
+     0, 1, 0, 1, 1;
+     1, -1, 0, 0, -1;
+     0, 0, 1, -1, 1;
+     0, 1, -1, 1, 0;
+     1, -1, 0, 1, 0
+     ];
+    
     [w, x, val] = approxLindisc(A);
     fprintf("-");
     if mod(i,40) == 0
         fprintf("\n");
     end
-    fprintf("\nlindisc(A): %.6f\n", val);
-    disp(w);
-    disp(x);
-    if val > 1.25
+    if val >= 0
         disp(A);
+        disp(w);
+        disp(x);
         fprintf("\nlindisc(A): %.6f\n", val);
     end
 end
 fprintf(">\n");
 
-% sat = [-1,-1,1,0,0,0; 
-%         1,-1,-1,0,0,0; 
-%         1,0,1,-1,0,0;
-%         0,0,0,1,1,-1;
-%         0,0,0,1,1,1;
-%         1,0,0,0,1,-1;
-%         1,0,0,0,1,1;
-%         ];
-
 function W = getW(n)
-%    inc = [0, 0.25, 0.5, 0.75, 1];
-    inc = [0, 1/5, 1/4, 2/5, 1/2, 3/5, 3/4, 4/5, 1];
+    inc = [0, 0.25, 0.5, 0.75, 1];
+%    inc = [0, 1/5, 1/4, 2/5, 1/2, 3/5, 3/4, 4/5, 1];
+%    inc = [0, 1/5, 2/5, 3/5, 4/5, 1];
+%   inc = [0, 1/8, 1/4, 3/8, 1/2, 5/8, 3/4, 7/8, 1];
     nInc = size(inc,2);
     W = zeros(n, nInc^n);
     for i = 1:n
@@ -61,6 +72,20 @@ function S = naesatInstance(n)
         row(vars(1)) = 2*randi(2)-3;
         row(vars(2)) = 2*randi(2)-3;
         row(vars(3)) = 2*randi(2)-3;
+        S(i, :) = row;
+        if ~disc(S)
+            S(i, :) = zeros(1,n);
+        end
+    end
+end
+
+function S = mononaesatInstance(n)
+    nSet = n+randi(2*n);
+    S = zeros(nSet,n);
+    for i=1:nSet
+        vars = randperm(n,3);
+        row = zeros(1,n);
+        row(vars) = 1;
         S(i, :) = row;
         if ~disc(S)
             S(i, :) = zeros(1,n);
@@ -103,3 +128,13 @@ function X = allBinaryStrLen(n)
         end
     end
 end
+
+
+% sat = [-1,-1,1,0,0,0; 
+%         1,-1,-1,0,0,0; 
+%         1,0,1,-1,0,0;
+%         0,0,0,1,1,-1;
+%         0,0,0,1,1,1;
+%         1,0,0,0,1,-1;
+%         1,0,0,0,1,1;
+%         ];
