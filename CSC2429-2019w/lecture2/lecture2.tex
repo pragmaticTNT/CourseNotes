@@ -1,0 +1,419 @@
+%!TEX root = ../MAIN-coursenotes.tex
+\subsection{Circuit Size Hierarchy}
+\begin{theorem}
+	\label{thm:circuitsizehierarchy}
+	If $n \leq s(n) \leq \frac{2^{n-2}}{n}$, then $\class{SIZE}[s] \subsetneqq \class{SIZE}[4s]$.
+\end{theorem}
+\begin{proof}
+	Use a combination of Shannon (Theorem \ref{thm:shannon1949-circuitsizelowerbd}) and Lupanov (Theorem \ref{thm:lupanov1958-circuitsizeupperbd}). Pick\footnote{Such an $m$ must exists. When $m = 1$, $2^{m}/m \leq s(n)$ and when $m = n-1$, $2^m/m \geq s(n)$ so there must be some $m$ such that $2^{m}/m \leq s(n)$ and $2^{m+1}/(m+1) \geq s(n)$. If $2^{m+1}/(m+1) \geq 2\cdot s(n)$ then 
+	\[s(n) \leq \frac{2^{m}}{m+1} \leq \frac{2^{m}}{m}\]	
+	which contradicts our original choice of $m$.} 
+	an $m < n$ such that
+	\[s(n) \leq \frac{2^m}{m} \leq 2s(n).\]
+	By Shannon, there exists a function $f: \{0, 1\}^m \rightarrow \{0,1\}$ such that 
+	\[\circuitsize(f) > \frac{2^m}{m} \geq s(n).\]
+	Thus $f \notin \class{SIZE}[s]$. By the tight bound from Lupanov's theorem, $\circuitsize(f) \leq 2^m/m + o(2^m/m)$ so 
+	\[\circuitsize(f) \leq \frac{2\cdot 2^m}{m} \leq 4s(n)\]
+	and $f \in \class{SIZE}[4s]$. 
+\end{proof}
+
+\section{Lower Bounds for Explicit Functions}
+\subsection{Khrapchenko and Koutsoupias Lower Bound}
+Let us define $PARITY_n$ as $\XOR_n$ and $1 - PARITY_n$ as $\overline{\XOR}_n$. Recall\footnote{Construct a circuit with $n-1$ $\xor$-gates and substituting three DeMorgan gates $(x \land \lnot y) \lor (\lnot x \land y)$ for each $x \xor y$.} that $\circuitsize(\XOR_n) \leq 3(n-1)$ and $\leafsize(\XOR_n) \leq 2^{2\ceil{\log n}}$. We will show that these bounds are tight. 
+
+Notation: $\lambda(\mm{P})$ is the largest eigenvalue of a symmetric matrix $\mm{P}$. Recall\footnote{I think this can be shown as follows. Take the largest eigen-vector $\vv{x}$ of $\mm{P}$ and decompose it in the eigen-basis of $\mm{Q}$. Then right-multiplying $\mm{P} + \mm{Q}$ by $\vv{x}$.} that 
+\[\lambda(\mm{P} + \mm{Q}) \leq \lambda(\mm{P}) + \lambda(\mm{Q}).\]
+For non-empty $A, B \subseteq \{0,1\}^n$, the matrix $\mm{M} \subseteq \{0,1\}^{A\times B}$ is the matrix 
+\[\mm{M}_{a,b} = \begin{cases}
+1 &\mbox{if $a_i \neq b_i$ for exactly one $i$}\\
+0 &\mbox{otherwise}
+\end{cases}\]
+you can read this as ``the hamming distance of $\vv{a}$ and $\vv{b}$ differs by exactly one''. Note that $\mm{M}^{\intercal}\mm{M} \in \NN^{B \times B}$ with entry $(i,j)$ interpreted as ``the number of vectors $\vv{a} \in A$ such that both $\vv{b}_i$ and $\vv{b}_j$ are one away from $\vv{a}$''. Similarly $\mm{M}\mm{M}^{\intercal} \in \NN^{A \times A}$ with entry $(i,j)$ interpreted as ``the number of vectors $\vv{b} \in B$ such that both $\vv{a}_i$ and $\vv{a}_j$ are one away from $\vv{b}$''. It is a fact from linear algebra that $\mm{M}^{\top}\mm{M}$ and $\mm{M}\mm{M}^{\top}$ have the same non-zero eigen-values. In particular,  $\lambda(\mm{M}^{\intercal}\mm{M}) = \lambda(\mm{M}\mm{M}^{\intercal})$.
+
+\begin{theorem}
+	(Koutsoupias '93) For any $f: \{0, 1\}^n \rightarrow \{0,1\}$ and $A \subseteq f^{-1}(0)$ and $B \subseteq f^{-1}(1)$,
+	\[\leafsize(f) \geq \lambda(\mm{M}^{\intercal}\mm{M}).\]
+\end{theorem}
+\begin{proof}
+	By induction on $\leafsize(f)$. The base case occurs when $\leafsize(f) = 1$ and the circuit only reads in one out of the $n$ variables of the input. W.l.o.g assume that the input to the leaf is $x_1$. Then $f(\vv{x}) = x_1$ or $f(\vv{x}) = 1 - x_1$; assume the former. Let $A = f^{-1}(0)$ and $B = f^{-1}(1)$. Then $A = \{0s: s \in \{0,1\}^{n-1}\}$ and $B = \{1s: s \in \{0,1\}^{n-1}\}$. Recall that entry $(i,j)$ of $\mm{M}^{\top}\mm{M}$ is the number of elements $\vv{a} \in A$ such that both $\vv{b}_i$ and $\vv{b}_j$ differ from $\vv{a}$ by one. Notice that $\vv{a} = 0s$ and $\vv{b} = 1s'$ differ by exactly one if and only if $s = s'$. Thus $\mm{M}^{\top}\mm{M}$ is exactly the identity matrix with dimension $|B| \times |B|$ and $\lambda(\mm{M}^{\top}\mm{M}) = 1$ satisfying the theorem.  
+	
+	In the inductive step, let $F$ be a formula which computes $f$ of size $\leafsize(f)$. Suppose that $F = F_1 \land F_2$ for some circuits $F_1$ and $F_2$. Let $f_1$ and $f_2$ be the functions computed by $F_1$ and $F_2$ respectively. Notices that $\leafsize(f) = \leafsize(f_1) + \leafsize(f_2)$. Let $A_1 = f_1^{-1}(0)$ and $A_2 = A \backslash A_1$. Since $F = F_1 \land F_2$, $A_2 \subset f_2^{-1}(0)$ as at least one of $F_1$ or $F_2$ must evaluate to $0$. Consider matrices $\mm{M}_1 \in \NN^{A_1 \times B}$ and $\mm{M}_2 
+	\in \NN^{A_2 \times B}$. Notice that $\mm{M}^{\top}\mm{M} = \mm{M}_1^{\top}\mm{M}_1 + \mm{M}_2^{\top}\mm{M}_2$ since $A_1 \cup A_2 = A$ and each matrix product counts the number of off-by-one vectors $\vv{a}$ matched to by $\vv{b} \in B$. Then
+	\begin{align*}
+		\lambda(\mm{M}^{\top}\mm{M}) &= \lambda(\mm{M}_1^{\top}\mm{M}_1 + \mm{M}_2^{\top}\mm{M}_2) &\mbox{(definition)}\\
+		&\leq \lambda(\mm{M}_1^{\top}\mm{M}_1) + \lambda(\mm{M}_2^{\top}\mm{M}_2) &\mbox{(symmtric matrix prop.)}\\ 
+		&\leq \leafsize(f_1) + \leafsize(f_2) &\mbox{(induction hyp.)}\\ 
+		&= \leafsize(f)
+	\end{align*} 
+	The same is true if $F = F_1 \lor F_2$, but this requires decomposing $B$. Remember however that $\lambda(\mm{M}^{\top}\mm{M}) = \lambda(\mm{M}\mm{M}^{\top})$ so it does not make much of a difference.
+\end{proof}
+
+The following is only for the DeMorgan basis.
+\begin{corollary}
+	\label{cor:khrapchenko1071-quadraticlb}
+	(Khrapchenko 1971)
+	\[\leafsize(f) \geq \frac{\left(\sum_{\vv{a} \in A}\sum_{\vv{b} \in B} \mm{M}_{a,b}\right)^2}{|A|\cdot|B|}\]
+\end{corollary}
+\begin{proof}
+	\footnote{:) I like this} The idea is to write $\lambda(\mm{M}^{\top}\mm{M})$ as a Rayleigh quotient and then substitute in $\ind{1}$ to get that lower bound.
+	\begin{align*}
+		\lambda\left(\mm{M}^{\top}\mm{M}\right) &= \max_{\vv{z} \in \RR^{B}\backslash \emptyset} \frac{\vv{z}^{\top}\mm{M}^{\top}\mm{M}\vv{z}}{\vv{z}^{\top}\vv{z}}\\
+		&\geq \frac{\ind{1}^{\top}\mm{M}^{\top}\mm{M}\ind{1}}{|B|}\\
+		&=\frac{\sum_{a \in A}\left(\sum_{b \in B}\mm{M}_{a,b}\right)^2}{|B|}\\
+		&\geq \frac{\left(\sum_{a \in A} \sum_{b \in B} \mm{M}_{a,b}\right)^2}{|A|\cdot|B|}
+	\end{align*}
+	where the last inequality follows by Cauchy-Schwartz\footnote{The application of Cauchy-Schwartz here is subtle. The key is to multiply top and bottom by $\left(\sum_{a \in A} 1^2\right)$ and combine the two sum of squares.}.
+\end{proof}
+
+We use the above Corollary \ref{cor:khrapchenko1071-quadraticlb} to show that $\leafsize(\XOR_n) \geq n^2$. Take $A$ and $B$ to be the set of even and odd strings\footnote{Here the parity of the string $s$ corresponds to the parity of the sum of ones in $s$.} in $\{0,1\}^n$ respectively. Then, by the above,
+\[\leafsize(f) \geq \frac{\left(\sum_{a \in A}\sum_{b \in B} \mm{M}_{a,b}\right)^2}{|A|\cdot|B|} = \frac{\left(n2^{n-1}\right)^2}{2^{n-1}\cdot 2^{n-1}} = n^2.\]
+This technique can achieve gaps of at most $n^2$. Exercise: (1)\footnote{Hint: Take $A = \{s \in \{0,1\}^n:s\mbox{ has exactly $\ceil{n/2}-1$ ones}\}$ and $B = \{t \in \{0,1\}^n:t\mbox{ has exactly $\ceil{n/2}$ ones}\}$.} prove lower-bound $\leafsize(MAJ_n) \geq \Omega(n^2)$ and (2) can you devise an upper bound of $\leafsize(MAJ_n) \leq n^{O(1)}$.
+
+\subsection{Restrictions and Gate Elimination}
+\begin{definition}
+	For $i \in [n]$ and $b \in \{0,1\}$ the \textbf{1-bit restriction}, $x_i \leftarrow b$ is the $n$-ary function $f^{(x_i \leftarrow b)}$. The substitution can be done \emph{syntactically} for circuits $C$, namely, $C^{(x_i \leftarrow b)}$. The technique is to substitute $x_i \leftarrow b$ and $\overline{x}_i \leftarrow 1 - b$ and performing the relevant simplifications.
+\end{definition}
+
+There are a couple of observations to note. (1) If $C$ computes $f$, then $C^{(x_i \leftarrow b)}$ computes $f^{(x_i \leftarrow b)}$. (2) If $x_i$ appears below a gate in $C$ then for both settings of $b \in \{0,1\}$, $\size\left(C^{(x_i \leftarrow b)}\right) \leq \size(C) - 1$ i.e. any setting of $b$ will knock out one gate in $C$. (2) There exists a setting of $b$ for each gate, such that $\size\left(C^{(x_i \leftarrow b)}\right) \leq \size(C) - 2$ i.e. the setting of $b$ knocks out two gates in $C$.
+
+\begin{theorem}
+	\label{thm:schnorr1979-XORlb}
+	(Schnorr 1979) $C(XOR_n) \geq 3(n-1)$.
+\end{theorem}
+\begin{proof}
+	By induction. The base case where $n = 1$ is trivial. The crucial observation is as follows. If a literal is below $k$ $\land/\lor$ gates (of the same type), then there is a setting of the literal such that you can knock out at least $k$ gates. Just think about the different settings of the literal.
+	
+	Consider any circuit $C$ which calculates the $XOR_n$ function. Identify three gates in $C$:
+	\begin{enumerate}
+		\item A gate whose inputs are two literals. Let these be $x_i$ and $x_j$. 
+		\item Pick a literal of the previous gate, say $x_i$. Find another gate with $x_i$ as an input. Suppose such a gate does not exist. Then, by setting $x_j$ appropriately, we could knock out the gate in step $1$ and the output would not depend on $x_i$. This would not calculate the $XOR_n$ function.
+		\item The gate above the one in step 2. Such a gate exists if the gate from step $2$ is not the output of the circuit. Suppose for a contradiction that it was. Then a setting of $x_i$ would fix the output. This would also not calculate the $XOR_n$ function.
+	\end{enumerate}  
+	By setting $x_i$ appropriately, we can kills all three gates above. See Figure \ref{fig:schnorr1979}.
+	
+	\fig{schnorr1979}{0.7}{The three gates that get eliminated when we restrict $x_i$. The actual setting of $x_i$ depends on the gate type.}
+	
+	By the induction hypothesis, $C^{(x_i \leftarrow b)}$ has at least $3(n - 2)$ gates. Since we were able to eliminate three gates by setting $x_i$, we know that $C$ has to have $3(n-1)$ gates.  
+\end{proof}
+More sophisticated versions of gate elimination allow for slightly better lower bounds. The current record is $5n - o(n)$ for DeMorgan circuits and $\left(3 + \frac{1}{86}\right)n$ for circuits in the full binary basis. 
+
+\subsection{Subbotovskaya's Method (1961)} 
+\begin{definition}
+	A formula $F$ is \textbf{nice} if for every sub-formula of the form $x_i \land F'$, $\overline{x}_i \land F'$, $x_i \lor F'$, $\overline{x}_i \lor F'$, the variable $x_i$ does \emph{not} occur in $F'$.
+\end{definition}
+
+\begin{lemma}
+	Every formula is equivalent to a \emph{nice} formula of the same (or less) leaf size.
+\end{lemma}
+\begin{proof}
+	Given sub-formulas of the form $x_i \land F$, $\overline{x}_i \land F$, $x_i \lor F$, and $\overline{x}_i \lor F$ where $F$ contains literals $x_i$ or $\overline{x}_i$, repeatedly apply 
+	\begin{align*}
+		x_i \land F \rightarrow x_i &\land F^{(x_i \leftarrow 1)}\\
+		\overline{x}_i \land F \rightarrow \overline{x}_i &\land F^{(x_i \leftarrow 0)}\\
+		x_i \lor F \rightarrow x_i &\lor F^{(x_i \leftarrow 0)}\\
+		\overline{x}_i \lor F \rightarrow \overline{x}_i &\lor F^{(x_i \leftarrow 1)}\\
+	\end{align*}
+	This shows that every minimal formula for a function $f$ is \emph{nice}.
+\end{proof}
+
+\begin{lemma}
+	\label{lem:onebitrestrictionbd}
+	For every $f: \{0,1\}^n \rightarrow \{0,1\}$,
+	\[\expected_{i \in [n], b\in \{0,1\}}\left[\leafsize\left(f^{(x_i \leftarrow b)}\right)\right] \leq \left(1 - \frac{1}{n}\right)^{1.5} \leafsize(f).\]
+\end{lemma}
+\begin{proof}
+	Let $F$ be a minimal nice formula for $f$. Let $\ell_i$ be the all leaves of $F$ labelled with $x_i$ or $\bar{x}_i$. Then $\leafsize(f) = \sum_{i = 1}^{n} \ell_i$.  Notice that every gate $g$ with a leaf $\lambda$ has an associated sub-formula $F'$ such that $\lambda$ does not occur in $F'$.
+	
+	For a bit $b \in \{0,1\}$, the random restriction $F^{(x_i \leftarrow b)}$ will kill leaf $x_i$ with probability $1$ and kill all leaves in $F'$ with probability $\frac{1}{2}$. Thus in expectation, $1.5$ leaves are killed under the 1-bit restriction $F^{(x_i \leftarrow b)}$. For each $i \in [n]$ we have
+	\[\expected_{b \in \{0,1\}}\left[\leafsize(F) - \leafsize\left(F^{(x_i \leftarrow b)}\right)\right] \geq 1.5 \ell_i.\] 
+	Averaging over all choices of $i$, we have that 
+	\[\expected_{i \in [n], b \in \{0,1\}}\left[\leafsize(F) - \leafsize\left(F^{(x_i \leftarrow b)}\right)\right] \geq \frac{1.5}{n}\sum_{i = 1}^{n} \ell_i = \frac{1.5\leafsize(F)}{n}.\]
+	Rearranging the above, we have
+	\[\expected_{i \in [n], b \in \{0,1\}}\left[\leafsize\left(F^{(x_i \leftarrow b)}\right)\right] \leq \left(1 - \frac{1.5}{n}\right)\leafsize(F) \leq \left(1 - \frac{1}{n}\right)^{1.5} \leafsize(F)\]
+	where the last inequality follows as $1 - ax \leq (1 - x)^a$.
+\end{proof}
+Apparently, this lemma implies that $\leafsize(\xor_n) \geq n^{1.5}$.
+
+\begin{definition}
+	\label{def:restrictions}
+	A \textbf{restriction} $\rho$ is a function $\rho: [n] \rightarrow \{0,1,*\}$ which can be thought of as a partial assignment of an $n$-ary Boolean function $f$. Denote the restriction of $f$ under $\rho$ as $f \upharpoonright \rho: \{0,1\}^{\rho^{-1}(*)} \rightarrow \{0,1\}$. Further $\rho$ is a \textbf{$k$-star restriction} if $|\rho^{-1}(*)| = k$. 
+		
+	Let $p\in [0,1]$. In a \textbf{$p$-random restriction} where you set
+	\[R_p(i) = \begin{cases}
+	*&\mbox{with probability } p\\
+	0&\mbox{with probability } \frac{1-p}{2}\\
+	1&\mbox{with probability } \frac{1-p}{2}
+	\end{cases}\]
+\end{definition}
+
+\begin{theorem}
+	\label{thm:subbotovskaya-restrictionlb}
+	Let $f: \{0,1\}^n \rightarrow \{0,1\}$ and let $\rho$ be a uniform random $k$-start restriction. Then 
+	\[\expected\left[\leafsize(f\upharpoonright \rho)\right] \leq \left(\frac{k}{n}\right)^{1.5}\leafsize(f).\]
+\end{theorem}
+\begin{proof}
+	Repeatedly apply Lemma \ref{lem:onebitrestrictionbd} to restrict $k$ bits to get
+	\[\expected\left[f \upharpoonright \rho\right] \leq \left(1 - \frac{1}{n}\right)^{1.5}\cdot\left(1 - \frac{1}{n-1}\right)^{1.5}\cdots\left(1 - \frac{1}{k+1}\right)^{1.5} \leafsize(f) = \left(\frac{k}{n}\right)^{1.5}\leafsize(f).\]
+\end{proof}
+
+\begin{corollary}
+	\label{cor:extsubbotovskayatorandrestrictions}
+	\[\expected\left[\leafsize\left(f\upharpoonright R_p\right)\right] \leq O\left(p^{1.5}\leafsize(f) + 1\right).\]
+\end{corollary}
+According to Hastad (19 something or other) and Tal (2014), this can be improved to $O(p^2\leafsize(f) + 1)$.
+
+\textbf{Open problem}: what is the shrinkage exponent of monotone formulas? (this is known to be between $2$ and $\left(\log (\sqrt{5}) - 1\right)^{-1} = 3.27$).
+
+\subsection{Composition of Boolean Functions}
+\begin{definition}
+	Let $f:\{0,1\}^k \rightarrow \{0,1\}$ and $g: \{0,1\}^m \rightarrow \{0,1\}$. Let $f \comp g: (\{0,1\}^m)^k \rightarrow \{0,1\}$ is defined as
+	\[(f \comp g)(\vv{x}_1, ..., \vv{x}_k) = f\left(g(\vv{x}_1), ..., g(\vv{x})\right).\]
+	In essence the composition is of the form $f \comp g = f \circ g^k$. 
+\end{definition}
+Think of the input of the composition as a matrix $\mm{X} \in \{0,1\}^{k \times m}$ with rows $\vv{x}_1, ..., \vv{x}_k$. Apply $g$ to each row, then apply $f$ to the resulting column vector. Observe that $\leafsize(f \comp g) \leq \leafsize(f) \cdot \leafsize(g)$. 
+
+\begin{conjecture}
+	\textbf{(KRW).} For all functions $f$ and $g$,
+	\[\leafsize\left(f \comp g\right) = \tilde{\Omega}\left(\leafsize(f)\cdot \leafsize(g)\right)\]
+	where $\tilde{\Omega}(t(n)) = \Omega(t(n))/\left(\log t(n)\right)^{O(1)}$ for any function $t(n)$.
+\end{conjecture}
+
+The following is an explicit $n$-ary Boolean function for which the lower bound is true.
+\begin{lemma}
+	\label{lem:bdcompfwithxor}
+	For all $k, m \geq 1$ and $f: \{0,1\}^k \rightarrow \{0,1\}$,
+	\[\leafsize\left(f\comp XOR_m\right) \geq \leafsize(f) \cdot \Omega\left(\left(\frac{m}{\log k}\right)^2\right).\]
+\end{lemma}
+\begin{proof}
+	Let $p = \frac{2\ln k}{m}$. Apply $R_p$ on $k\times m$ variables of $f \comp XOR_m$. If $R_p$ has a $*$ in every row then 
+	\[\leafsize\left(\left(f\comp XOR_m\right) \upharpoonright R_p\right) \geq \leafsize(f)\]
+	since a formula which calculates the LHS can be used to calculate the RHS. In particular, if there is a $*$ in some row $i$, then from the perspective of $XOR_m$, the value of row $i$ is undetermined. If every single row is undetermined, then the input to $f$ is undetermined. Thus $\left(f \comp XOR_m\right) \upharpoonright R_p$ would be able to compute $f(s)$ for any $s \in \{0,1\}^k$.
+	
+	Let $E$ be the event that there exists a $*$ in every row of the input matrix after applying $R_p$. We bound $\Pr[E]$ below by bounding $\Pr\left[\overline{E}\right]$ above. Let $B_i$ be the event that some row $i$ is \emph{bad} i.e. does not have a $*$ after applying $R_p$. Since every element is fixed with probability $1-p$, $\Pr[B_i] = (1 - p)^{m}$ for all $i \in [k]$. Then 
+	\[\Pr\left[\overline{E}\right] \leq \sum_{i = 1}^{k} \Pr[B_i] = k(1-p)^{m} \approx k\exp(-pm) \leq \frac{1}{k}\] 
+	where the first inequality follows by union-bound and the last by the definition of $p$ above. Thus we have the following lower bound
+	\begin{equation}
+		\label{eq:lbdlembdcomfwithxor}
+		1 - \frac{1}{k} \leq \Pr\left[E\right] 
+	\end{equation} 
+	
+	To get an upper bound for $\Pr[E]$, observe that $\Pr[E] \leq \Pr\left[\leafsize\left(\left(f \comp XOR_m\right) \upharpoonright R_p\right) \geq \leafsize(f)\right]$. Apply Markov's inequality to get
+	\[\Pr\left[\leafsize\left(\left(f \comp XOR_m\right) \upharpoonright R_p\right) \geq \leafsize(f)\right] \leq \frac{\expected\left[\leafsize\left(\left(f \comp XOR_m\right) \upharpoonright R_p\right)\right]}{\leafsize(f)}\]
+	By the improvement noted after Corollary \ref{cor:extsubbotovskayatorandrestrictions}, $\expected\left[f \upharpoonright R_p\right] \leq O\left(p^2\leafsize(f) + 1\right)$, we have
+	\begin{equation}
+		\label{eq:ubdlembdcomfwithxor}
+		\Pr[E] \leq \frac{\expected\left[\leafsize\left(\left(f \comp XOR_m\right) \upharpoonright R_p\right)\right]}{\leafsize(f)} = O\left(\frac{p^2\leafsize(f \comp XOR_m) + 1}{\leafsize(f)}\right). 
+	\end{equation} 
+	
+	Combining the lower bound from Equation (\ref{eq:lbdlembdcomfwithxor}) and the upper bound from Equation (\ref{eq:ubdlembdcomfwithxor}), we have
+	\[1 - \frac{1}{k} \leq \Pr[E] \leq \frac{p^2\leafsize(f \comp XOR_m) + 1}{\leafsize(f)}\]
+	Rearrange with respect to $\leafsize(f \comp XOR_m)$, taking care to observe that $1 - \frac{1}{k} - \frac{1}{\leafsize(f)} \in O(1)$, to obtain
+	\[\leafsize\left(f \comp XOR_m\right) \geq \frac{\leafsize(f)}{p^2} = \leafsize(f) \cdot \Omega\left(\left(\frac{m}{\log k}\right)^2\right)\]
+	as required. 
+\end{proof}
+
+Using Lemma \ref{lem:bdcompfwithxor}, we can construct an explicit function for which we have a cubic lower bound on the leaf size.
+\begin{definition}
+	For parameters $k, m \in \NN$,
+	\[ANDREEV_{k,m}: \{\mbox{$k$-ary Boolean function}\} \times \{0,1\}^{k\times m} \rightarrow \{0,1\}\] 
+	such that $ANDREEV(f, \mm{X}) = \left(f\comp XOR_m\right)(\mm{X})$.
+	
+	Think of this as follows: consider the $(k + 1) \times 2^{k}$ table $T$ of $k$-ary Boolean strings and the evaluation of $f$ on these strings. See Table \ref{table:andreev}. The input matrix $\mm{X} \in \{0,1\}^{k \times m}$. Apply the $XOR_m$ function to each row of $\mm{X}$ to obtain a $k$-bit string $s$. Find the column of $T$ corresponding to $s$ and return $f(s)$.
+	\begin{table}[!ht]
+		\centering
+		\begin{tabular}{|c|c|c|}
+			\hline
+			$f(0^k)$ & $\cdots$ & $f(1^k)$\\
+			\hline
+			$0$ & $\cdots$ & $1$\\
+			$\vdots$ & $\vdots$ & $\vdots$\\
+			$0$ & $\cdots$ & $1$\\
+			\hline
+		\end{tabular}
+		\caption{Table $T$ of function $f$.}
+		\label{table:andreev}
+	\end{table}	
+\end{definition}
+When $m = 1$, $ANDREEV_{k,1}$ is just the multiplexor function. Let $n = 2^k + mk$. Then $ANDREEV_{k,m}$ can be thought of as an $n$-ary Boolean function with $\circuitsize(ANDREEV_{k, m}) = O(n)$. 
+
+\begin{theorem}
+	\label{thm:L-DmFormulaCubicExplicit-Andreev}
+	For every $f: \{0,1\}^k \rightarrow \{0,1\}$ we have
+	\[\leafsize\left(ANDREEV_{k,m}\right)\geq \leafsize\left(f\comp XOR_m\right) \geq \leafsize(f)\cdot\Omega\left(\left(\frac{m}{\log k}\right)^2\right).\]
+\end{theorem}
+\begin{proof}
+	By fixing $2^k$ values $f(s)$ for $s \in \{0,1\}^k$, in the formula for $ANDREEV_{k,m}$, we can calculate $f \comp XOR_m$. Thus $\leafsize(ANDREEV_{k,m}) \geq \leafsize(f \comp XOR_m)$. By Shannon's Theorem \ref{thm:shannon1949-circuitsizelowerbd}, there exists a $k$-ary Boolean function $f$ with circuit size, and thus leaf size, $\Omega(2^k/k)$. Let $m = 2^k/k$ and note that $n = 2^k + mk \in \Theta(2^k)$. Then, by Lemma \ref{lem:bdcompfwithxor},
+	\[\leafsize(ANDREEV_{k,m}) \geq \Omega\left(\frac{2^k}{k}\right) \cdot \Omega\left(\left(\frac{m}{\log k}\right)^2\right) = \Theta\left(\frac{n^3}{(\log n)^3(\log \log n)^2}\right).\]
+	Thus $\leafsize(ANDREEV_{k,m}) \in \tilde{O}(n^3)$.
+\end{proof}
+It turns out that this lower bound for the $ANDREEV_{m,k}$ is nearly tight. 
+
+\subsection{General Binary Basis}
+Let $B_2$ be the full binary basis (all 2-ary gate types). Unfortunately, the random restriction idea does not work in this setting since it is \emph{not true} that
+\[\expected[\leafsize_{B_2}(f \upharpoonright R_p)] \leq O\left(p^{1 + \epsilon}\leafsize_{B_2}(f) + 1\right)\]
+for any $\epsilon > 0$. Do you see why?\footnote{Let $f$ be the parity function.} 
+
+\begin{definition}
+	\label{def:NOTE-Vsubfunctions}
+	For $f: \{0,1\}^n \rightarrow \{0,1\}$ and $V \subset [n]$, 
+	\[\sub_V(f) = \{f\upharpoonright \rho: \rho:[n] \rightarrow \{0,1,*\} \mbox{ such that } \rho^{-1}(*) = V\}\] 
+	be the set of \textbf{$V$-subfunctions} of $f$.
+	
+	Further, define 
+	\[\sub_{V}^{*}(f) = \{f', 1 - f', \underline{0}, \underline{1}: f' \in \sub_V(f)\}\] where $\underline{b}$ is the constant $b$ function for $b \in \{0,1\}$. Note that $|\sub_{V}^{*}(f)| \leq 4\cdot|\sub_{V}(f)|$ (actually $|\sub_{V}^{*}(f)| \leq 2\cdot|\sub_{V}(f)| + 2$). 
+	
+	Let $F$ be an $n$-ary formula and $V \subset [n]$ as before. Then \textbf{the number of leaves of $F$ labelled by variables in $V$} be denoted $\ell_{V}(F)$. Note that $\leafsize(F) = \ell_V(F) + \ell_{[n]\backslash V}(F)$.
+\end{definition}
+
+\begin{example}
+	Consider $MAJ_3(x_1, x_2, x_3)$ and $V = \{1, 2\}$. Then 
+	\[\sub_V(MAJ_3) = \{x_1 \land x_2, x_1 \lor x_2\}\]
+	when $x_3$ is restricted to $0$ and $1$ respectively. 
+\end{example}
+
+Here are two important properties to note:
+\begin{enumerate}
+	\item Suppose $F = \gate(G,H)$ for some $\gate: \{0,1\}^2 \rightarrow \{0,1\}$. Then 
+	\[\sub_V(F) \subseteq \{\gate(g, h): g \in \sub_V(G) \mbox{ and } h \in \sub_V(H)\}.\]
+	and $|\sub_V^*(F)| \leq |\sub_V^*(G)| \cdot |\sub_V^*(H)|$. This should be pretty obvious. Let $f_V$ be any function in $\sub_V(f)$. Then this function must be equivalent to the composition of the function computed by $\gate$ and some two functions $g \in \sub_V(G)$ and $h \in \sub_V(H)$.
+	\item Suppose that $F = \gate(G, H)$ and $\ell_V(H) = 0$. Then $\sub_V^*(F) \subseteq \sub_V^*(G)$. Note that $\ell_V(H)$ means that none of the leaves in $H$ are labelled with any indices from $V$. When considering the $V$-functions of $H$, these can only be the constant functions $\underline{0}$ and $\underline{1}$. When composing the function calculated by $\gate$ with some $g \in \sub_V(G)$ and a function in $\{\underline{0}, \underline{1}\}$ we can only get $\{g, 1-g, \underline{0}, \underline{1}\}$. Thus every function in $\sub_V^*(F)$ is also in $\sub_V^{*}(G)$.
+\end{enumerate}
+
+\begin{lemma}
+	\label{lem:U-Vsubfunctions}
+	If $F$ is an $n$-ary formula, $V \subseteq [n]$, and $\ell_{V}(F) \geq 1$, then \[|\sub_V^*(F)| \leq 4 \cdot 16^{\ell_V(F) - 1}.\] 
+\end{lemma}
+\begin{proof}
+	By induction on $\leafsize(F)$. The base case where $\leafsize(F) = 1$ is trivial. The inductive case is also not that bad considering the two observations above. Suppose $F = \gate(G, H)$. If one of $\ell_V(G) = 0$ or $\ell_V(H) = 0$, then we can use the second observation. W.l.o.g assume $\ell_V(H) = 0$. By the induction hypothesis we have that  
+	\[|\sub_V^{*}(F)| \leq |\sub_V^*(G)| \leq 4 \cdot 16^{\ell_V(G) - 1} \leq 4 \cdot 16^{\ell_V(F) - 1}.\]
+	
+	Next suppose that $\ell_V(G) \geq 1$ and $\ell_V(H) \geq 1$. Then by the induction hypothesis, we have that 
+	\[|\sub_V^{*}(F)| \leq |\sub_V^*(G)| \cdot |\sub_V^*(G)| = 16^{\ell_V(G) + \ell_V(H) - 1} = 16^{\ell_V(F) - 1}\leq 4 \cdot 16^{\ell_V(F) - 1}\]
+	as required.
+\end{proof}
+
+\begin{corollary}
+	\label{cor:U-Vsubfunctions}
+	Let $F$ and $V$ be as above, then $|\sub_V(F)| \leq 16^{\ell_V(F)}$.
+\end{corollary}
+This is immediate when $\leafsize(F) \geq 1$. Only $\underline{b}$, $b \in \{0,1\}$, have leaf-size $0$, but $\left|\sub_V\left(\underline{b}\right)\right| = 1 \leq 16^{0}$. 
+
+\begin{theorem}
+	\label{thm:L-B2Formula-Nechiporuk}
+	\textbf{(Nechiporuk's Bound).} For any $f: \{0,1\}^n \rightarrow \{0,1\}$ and any partition of $[n]$ into $t$ disjoint components $V_1 \uplus \cdots \uplus V_t$
+	\[\leafsize_{B_2}(f) \geq \frac{1}{4}\sum_{i = 1}^{t}\log|\sub_{V_i}(f)|.\]
+\end{theorem}
+\begin{proof}
+	Direct application of Corollary \ref{cor:U-Vsubfunctions}. Let $F$ be the minimal formula computing $f$. Then
+	\[\leafsize_{B_2}(f) = \sum_{i = 1}^{t}\ell_{V_i}(F) \geq \sum_{i = 1}^{t}\log_{16}|\sub_{V_i}(F)| = \frac{1}{4} \sum_{i = 1}^{t}\log|\sub_{V_i}(F)|.\]
+\end{proof}
+
+Let us apply Theorem \ref{thm:L-B2Formula-Nechiporuk} to an explicit function in the full binary basis to get a lower bound. Consider is the element distinctness function.
+\begin{definition}
+	\label{def:FUN-elementdistinctness}
+	For $k \in \NN$, let $n = 2^k \cdot 2k$. The \textbf{element distinctness} function $ED_n$ is
+	\[ED_n: \{0,1\}^{2^k \times 2k} \rightarrow \{0,1\}\] where
+	\[ED_n(X_1, ..., X_{2^k}) = \begin{cases}
+	1 &\mbox{if $X_1, ..., X_{2k}$ are distinct elements of $\{0,1\}^{2k}$}\\
+	0 &\mbox{otherwise}
+	\end{cases}\]
+	Think of this as being given $2^k$ binary strings of length $2k$ and asked if they are all distinct.
+\end{definition} 
+
+\begin{theorem}
+	\label{thm:L-B2FormulaQuadraticExplicit}
+	\[\leafsize_{B_2}(ED_n) = \Omega\left(\frac{n^2}{\log n}\right).\]
+\end{theorem}
+\begin{proof}
+	Apply Nechiporuk's bound with $V_i$ as a block of length $2k$ corresponding to the coordinates of $X_i$. Remember $n = 2^k + 2k$.  
+\end{proof}
+Exercise: show that $\Omega(n^2/\log n)$ is the limit on the lower bound achievable by Nechiporuk's method.
+
+\subsection{Upper Bound}
+\begin{definition}
+	\label{def:randomizedcircuit}
+	A \textbf{randomized circuit} for a function $f: \{0,1\}^n \rightarrow \{0,1\}$ is a circuit $C$ with $n + m$ variables $x_1, ..., x_n$ and $y_1, ..., y_m$ (think of $\vv{x}$ as the input and $\vv{y}$ as a random seed) such that for every $\vv{x} \in \{0,1\}^n$
+	\[\Pr_{\vv{y} \in \{0,1\}^m}\left[C(\vv{x}, \vv{y}) = 1\right] \begin{cases}
+	\geq \frac{2}{3} &\mbox{if $f(\vv{x}) = 1$}\\
+	\leq \frac{1}{3} &\mbox{if $f(\vv{x}) = 0$}
+	\end{cases}\]
+\end{definition}
+Let $\class{BPP/poly}$ be the class of Boolean functions computable by poly-sized randomized circuits --- think of $\class{BPP/poly}$ as the non-uniform version of $\class{BPP}$. Generally $\frac{1}{3}$ and $\frac{2}{3}$ can be replaced with any $a$, $b$ satisfying $0 < a < b < 1$. 
+
+\begin{theorem}
+	\textbf{(Adelman, 1978).} If $f$ is computable by poly-size randomized circuit, then its computable by poly-sized (deterministic) circuits i.e. $\class{BPP/poly} \subseteq \class{P/poly}$.
+\end{theorem}
+\begin{proof}
+	The intuition is to improve the probability of success by doing repeated trials, taking the majority, then use the probabilistic method to show that there was a good choice of $\vv{y}$ which we can hard-wired into the circuit.
+	
+	Let $f$ be the given $n$-ary function with $\class{BPP/poly}$ circuit $C(\vv{x}, \vv{y})$. Recall that $MAJ_k$ has $O(k)$ sized circuits. Construct the composite function $g_k: \{0, 1\}^{n} \times \{0,1\}^{k \times m} \rightarrow \{0,1\}$ such that 
+	\[g_k(\vv{x}, \mm{Y}) = MAJ_k\left(C(\vv{x}, \vv{y}_1), ..., C(\vv{x}, \vv{y}_k)\right)\] 
+	where each $\vv{y}_i$ is the $i$\textsuperscript{th} row of $\mm{Y}$. Observe that $\circuitsize(g_k) \leq k \cdot \circuitsize(f) + O(k)$ since we can replace each of the $k$ inputs of $MAJ_k$ by a circuit of size $\circuitsize(f)$. If $k$ is $\poly(n)$ then $g_k \in \class{P/poly}$.
+	
+	On a randomly sampled seed $\vv{y}_i$, let $X_i$ be the indicator r.v. for $C(\vv{x}, \vv{y}_i) \neq f(\vv{x})$. Let $X = X_1 + \cdots + X_k$. Observe that 
+	\begin{align*}
+		\Pr_{\mm{Y} \in \{0,1\}^{k \times m}}\left[g_k(\vv{x}, \mm{Y}) \neq f(\vv{x})\right] &= \Pr_{\vv{y}_1, ..., \vv{y}_k \in \{0,1\}^{m}}\left[MAJ_k\left(C(\vv{x}, \vv{y}_1), ..., C(\vv{x}, \vv{y}_k)\right) \neq f(\vv{x})\right]\\
+		&= \Pr\left[X \geq \frac{k}{2}\right]\\
+		&= \Pr\left[X \geq (1 + \epsilon)pk\right]
+	\end{align*}
+	where $p = \Pr[C(\vv{x}, \vv{y}) \neq f(\vv{x})]$ and $\epsilon = \frac{1 - 2p}{2p}$. From Definition \ref{def:randomizedcircuit}, we have $p = \frac{1}{3}$ and $\epsilon = \frac{1}{2}$. Thus by Chernoff bound we have
+	\[\Pr_{\mm{Y} \in \{0,1\}^{k \times m}}\left[g_k(\vv{x}, \mm{Y}) \neq f(\vv{x})\right] = \Pr\left[X \geq (1 + \epsilon)pk\right] \leq \exp\left(\frac{-\epsilon^2pk}{2 + \epsilon}\right) = \exp\left(\frac{-k}{30}\right).\]
+	When $k > 30$, $\Pr\left[g_k(\vv{x}, \mm{Y}) \neq f(\vv{x})\right]$ is less than $2^{-n}$ and there exists a $\mm{Y}$ for which $g_k(\vv{x}, \mm{Y}) = f(\vv{x})$ with probability greater than $1 - 2^{-n}$. Since there are only $2^{n}$ inputs $\vv{x}$, $g_k(\vv{x}, \mm{Y})$ matches $f(\vv{x})$ on every input. By hard-wiring $\mm{Y}$ into the circuit for $g_k$, we get a deterministic $\poly(n)$ sized circuit for $f$. 
+\end{proof}
+
+\section{Restricted Setting}
+Welp, that is all the bounds that we could get out of the general case. Time to consider some restricted settings.
+
+\subsection{Monotone and Others}
+\begin{definition}
+	A \textbf{monotone circuit}
+\end{definition}
+
+Observe that if $MAJ_n(\vv{x}) = 0$, then for some uniformly random bit $x_i$, $\Pr[x_i = 1] = \frac{1}{2} - \frac{1}{2n}$.
+\begin{theorem}
+	\textbf{(Valiant, 1984).} $MAJ_n$ has poly-sized monotone circuits\footnote{And monotone formulas apparently!}.
+\end{theorem}
+\begin{proof}
+	We are going to use the idea of amplification and projections. The idea is to compose $MAJ_3$ with itself $k$ times. 
+\end{proof}
+
+\begin{definition}
+	For $f: \{0,1\}^m \rightarrow \{0,1\}$, let $\mu_f: [0,1] \rightarrow [0,1]$ be defined as
+	\[\mu_f(p) = \Pr_{y_1, ..., y_m \in Bern(p)}\Pr[f(y_1, ..., y_m) = 1].\]
+\end{definition}
+$\mu$ is particularly nice for monotone, non-constant functions $f$. 
+
+\begin{example}
+	$MAJ_3(p) = p^3 + 3p^2(1-p)$.
+\end{example}
+Observe that $\mu_{f \comp g}(p) = \mu_f(\mu_g(p))$. To see this, you should draw out the little tree. 
+
+\begin{lemma}
+	There is a constant $c < 3$ such that $\mu_{MAJ_3}^{c\log n}\left(\frac{1}{2} - \frac{1}{2n}\right)$
+\end{lemma}
+
+A striking consequence of this result.
+\begin{definition}
+	$f: \{0,1\}^n \rightarrow \{0,1\}$ is a \textbf{Slice functions} if there exists $k \in \{0, ..., n\}$ such that $f(x) = 0$ if $|x| < k$ and $f(x) = 1$ if $|x| > k$.
+\end{definition}
+
+\begin{theorem}
+	\textbf{(Berkowitz 1982).} If $f$ is a slice function then...
+\end{theorem}
+
+\textbf{Challenge.} Let $\leafsize_{d}(f)$ be the leaf size of an $n$-ary Boolean function $f$ in $\class{AC}^0$ with depth at most $d$. Observe that $\leafsize_2(XOR_n) \leq n2^n$ as you can take an ``or'' of $2^n$ ``and'' gates with fan-in $n$ each specifying a setting of the $n$ input variables.
+
+Further note that for $k$ and $n_1, ..., n_k$ where $\sum_{i = 1}^{k} n_i = n$, 
+\begin{equation}
+	\label{eq:U-AC0recurrence}
+	\leafsize_{d+1}(XOR_n) \leq 2^{k-1}\sum_{i = 1}^{k}\leafsize_{d}(XOR_{n_i}).
+\end{equation}
+
+(I still need to work out the details of this proof). Using $\leafsize_2(XOR_n) \leq n2^n$ for the base case and the recurrence shown in Equation (\ref{eq:U-AC0recurrence}), we can show 
+\[\leafsize_{d+1}(XOR_n) \leq n2^{dn^{1/d}}\]
+for any $n$ and $d \geq 2$. However, when $n$ is a power of $2$, we can get a slightly tighter bound of 
+\[\leafsize_{d+1}(XOR_n) \leq n2^{d\left(n^{1/d} - 1\right)}.\]
+
+Ben suspects that the above inequality holds for all $n$, not just powers of two, since for $d = \ceil{\log n}$ it is know that $n^{1/d} - 1 = 2^{\log n/ \log n} - 1 = 1$ in the exponent of $2$ is sufficient i.e. it is known that
+\[\leafsize_{\ceil{\log n}}(XOR_n) \in O(n^2).\]
+Further, Ben believes that it is sufficient to achieve this tighter bound by analyzing the recurrence relation more carefully. 

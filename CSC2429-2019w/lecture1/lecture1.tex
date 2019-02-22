@@ -1,16 +1,11 @@
-\documentclass[11pt]{article}
-\usepackage{../structure}
-
-\begin{document}
-\makeheader{January 10, 2019}{1}{The Basics}{Lily Li}
-
-\section*{Overview}
-\begin{itemize}
-	\item [Section \ref{sec:admin}:] \textbf{Administrivia.}
-	\item [Section \ref{section:definitions}:] \textbf{Definitions.} Define Boolean function $f$, DeMorgan circuits, circuits size $\circuitsize(f)$, leaf size $\leafsize(f)$, and depth of a circuit. Spira 1971, relates leaf-size of a formula and its depth. 
-	\item [Section \ref{sec:uniformvsconcrete}:] \textbf{Models of Computation.} Define uniform and non-uniform models of computation. Circuits can efficiently simulate Turing Machines. 
-	\item [Section \ref{sec:circuitsize}:] \textbf{Circuit Size of Boolean Functions.} Lupanov 1958, upper bound of $O(2^{n}/n)$ for $n$-ary Boolean functions. Shannon 1949, proved matching lower bound.
-\end{itemize}
+%!TEX root = ../MAIN-coursenotes.tex
+%\subsection*{Overview}
+%\begin{itemize}
+%	\item [Section \ref{sec:admin}:] \textbf{Administrivia.}
+%	\item [Section \ref{section:definitions}:] \textbf{Definitions.} Define Boolean function $f$, DeMorgan circuits, circuits size $\circuitsize(f)$, leaf size $\leafsize(f)$, and depth of a circuit. Spira 1971, relates leaf-size of a formula and its depth. 
+%	\item [Section \ref{sec:uniformvsconcrete}:] \textbf{Models of Computation.} Define uniform and non-uniform models of computation. Circuits can efficiently simulate Turing Machines. 
+%	\item [Section \ref{sec:circuitsize}:] \textbf{Circuit Size of Boolean Functions.} Lupanov 1958, upper bound of $O(2^{n}/n)$ for $n$-ary Boolean functions. Shannon 1949, proved matching lower bound.
+%\end{itemize}
 
 \section{Administrivia}
 \label{sec:admin}
@@ -22,286 +17,293 @@
 	\item \textbf{Workload:} Homework assignment(s), scribe notes, paper report (5 to 10 pages), and presentation if you so choose. No exams.
 \end{itemize}
 
-\section{Definitions}
-\label{section:definitions}
-\begin{definition}
-	A \textbf{$n$-ary Boolean function} $f$ is a function of the form $f: \{0,1\}^n \rightarrow \{0,1\}$. Usually we interpret $(0,1)$ as $(\false, \true)$ or as $(1,-1)$ --- this makes sense if you think of it as $(-1)^0$ and $(-1)^{1}$.
-\end{definition}
+\section{Basic Definitions}
+	\subsection{Boolean Functions}
+	\label{section:definitions}
+	\begin{definition}
+		A \textbf{$n$-ary Boolean function} $f$ is a function of the form $f: \{0,1\}^n \rightarrow \{0,1\}$. Usually we interpret $(0,1)$ as $(\false, \true)$ or as $(1,-1)$ --- this makes sense if you think of it as $(-1)^0$ and $(-1)^{1}$.
+	\end{definition}
+	
+	Let $\{0,1\}^* = \cup_{n \in \NN} \{0,1\}^n$. We typically refer to a family of Boolean function(s) $f: \{0,1\}^* \rightarrow \{0,1\}$. This corresponds to a sequence of functions $f_n: \{0,1\}^n \rightarrow \{0,1\}$ and to a language $L \subseteq \{0, 1\}^*$ described by its characteristic function $f_L: \{0,1\}^* \rightarrow \{0,1\}$.
+	
+	\begin{example}
+		The following are some examples of $n$-ary Boolean functions:
+		\begin{enumerate}
+			\item $PARITY(x_1, ..., x_n) = \sum_{i = 1}^{n} x_i \mod 2$.
+			\item $MOD_p(x_1, ..., x_n) = 1 \iff \sum_{i = 1}^{n} x_i \equiv 0 \mod p$.
+			\item $MAJORITY_n(x_1, ..., x_n) = 1 \iff \sum_{i=1}^{n} x_i \geq \ceil{n/2}$.
+			\item $k-CLIQUE: \{0,1\}^{\binom{n}{2}} \rightarrow \{0,1\}$. Think of each graph $G$ as an indicator vector $\ind{1}_G$ over its $\binom{n}{2}$ edges. Then $k-CLIQUE(\ind{1}_G) = 1$ if and only if $G$ has a $k$-clique.
+		\end{enumerate}
+	\end{example}
+	
+	Let us consider DeMorgan circuits. These contain logical connectives $\{\lor, \land, \lnot\}$, input variables $\{x_1, ..., x_n\}$, and constants $\{0,1\}$. 
+	
+	\begin{definition}
+		\label{def:demorgancircuit}
+		A \textbf{$n$-ary DeMorgan circuit} is a finite directed acyclic graph (DAG) with nodes labelled as follows:
+		\begin{itemize}
+			\item Nodes of in-degree zero (``inputs'') are labelled by a variable or a constant.
+			\item Non-input nodes (``gates'') of in-degree one are labelled with $\lnot$. Gates of in-degree two are labelled with $\lor$ or $\land$.
+			\item A subset of the nodes are designated as ``outputs'' (default: \emph{the} node with out-degree zero).
+		\end{itemize}
+		Two circuits are \textbf{equivalent} if they compute the same function.
+	\end{definition}
+	
+	\textbf{Formulas} are tree-like circuits. Since different branches in a formula depend on different copies of the variables, formulas are memory-less. See Figure \ref{fig:circuitandformula}. Proving that formulas are polynomially weaker than circuits is still an open problem.
+	
+	\begin{figure}[ht]
+		\centering
+		\begin{tikzpicture}[->, >=stealth', shorten >= 1pt, auto, node distance=4em, baseline=(current bounding box.center)]
+		\node[state,accepting]	(out) 					{$\land$};
+		\node[state]	(or)[below left of=out]	{$\lor$};
+		\node[state]	(not)[below right of=out]{$\lnot$};
+		\node[state]	(and)[below right of=not]{$\land$};
+		\node[state]	(x1)[below left of=or]	{$x$};
+		\node[state]	(y1)[below right of=or]	{$y$};
+		\node[state]	(x2)[below left of=and]	{$x$};
+		\node[state]	(y2)[below right of=and]{$y$};
+		\path 	(x1)	edge	node{} 	(or)
+		(y1)	edge	node{}	(or)
+		(x2)	edge	node{}	(and)
+		(y2)	edge	node{}	(and)
+		(or)	edge	node{}	(out)
+		(and)	edge	node{}	(not)
+		(not)	edge	node{}	(out);
+		\end{tikzpicture}
+		\qquad
+		\begin{tikzpicture}[->, >=stealth', shorten >= 1pt, auto, node distance=4em, baseline=(current bounding box.center)]
+		\node[state,accepting]	(out)							{$\land$};
+		\node[state]	(not)[below right of=out]		{$\lnot$};
+		\node[state]	(and)[below of=not]		{$\land$};
+		\node[state]	(or)[left of=and]				{$\lor$};
+		\node[state]	(z)[below of=and]				{$z$};	
+		\node[state]	(outsub)[left of=z]		 		{$\land$};
+		\node[state]	(notsub)[left of=or]			{$\lnot$};
+		\node[state]	(andsub)[below of=notsub]		{$\land$};	
+		\node[state]	(orsub)[left of=notsub]			{$\lor$};
+		\node[state]	(x)[below of=orsub]				{$x$};
+		\node[state]	(y)[below of=andsub]			{$y$};
+		\path 	(x)		edge	node{} 	(orsub)
+				(y)		edge	node{}	(orsub)
+				(x)		edge	node{}	(andsub)
+				(y)		edge	node{}	(andsub)
+				(orsub)	edge	node{}	(outsub)
+				(andsub)	edge	node{}	(notsub)
+				(notsub)	edge	node{}	(outsub)
+				(outsub)	edge	node{}	(or)
+				(outsub)	edge	node{}	(and)
+				(z)		edge	node{}	(or)
+				(z)		edge	node{}	(and)
+				(or)	edge	node{}	(out)
+				(and)	edge	node{}	(not)
+				(not)	edge	node{}	(out);
+		\end{tikzpicture}
+		\caption{(Left) Formula computing $x \xor y$. (Right) Circuit computing $x \xor y \xor z$.}
+		\label{fig:circuitandformula}
+	\end{figure}
+	
+	\begin{definition}
+		\label{def:circuitsize}
+		The \textbf{size} of a circuit is the number of $\lor$ and $\land$ gates it contains. 
+		
+		The \textbf{leaf-size} of a formula is the number of leaves in its associated DAG. This is one more than the circuit size as defined above. 
+		
+		The \textbf{circuit size} of an $n$-ary Boolean function $f: \{0,1\}^n \rightarrow \{0,1\}$, written $\circuitsize(f)$, is the minimum size of a circuit computing $f$. Similarly, the \textbf{formula (leaf) size} of $f$, written $\leafsize(f)$, is the minimum size of a formula computing $f$. 
+		
+		The \textbf{depth} of a circuit is the maximum number of $\land$ and $\lor$ gates on any input to output path.
+	\end{definition}
+	
+	\begin{example}
+		It is a major open problem to compute the circuit and leaf size lower bounds for various Boolean functions. A couple of known results are as follows.
+		\begin{center}
+			\begin{tabular}{c|c|c}
+				$f$ 		& $\leafsize(f)$ 	& $\circuitsize(f)$\\ \hline
+				&&\\[-1em]
+				$AND_n$ 	& $n$ 				& $n-1$\\ \hline
+				&&\\[-1em]
+				$PARITY_n$ 	& $\Theta\left(n^2\right)$ 	& $3(n-1)$\\
+			\end{tabular}
+		\end{center}
+		The results for $AND_n$ are tight since the output depends on all the inputs. Improving the gap size between $\leafsize(PARITY_n)$ and $\circuitsize(PARITY_n)$ would separate $\class{NC}_1$ from $\class{P}$.
+	\end{example}
 
-Let $\{0,1\}^* = \cup_{n \in \NN} \{0,1\}^n$. We typically refer to a family of Boolean function(s) $f: \{0,1\}^* \rightarrow \{0,1\}$. This corresponds to a sequence of functions $f_n: \{0,1\}^n \rightarrow \{0,1\}$ and to a language $L \subseteq \{0, 1\}^*$ described by its characteristic function $f_L: \{0,1\}^* \rightarrow \{0,1\}$.
-
-\begin{example}
-	The following are some examples of $n$-ary Boolean functions:
-	\begin{enumerate}
-		\item $PARITY(x_1, ..., x_n) = \sum_{i = 1}^{n} x_i \mod 2$.
-		\item $MOD_p(x_1, ..., x_n) = 1 \iff \sum_{i = 1}^{n} x_i \equiv 0 \mod p$.
-		\item $MAJORITY_n(x_1, ..., x_n) = 1 \iff \sum_{i=1}^{n} x_i \geq \ceil{n/2}$.
-		\item $k-CLIQUE: \{0,1\}^{\binom{n}{2}} \rightarrow \{0,1\}$. Think of each graph $G$ as an indicator vector $\ind{1}_G$ over its $\binom{n}{2}$ edges. Then $k-CLIQUE(\ind{1}_G) = 1$ if and only if $G$ has a $k$-clique.
-	\end{enumerate}
-\end{example}
-
-Let us consider DeMorgan circuits. These contain logical connectives $\{\lor, \land, \lnot\}$, input variables $\{x_1, ..., x_n\}$, and constants $\{0,1\}$. 
-
-\begin{definition}
-	\label{def:demorgancircuit}
-	A \textbf{$n$-ary DeMorgan circuit} is a finite directed acyclic graph (DAG) with nodes labelled as follows:
+	\subsection{Other Ways of Measuring Size}
+	Other ways of counting the size of a circuit include: (1) counting the number of wires and (2) counting all gate types (including $\lnot$ gates). It turns out that the result of these calculations differ from our definition above by at most a factor of two. It should be easy to see why this is in the former case. Every $\land$ and $\lor$ gate has two incoming wires. Claim \ref{claim:negationnotaproblem} shows this in the latter case.
+	
+	\begin{definition}
+		\label{def:negationnormalform}
+		The input to every $\lnot$ gate in a circuit in \textbf{negation normal form} is a variable. See Figure \ref{fig:negationnormalform}.
+	\end{definition}
+	\begin{figure}[ht]
+		\centering
+		\begin{tikzpicture}[->, >=stealth', shorten >= 1pt, auto, node distance=4em, baseline=(current bounding box.center)]
+		\node[state,accepting]	(not1) 					{$\lnot$};
+		\node[state]	(and1)[below of=not1]	{$\land$};
+		\node[state]	(x)[below left of=and1]	{$x$};
+		\node[state]	(y)[below right of=and1]{$y$};
+		\path 	(x)	edge	node{} 	(and1)
+		(y)	edge	node{}	(and1)
+		(and1)	edge	node{}	(not1);
+		\end{tikzpicture}
+		\qquad$\implies$\qquad
+		\begin{tikzpicture}[->, >=stealth', shorten >= 1pt, auto, node distance=4em, baseline=(current bounding box.center)]
+		\node[state,accepting]	(or)					{$\lor$};
+		\node[state]	(not1)[below left of=or]{$\lnot$};
+		\node[state]	(not2)[below right of=or]{$\lnot$};
+		\node[state]	(x)[below of=not1]		{$x$};
+		\node[state]	(y)[below of=not2]		{$y$};
+		\path 	(x)	edge	node{} 	(not1)
+		(y)	edge	node{}	(not2)
+		(not1)	edge	node{}	(or)
+		(not2)	edge	node{}	(or);
+		\end{tikzpicture}
+		\caption{Apply DeMorgan's Law to all $\lnot$ gates whose inputs are not literals on the left circuit to get the equivalent right circuit in negation normal form.}
+		\label{fig:negationnormalform}
+	\end{figure}
+	
+	\begin{claim}
+		\label{claim:negationnotaproblem}
+		Every circuit $C$ of size $m$ is equivalent to a circuit in negation normal form of size $\leq 2m$. 
+	\end{claim}
+	\begin{proof}
+		Apply DeMorgan's law to every $\lnot$ gate whose input is not a variable. This switches the order of $\lnot$ and $\land$/$\lor$ in the DAG and adds an additional $\lnot$ gate. By the end of the process we have added at most $m$ $\lnot$ gates.  
+	\end{proof}
+	
+	Thus we can push all $\lnot$ gates to the bottom and interpret the inputs as literals (variables and their negation). We can also modify the definition of leaf-size to only count leaves leading to literals (never-mind the constants).
+	
+	\subsection{General Basis}
+	A \textbf{basis} $B$ is a set of Boolean functions (or ``gate types''). Examples of basis include: 
 	\begin{itemize}
-		\item Nodes of in-degree zero (``inputs'') are labelled by a variable or a constant.
-		\item Non-input nodes (``gates'') of in-degree one are labelled with $\lnot$. Gates of in-degree two are labelled with $\lor$ or $\land$.
-		\item A subset of the nodes are designated as ``outputs'' (default: \emph{the} node with out-degree zero).
+		\item DeMorgan basis: $\{\land, \lor, \lnot\}$.
+		\item Full binary basis: all Boolean functions $\{0,1\}^2 \rightarrow \{0,1\}$ (for example, you would get $\xor$).
+		\item Monotone basis: $\{\land, \lor\}$ (NOT universal).
+		\item $\class{AC}^0$ basis: $\{\land^{k}, \lor^k, \lnot: k \in \NN\}$ which are unbounded fan-in $\land$ and $\lor$ gates.
 	\end{itemize}
-	Two circuits are equivalent if they compute the same function.
-\end{definition}
+	For a function $f$, let $\leafsize_B(f)$ and $\circuitsize_B(f)$ be the leaf and circuit size of $f$ with formulas and circuits built from gates of basis $B$. A basis is \textbf{universal} if it computes all functions. For two universal basis $B_1$ and $B_2$ it is possible to build a circuit using gates from $B_1$ which simulates any gate from $B_2$. If all functions in $B_1$ and $B_2$ have constant arity, it follows that $\circuitsize_{B_2}(f) = O(\circuitsize_{B_1}(f))$; for formula size, the relation is $\leafsize_{B_2}(f) = \leafsize_{B_1}(f)^{O(1)}$. This polynomial blow-up is unavoidable in some cases. Recall the function $PARITY_n$: $\leafsize_{\{\land, \lor, \lnot\}}(PARITY_n) = \Theta(n^2)$ whereas $\leafsize_{\{\xor\}}(PARITY_n) = n-1$.
 
-\textbf{Formulas} are tree-like circuits. Since different branches in a formula depend on different copies of the variables, formulas are memory-less. See Figure \ref{fig:circuitandformula}. Proving that formulas are polynomially weaker than circuits is still an open problem.
-
-\begin{figure}[ht]
-	\centering
-	\begin{tikzpicture}[->, >=stealth', shorten >= 1pt, auto, node distance=4em, baseline=(current bounding box.center)]
-	\node[state,accepting]	(out) 					{$\land$};
-	\node[state]	(or)[below left of=out]	{$\lor$};
-	\node[state]	(not)[below right of=out]{$\lnot$};
-	\node[state]	(and)[below right of=not]{$\land$};
-	\node[state]	(x1)[below left of=or]	{$x$};
-	\node[state]	(y1)[below right of=or]	{$y$};
-	\node[state]	(x2)[below left of=and]	{$x$};
-	\node[state]	(y2)[below right of=and]{$y$};
-	\path 	(x1)	edge	node{} 	(or)
-	(y1)	edge	node{}	(or)
-	(x2)	edge	node{}	(and)
-	(y2)	edge	node{}	(and)
-	(or)	edge	node{}	(out)
-	(and)	edge	node{}	(not)
-	(not)	edge	node{}	(out);
-	\end{tikzpicture}
-	\qquad
-	\begin{tikzpicture}[->, >=stealth', shorten >= 1pt, auto, node distance=4em, baseline=(current bounding box.center)]
-	\node[state,accepting]	(out)							{$\land$};
-	\node[state]	(not)[below right of=out]		{$\lnot$};
-	\node[state]	(and)[below of=not]		{$\land$};
-	\node[state]	(or)[left of=and]				{$\lor$};
-	\node[state]	(z)[below of=and]				{$z$};	
-	\node[state]	(outsub)[left of=z]		 		{$\land$};
-	\node[state]	(notsub)[left of=or]			{$\lnot$};
-	\node[state]	(andsub)[below of=notsub]		{$\land$};	
-	\node[state]	(orsub)[left of=notsub]			{$\lor$};
-	\node[state]	(x)[below of=orsub]				{$x$};
-	\node[state]	(y)[below of=andsub]			{$y$};
-	\path 	(x)		edge	node{} 	(orsub)
-			(y)		edge	node{}	(orsub)
-			(x)		edge	node{}	(andsub)
-			(y)		edge	node{}	(andsub)
-			(orsub)	edge	node{}	(outsub)
-			(andsub)	edge	node{}	(notsub)
-			(notsub)	edge	node{}	(outsub)
-			(outsub)	edge	node{}	(or)
-			(outsub)	edge	node{}	(and)
-			(z)		edge	node{}	(or)
-			(z)		edge	node{}	(and)
-			(or)	edge	node{}	(out)
-			(and)	edge	node{}	(not)
-			(not)	edge	node{}	(out);
-	\end{tikzpicture}
-	\caption{(Left) Formula computing $x \xor y$. (Right) Circuit computing $x \xor y \xor z$.}
-	\label{fig:circuitandformula}
-\end{figure}
-
-\begin{definition}
-	\label{def:circuitsize}
-	The \textbf{size} of a circuit is the number of $\lor$ and $\land$ gates it contains. 
+	\subsection{Models of Computation}
+	\label{sec:uniformvsconcrete}
+	\begin{definition}
+		\label{def:mmodelsofcomputation} 
+		A \textbf{uniform model of computation} is a single machine/program with a finite description which operates on all inputs in $\{0,1\}^*$. Examples range from simple finite automata (where we have lower bounds ala the pumping lemma) to complex Turing Machines (lower bounds much harder to come by).
+		
+		Recall that a language $L \subseteq \{0,1\}^*$ can be interpreted as a sequence of functions $(f_0, f_1, ...)$ where $f_n: \{0,1\}^n \rightarrow \{0,1\}$ and $f_n(\vv{x}) = 1 \iff \vv{x} \in L$ for any $\vv{x} \in \{0,1\}^n$. A \textbf{non-uniform (concrete) model of computation} is a sequence $(C_0, C_1, ...)$ of combinatorial objects (namely circuits) where $C_n$ computes $f_n$. Examples include: circuits in the DeMorgan basis, restricted class of circuits (formulas, monotone model), decision trees, etc.  
+	\end{definition}
 	
-	The \textbf{leaf-size} of a formula is the number of leaves in its associated DAG. This is one more than the circuit size as defined above. 
+	Observe that the non-uniform model of computation is more powerful than the uniform one since the finite program can be used as every combinatorial objects in the sequence. It follows that lower bounds in the non-uniform model also imply lower bounds in the uniform model. While upper bounds in the uniform model imply upper bounds in the non-uniform model. \emph{We want: unconditional lower bounds.} 
 	
-	The \textbf{circuit size} of an $n$-ary Boolean function $f: \{0,1\}^n \rightarrow \{0,1\}$, written $\circuitsize(f)$, is the minimum size of a circuit computing $f$. Similarly, the \textbf{formula (leaf) size} of $f$, written $\leafsize(f)$, is the minimum size of a formula computing $f$. 
+	Circuits efficiently simulate Turing Machines. 
+	\begin{lemma}
+		Any Turing Machine (TM) $M$ with running time $t(n)$ can be simulated by a circuit (family of) of size $O\left(t(n)^2\right)$.
+	\end{lemma}
+	Exercise for the reader. \emph{Hint: think about configurations of the Turing Machines as a $t(n) \times t(n)$ grid and construct a circuit for every grid cell.} Fischer and Pipenger (1979) proved an $O(t(n)\log t(n))$ upper bound on \emph{oblivious Turing Machines}\footnote{An oblivious TM is one whose head motion depends only on the size of the input and not its particular bits. Take a look at \href{https://rjlipton.wordpress.com/2009/07/28/oblivious-turing-machines-and-a-crock/}{this} blog post for some entertainment.}. It is unknown if we can do better. 
 	
-	The \textbf{depth} of a circuit is the maximum number of $\land$ and $\lor$ gates on any input to output path.
-\end{definition}
-
-Other ways of counting the size of a circuit include: (1) counting the number of wires and (2) counting all gate types (including $\lnot$ gates). It turns out that the result of these calculations differ from our definition above by at most a factor of two. It should be easy to see why this is in the former case. Every $\land$ and $\lor$ gate has two incoming wires. Claim \ref{claim:negationnotaproblem} shows this in the latter case.
-
-\begin{definition}
-	\label{def:negationnormalform}
-	The input to every $\lnot$ gate in a circuit in \textbf{negation normal form} is a variable. See Figure \ref{fig:negationnormalform}.
-\end{definition}
-\begin{figure}[ht]
-	\centering
-	\begin{tikzpicture}[->, >=stealth', shorten >= 1pt, auto, node distance=4em, baseline=(current bounding box.center)]
-	\node[state,accepting]	(not1) 					{$\lnot$};
-	\node[state]	(and1)[below of=not1]	{$\land$};
-	\node[state]	(x)[below left of=and1]	{$x$};
-	\node[state]	(y)[below right of=and1]{$y$};
-	\path 	(x)	edge	node{} 	(and1)
-	(y)	edge	node{}	(and1)
-	(and1)	edge	node{}	(not1);
-	\end{tikzpicture}
-	\qquad$\implies$\qquad
-	\begin{tikzpicture}[->, >=stealth', shorten >= 1pt, auto, node distance=4em, baseline=(current bounding box.center)]
-	\node[state,accepting]	(or)					{$\lor$};
-	\node[state]	(not1)[below left of=or]{$\lnot$};
-	\node[state]	(not2)[below right of=or]{$\lnot$};
-	\node[state]	(x)[below of=not1]		{$x$};
-	\node[state]	(y)[below of=not2]		{$y$};
-	\path 	(x)	edge	node{} 	(not1)
-	(y)	edge	node{}	(not2)
-	(not1)	edge	node{}	(or)
-	(not2)	edge	node{}	(or);
-	\end{tikzpicture}
-	\caption{Apply DeMorgan's Law to all $\lnot$ gates whose inputs are not literals on the left circuit to get the equivalent right circuit in negation normal form.}
-	\label{fig:negationnormalform}
-\end{figure}
-
-\begin{claim}
-	\label{claim:negationnotaproblem}
-	Every circuit $C$ of size $m$ is equivalent to a circuit in negation normal form of size $\leq 2m$. 
-\end{claim}
-\begin{proof}
-	Apply DeMorgan's law to every $\lnot$ gate whose input is not a variable. This switches the order of $\lnot$ and $\land$/$\lor$ in the DAG and adds an additional $\lnot$ gate. By the end of the process we have added at most $m$ $\lnot$ gates.  
-\end{proof}
-
-Thus we can push all $\lnot$ gates to the bottom and interpret the inputs as literals (variables and their negation). We can also modify the definition of leaf-size to only count leaves leading to literals (never-mind the constants).
-
-\begin{example}
-	It is a major open problem to compute the circuit and leaf size lower bounds for various Boolean functions. A couple of known results are as follows.
-	\begin{center}
-		\begin{tabular}{c|c|c}
-			$f$ 		& $\leafsize(f)$ 	& $\circuitsize(f)$\\ \hline
-			&&\\[-1em]
-			$AND_n$ 	& $n$ 				& $n-1$\\ \hline
-			&&\\[-1em]
-			$PARITY_n$ 	& $\Theta\left(n^2\right)$ 	& $3(n-1)$\\
-		\end{tabular}
-	\end{center}
-	The results for $AND_n$ are tight since the output depends on all the inputs. Improving the gap size between $\leafsize(PARITY_n)$ and $\circuitsize(PARITY_n)$ would separate $\class{NC}_1$ from $\class{P}$.
-\end{example}
-
-Next we consider the relationship between circuit size and depth. First observe that every circuit of depth $d$ is equivalent to a formula of size  at most $2^d$. To see this, take the circuit and duplicate any branches that gets reused. The resulting binary tree has at most as many nodes as a perfect binary tree of depth $d$ which itself has circuit size $2^d$.   
-\begin{theorem}
-	(Spira 1971). Every formula with leaf-size $s$ is equivalent to a formula of depth $O(\log s)$ ($2\log_{3/2}(s)$ to be exact) and thus size at most $s^{O(1)}$ ($s^{2/\log_2(3/2)}$).
-\end{theorem}
-\begin{proof}
-	By induction on $s$. The base case is trivial. Let $F$ be the original formula and $g$ be some gate. Let $F_g$ be the sub-formula rooted at $g$. For $b \in \{0,1\}$, let $F^{(g \leftarrow b)}$ be the formula with $g$ replaced with the constant value $b$. See Figure \ref{fig:spira1971}. Note that $\leafsize(F) = \leafsize\left(F_g\right) + \leafsize\left(F^{\left(g \leftarrow b\right)}\right)$. Minimize $\leafsize(F)$ by balancing the two terms on the RHS. By Claim \ref{claim:pickgoodgate}, we can find a gate $g$ such that $\frac{s}{3} \leq \leafsize(F_g) \leq \frac{2s}{3}$. 
+	\begin{corollary}
+		If there is a super polynomial lower-bound (better than $\Omega(n^c)$ for all constants $c > 0$) on the circuit size of any language in $\class{NP}$, then $\class{P} \neq \class{NP}$. 
+	\end{corollary}
+	Finding the lower-bound would actually show $\class{NP} \not\subseteq \class{P/poly}$ where $\class{P/poly}$ is the class of languages decidable by $\poly(n)$-size circuits.
 	
-	\fig{spira1971}{1}{Illustration of gate $g$ and formulas $F_g$ and $F^{g \leftarrow b}$.}
+	We will see some polynomial lower bounds for formulas in the DeMorgan basis later on. As a historical curio, the following is a catalogue of lower bound results for an explicit Boolean function:
+	\begin{enumerate}
+		\item $\Omega(n^{1.5})$ Subboboskay '61
+		\item $\Omega(n^{2})$ Khrapchenko '71
+		\item $\Omega(n^{2.5 - o(1)})$ Andreev '83
+		\item $\Omega(n^{3 - o(1)})$ H\aa stad '98 (this is the state of the art until very recently). 
+	\end{enumerate}
+
+\section{DeMorgan Basis}
+	\subsection{Balancing Formulas}
+	Next we consider the relationship between circuit size and depth. First observe that every circuit of depth $d$ is equivalent to a formula of size  at most $2^d$. To see this, take the circuit and duplicate any branches that gets reused. The resulting binary tree has at most as many nodes as a perfect binary tree of depth $d$ which itself has circuit size $2^d$.   
 	
-	Note that $F \equiv \left(F_g \land F^{(g \leftarrow 1)}\right) \lor \left((\lnot F_g) \land F^{(g \leftarrow 0)}\right)$; $F_g$ must evaluate to $0$ or $1$ and the formula does just that. Apply the induction hypothesis to the four formulas $F_g$, $F^{(g \leftarrow 1)}$, $\lnot F_g$, and $F^{(g \leftarrow 0)}$ to get formulas of depth $\leq 2 \log_{3/2}(2s/3)$. The original formula $F$ can only grow by at most depth two so
-	\begin{align*}
-		\depth(F) &\leq \max\left\{\depth\left(F_g\right), \depth\left(F^{(g \leftarrow 1)}\right), \depth\left(\lnot F_g\right), \depth\left(F^{(g \leftarrow 0)}\right)\right\} + 2\\
-		&\leq 2\log_{3/2}\frac{2s}{3} + 2\\ 
-		&= (2\log_{3/2}s - 2) + 2\\
-		&= 2\log_{3/2}s
-	\end{align*} 
-	Thus there exists a formula equivalent to $F$ of depth at most $O(\log s)$.
-\end{proof}
-
-\begin{claim}
-	\label{claim:pickgoodgate}
-	There exists a gate $g$ such that $F_g$ has leaf-size between $\frac{s}{3}$ and $\frac{2s}{3}$ leaves.
-\end{claim}
-\begin{proof}
-	Let $r \rightsquigarrow \ell$ be a root to leaf path in the DAG containing the most $\land$/$\lor$ gates. At the root $r$, $\leafsize(F_r) = \leafsize(F) = s$ and at the leaf $\ell$, $\leafsize(F_{\ell}) = 1$. Starting at $r$ and moving down to $\ell$, the successive leaf-sizes can at most halve after each step. Thus there must exists a gate $g$ for which $\frac{s}{3} \leq \leafsize(F_g) \leq \frac{2s}{3}$.
-\end{proof}
-
-A \textbf{basis} $B$ is a set of Boolean functions (or ``gate types''). Examples of basis include: 
-\begin{itemize}
-	\item DeMorgan basis: $\{\land, \lor, \lnot\}$.
-	\item Full binary basis: all Boolean functions $\{0,1\}^2 \rightarrow \{0,1\}$ (for example, you would get $\xor$).
-	\item Monotone basis: $\{\land, \lor\}$ (NOT universal).
-	\item $\class{AC}^0$ basis: $\{\land^{k}, \lor^k, \lnot: k \in \NN\}$ which are unbounded fan-in $\land$ and $\lor$ gates.
-\end{itemize}
-For a function $f$, let $\leafsize_B(f)$ and $\circuitsize_B(f)$ be the leaf and circuit size of $f$ with formulas and circuits built from gates of basis $B$. A basis is \textbf{universal} if it computes all functions. For two universal basis $B_1$ and $B_2$ it is possible to build a circuit using gates from $B_1$ which simulates any gate from $B_2$. However, if you require the circuit to be a formula, then there might be a polynomial size blow-up in the number of gates used. Recall the function $PARITY_n$. In the DeMorgan basis $\leafsize_{\{\land, \lor, \lnot\}}(PARITY_n) = \Theta(n^2)$ where-as $\leafsize_{\{\xor, \land, \lor, \lnot\}}(PARITY_n) = n-1$.
-
-\section{Models of Computation}
-\label{sec:uniformvsconcrete}
-\begin{definition}
-	\label{def:mmodelsofcomputation} 
-	A \textbf{uniform model of computation} is a single machine/program with a finite description which operates on all inputs in $\{0,1\}^*$. Examples range from simple finite automata (where we have lower bounds ala the pumping lemma) to complex Turing Machines (lower bounds much harder to come by).
+	The next theorem shows the converse: every formula of size $s$ can be ``balanced'' to obtain a formula of depth $O(\log s)$.
+	\begin{theorem}
+		\textbf{(Spira 1971).} Every formula with leaf-size $s$ is equivalent to a formula of depth $O(\log s)$ ($2\log_{3/2}(s)$ to be exact) and thus size at most $s^{O(1)}$ ($s^{2/\log_2(3/2)}$).
+	\end{theorem}
+	\begin{proof}
+		By induction on $s$. The base case is trivial. Let $F$ be the original formula and $g$ be some gate. Let $F_g$ be the sub-formula rooted at $g$. For $b \in \{0,1\}$, let $F^{(g \leftarrow b)}$ be the formula with $g$ replaced with the constant value $b$. See Figure \ref{fig:spira1971}. Note that $\leafsize(F) = \leafsize\left(F_g\right) + \leafsize\left(F^{\left(g \leftarrow b\right)}\right)$. Minimize $\leafsize(F)$ by balancing the two terms on the RHS. By Claim \ref{claim:pickgoodgate}, we can find a gate $g$ such that $\frac{s}{3} \leq \leafsize(F_g) \leq \frac{2s}{3}$. 
+		
+		\fig{spira1971}{1}{Illustration of gate $g$ and formulas $F_g$ and $F^{g \leftarrow b}$.}
+		
+		Note that $F \equiv \left(F_g \land F^{(g \leftarrow 1)}\right) \lor \left((\lnot F_g) \land F^{(g \leftarrow 0)}\right)$; $F_g$ must evaluate to $0$ or $1$ and the formula does just that. Apply the induction hypothesis to the four formulas $F_g$, $F^{(g \leftarrow 1)}$, $\lnot F_g$, and $F^{(g \leftarrow 0)}$ to get formulas of depth $\leq 2 \log_{3/2}(2s/3)$. The original formula $F$ can only grow by at most depth two so
+		\begin{align*}
+			\depth(F) &\leq \max\left\{\depth\left(F_g\right), \depth\left(F^{(g \leftarrow 1)}\right), \depth\left(\lnot F_g\right), \depth\left(F^{(g \leftarrow 0)}\right)\right\} + 2\\
+			&\leq 2\log_{3/2}\frac{2s}{3} + 2\\ 
+			&= (2\log_{3/2}s - 2) + 2\\
+			&= 2\log_{3/2}s
+		\end{align*} 
+		Thus there exists a formula equivalent to $F$ of depth at most $O(\log s)$.
+	\end{proof}
 	
-	Recall that a language $L \subseteq \{0,1\}^*$ can be interpreted as a sequence of functions $(f_0, f_1, ...)$ where $f_n: \{0,1\}^n \rightarrow \{0,1\}$ and $f_n(\vv{x}) = 1 \iff \vv{x} \in L$ for any $\vv{x} \in \{0,1\}^n$. A \textbf{non-uniform (concrete) model of computation} is a sequence $(C_0, C_1, ...)$ of combinatorial objects (namely circuits) where $C_n$ computes $f_n$. Examples include: circuits in the DeMorgan basis, restricted class of circuits (formulas, monotone model), decision trees, etc.  
-\end{definition}
+	\begin{claim}
+		\label{claim:pickgoodgate}
+		There exists a gate $g$ such that $F_g$ has leaf-size between $\frac{s}{3}$ and $\frac{2s}{3}$ leaves.
+	\end{claim}
+	\begin{proof}
+		Let $r \rightsquigarrow \ell$ be a root to leaf path in the DAG containing the most $\land$/$\lor$ gates. At the root $r$, $\leafsize(F_r) = \leafsize(F) = s$ and at the leaf $\ell$, $\leafsize(F_{\ell}) = 1$. Starting at $r$ and moving down to $\ell$, the successive leaf-sizes can at most halve after each step. Thus there must exists a gate $g$ for which $\frac{s}{3} \leq \leafsize(F_g) \leq \frac{2s}{3}$.
+	\end{proof}
 
-Observe that the non-uniform model of computation is more powerful than the uniform one since the finite program can be used as every combinatorial objects in the sequence. It follows that lower bounds in the non-uniform model also imply lower bounds in the uniform model. While upper bounds in the uniform model imply upper bounds in the non-uniform model. \emph{We want: unconditional lower bounds.} 
-
-Circuits efficiently simulate Turing Machines. 
-\begin{lemma}
-	Any Turing Machine (TM) $M$ with running time $t(n)$ can be simulated by a circuit (family of) of size $O\left(t(n)^2\right)$.
-\end{lemma}
-Exercise for the reader. \emph{Hint: think about configurations of the Turing Machines as a $t(n) \times t(n)$ grid and construct a circuit for every grid cell.} Fischer and Pipenger (1979) proved an $O(t(n)\log t(n))$ upper bound on \emph{oblivious Turing Machines}\footnote{An oblivious TM is one whose head motion depends only on the size of the input and not its particular bits. Take a look at \href{https://rjlipton.wordpress.com/2009/07/28/oblivious-turing-machines-and-a-crock/}{this} blog post for some entertainment.}. It is unknown if we can do better. 
-
-\begin{corollary}
-	If there is a super polynomial lower-bound (better than $\Omega(n^c)$ for all constants $c > 0$) on the circuit size of any language in $\class{NP}$, then $\class{P} \neq \class{NP}$. 
-\end{corollary}
-Finding the lower-bound would actually show $\class{NP} \not\subseteq \class{P/poly}$ where $\class{P/poly}$ is the class of languages decidable by $\poly(n)$-size circuits.
-
-We will see some polynomial lower bounds for formulas in the DeMorgan basis later on. As a historical curio, the following is a catalogue of lower bound results for an explicit Boolean function:
-\begin{enumerate}
-	\item $\Omega(n^{1.5})$ Subboboskay '61
-	\item $\Omega(n^{2})$ Khrapchenko '71
-	\item $\Omega(n^{2.5 - o(1)})$ Andreev '83
-	\item $\Omega(n^{3 - o(1)})$ H\aa stad '98 (this is the state of the art until very recently). 
-\end{enumerate}
-
-\section{Circuit Size of Boolean Functions}
+\section{Circuit Size of General Boolean Functions}
 \label{sec:circuitsize}
 
-\subsection{Upper Bound}
-\label{ssec:circuitsizeupperbd}
-Given a function $f: \{0,1\}^n \rightarrow \{0,1\}$, let us consider some upper bounds for $\circuitsize(f)$.
-\begin{enumerate}
-	\item Brute force DNF: $O(n2^n)$. There are $2^n$ rows in the truth table of $f$. Each row specifies the output given the $n$ inputs. Thus a clause with $n-1$ $\land$ gates represents each row of the table. Formally we consider the expression
-	\[f(\vv{x}) = \bigvee_{\vv{a} \in f^{-1}(1)} (\vv{x} = \vv{a}) = \bigvee_{\vv{a} \in  \in f^{-1}(1)} \left(l_1 \land l_2 \land \cdots \land l_{n-1} \land l_n\right)\]
-	where $l_i = x_i$ if $a_i = 1$ and $l_i = \overline{x}_i$ otherwise.
-	\item Function decomposition: $O(2^n)$. Observe that 
-	\[f(\vv{x}) \equiv \left(x_n \land f_1(\vv{x})\right) \lor \left(\overline{x}_n \land f_0(\vv{x})\right).\]
-	where $f_1 = f(x_1, ..., x_{n-1}, 1)$ and $f_0 = f(x_1, ..., x_{n-1}, 0)$. Thus
-	\[\circuitsize(f) \leq \circuitsize(f_1) + \circuitsize(f_0) + 3.\]
-	Apply the decomposition recursively to $f_1$ and $f_0$. Generally at step $k$,
-	\[\circuitsize(f) \leq \sum_{\vv{a} \in \{0,1\}^k}\circuitsize(f_{\vv{a}}) + 3(2^k - 1)\]
-	where $f_{\vv{a}}(\vv{x}) = f(x_1, ..., x_{n-k}, a_1, ..., a_k)$. Since $f(\vv{a})$ is a constant at the $n$\textsuperscript{th} step, $3(2^n - 1)$ is an upper bound on the circuit size of $f$. 
-	\item Computation reuse: $O(2^n/n)$. See Theorem \ref{thm:lupanov1958-circuitsizeupperbd} below. 
-\end{enumerate}
-
-Let $ALL_n: \{0,1\}^n \rightarrow \{0,1\}^{2^{2^{n}}}$ be the function which calculates all the $n$-ary Boolean functions at the same time\footnote{To see that the range of $ALL_n$ is indeed $2^{2^{n}}$, recall that the domain of every $n$-ary Boolean function is $2^{n}$. There is a bijection between the set of functions and the power set of $\{0,1\}^n$ (of size $2^{2^{n}}$).}. That is $(ALL_n(\vv{x}))_f \coloneqq f(\vv{x})$ for any $n$-ary Boolean function $f$.
-
-\begin{claim}
-	\label{claim:upperbdalln}
-	$\circuitsize(ALL_n) \leq O(2^{2^{n}})$.
-\end{claim}
-\begin{proof}
-	Similar to the function decomposition analysis. For every function $f$ in the output of $ALL_n$, $f(\vv{x}) \equiv \left(x_n \land f_{1}(\vv{x})\right) \lor \left(\overline{x}_n \land f_{0}(\vv{x})\right)$ where $f_1 = f(x_1, ..., x_{n-1}, 1)$ and $f_0 = f(x_1, ..., x_{n-1}, 0)$. Note that $f_1$ and $f_0$ are outputs of $ALL_{n-1}$. See Figure \ref{fig:circuitsizealln}. Since $ALL_n$ has $2^{2^{n}}$ outputs,
-	\[\circuitsize(ALL_n) \leq \circuitsize(ALL_{n-1}) + 3\left(2^{2^{n}}\right) = c\left(2^{2^{n-1}}\right) + 3\left(2^{2^{n}}\right) \in O\left(2^{2^{n}}\right)\]
-	for some constant $c$. 
-	\fig{circuitsizealln}{1}{Obtaining a circuit for $ALL_n$ from a circuit for $ALL_{n-1}$.}
-\end{proof}
-
-\begin{theorem}
-	\label{thm:lupanov1958-circuitsizeupperbd}
-	(Lupanov 1958) Every $n$-ary Boolean function has circuit size $O(2^n/n)$
-\end{theorem}
-\begin{proof}
-	The key idea is to use $ALL_{n-k}$ in place of $\{f_{\vv{a}}: \vv{a} \in \{0,1\}^k\}$ in the analysis of function decomposition. Formally, we have 
-	\[\circuitsize(f) \leq \sum_{\vv{a} \in \{0,1\}^k}\circuitsize(f_{\vv{a}}) + 3(2^k - 1) \leq \circuitsize(ALL_{n-k}) + 3(2^k - 1) \leq O\left(2^{2^{n-k}}\right) + O(2^k)\]
-	where the last inequality follows from Claim \ref{claim:upperbdalln}. Observe that the two terms on the RHS are balanced when $k = n - \log(n - \log n)$ since
-	\begin{align*}
-		 O\left(2^{2^{n-k}}\right) + O\left(2^k\right) &= O\left(2^{2^{\log(n - \log n)}}\right) + O\left(2^{n - \log(n - \log n)}\right)\\
-		 &= O\left(2^{n - \log n}\right)\\
-		 &= O\left(2^n/n\right)
-	\end{align*}
-	It follows that the circuit complexity of all $n$-ary Boolean function is bounded above by $O(2^n/n)$.
-\end{proof}
-
-\subsection{Lower Bound}
-\label{ssec:circuitsizelowerbd}
-Prior to Lupanov's result above, Shannon showed a matching lower bound. 
-\begin{theorem}
-	(Shannon 1949) Almost all $n$-ary Boolean functions (as $n \rightarrow \infty$) have circuit size $O(2^n/n)$.
-\end{theorem}
-\begin{proof}
-	Use the counting argument. Recall the number of $n$-ary Boolean functions is $2^{2^{n}}$ and let $s = \frac{2^n}{n}$. We will show that the number of Boolean functions which can be computed by circuits of size $s$ is $\ll 2^{2^{n}}$. Let $A$ be the set of all $n$-ary circuits with $2n$ literals, $x_1, ..., x_n, \overline{x}_1, ..., \overline{x}_n$, and $s$ gates, denoted $g_1, ..., g_s$. We obtain an upper bound on the number of circuits in $A$ as follows. Each circuit can use any subset of the $s$ gates. Each $\land$/$\lor$ gate can pick two inputs from the $2n$ literals and $s-1$ other gates. If $n$ is sufficiently large (say $n \geq 100$), then $s + 2n < 3s$ so
-	\[|A| \leq 2^s(s + 2n)^{2s} \leq 18^ss^{2s}.\] 
-	Observe that every $n$-ary function with $\circuitsize(f) \leq s$ is computed by at least $s!$ distinct circuits in $A$ since we can permute the labels on the $s$ gates. Thus the total number of Boolean functions computed by circuits in $A$ is at most $\frac{|A|}{s!}$. Recall that $s! \geq \left(\frac{s}{e}\right)^s$. For $s = \frac{2^n}{n}$,
-	\begin{align*}
-		\frac{|A|}{s!} \leq \frac{18^ss^{2s}}{\left(s/e\right)^s} \leq 50^s s^{s} = 50^{2^n/n}\left(\frac{2^n}{n}\right)^{2^{n}/n} = \left(\frac{50}{n}\right)^{2^n/n}\left(2^{n}\right)^{2^{n}/n} \leq 2^{2^n-2^n/n}
-	\end{align*}
-	since $n \geq 100$. Thus at least $2^{s}$ Boolean formulas have circuit size greater than $s$.
-\end{proof}
-\end{document}
+	\subsection{Upper Bound}
+	\label{ssec:circuitsizeupperbd}
+	Given a function $f: \{0,1\}^n \rightarrow \{0,1\}$, let us consider some upper bounds for $\circuitsize(f)$.
+	\begin{enumerate}
+		\item Brute force DNF: $O(n2^n)$. There are $2^n$ rows in the truth table of $f$. Each row specifies the output given the $n$ inputs. Thus a clause with $n-1$ $\land$ gates represents each row of the table. Formally we consider the expression
+		\[f(\vv{x}) = \bigvee_{\vv{a} \in f^{-1}(1)} (\vv{x} = \vv{a}) = \bigvee_{\vv{a} \in  \in f^{-1}(1)} \left(l_1 \land l_2 \land \cdots \land l_{n-1} \land l_n\right)\]
+		where $l_i = x_i$ if $a_i = 1$ and $l_i = \overline{x}_i$ otherwise.
+		\item Function decomposition: $O(2^n)$. Observe that 
+		\[f(\vv{x}) \equiv \left(x_n \land f_1(\vv{x})\right) \lor \left(\overline{x}_n \land f_0(\vv{x})\right).\]
+		where $f_1 = f(x_1, ..., x_{n-1}, 1)$ and $f_0 = f(x_1, ..., x_{n-1}, 0)$. Thus
+		\[\circuitsize(f) \leq \circuitsize(f_1) + \circuitsize(f_0) + 3.\]
+		Apply the decomposition recursively to $f_1$ and $f_0$. Generally at step $k$,
+		\[\circuitsize(f) \leq \sum_{\vv{a} \in \{0,1\}^k}\circuitsize(f_{\vv{a}}) + 3(2^k - 1)\]
+		where $f_{\vv{a}}(\vv{x}) = f(x_1, ..., x_{n-k}, a_1, ..., a_k)$. Since $f(\vv{a})$ is a constant at the $n$\textsuperscript{th} step, $3(2^n - 1)$ is an upper bound on the circuit size of $f$. 
+		\item Computation reuse: $O(2^n/n)$. See Theorem \ref{thm:lupanov1958-circuitsizeupperbd} below. 
+	\end{enumerate}
+	
+	Let $ALL_n: \{0,1\}^n \rightarrow \{0,1\}^{2^{2^{n}}}$ be the function which calculates all the $n$-ary Boolean functions at the same time\footnote{To see that the range of $ALL_n$ is indeed $2^{2^{n}}$, recall that the domain of every $n$-ary Boolean function is $2^{n}$. There is a bijection between the set of functions and the power set of $\{0,1\}^n$ (of size $2^{2^{n}}$).}. That is $(ALL_n(\vv{x}))_f \coloneqq f(\vv{x})$ for any $n$-ary Boolean function $f$.
+	
+	\begin{claim}
+		\label{claim:upperbdalln}
+		$\circuitsize(ALL_n) \leq O(2^{2^{n}})$.
+	\end{claim}
+	\begin{proof}
+		Similar to the function decomposition analysis. For every function $f$ in the output of $ALL_n$, $f(\vv{x}) \equiv \left(x_n \land f_{1}(\vv{x})\right) \lor \left(\overline{x}_n \land f_{0}(\vv{x})\right)$ where $f_1 = f(x_1, ..., x_{n-1}, 1)$ and $f_0 = f(x_1, ..., x_{n-1}, 0)$. Note that $f_1$ and $f_0$ are outputs of $ALL_{n-1}$. See Figure \ref{fig:circuitsizealln}. Since $ALL_n$ has $2^{2^{n}}$ outputs,
+		\[\circuitsize(ALL_n) \leq \circuitsize(ALL_{n-1}) + 3\left(2^{2^{n}}\right) = c\left(2^{2^{n-1}}\right) + 3\left(2^{2^{n}}\right) \in O\left(2^{2^{n}}\right)\]
+		for some constant $c$. 
+		\fig{circuitsizealln}{1}{Obtaining a circuit for $ALL_n$ from a circuit for $ALL_{n-1}$.}
+	\end{proof}
+	
+	\begin{theorem}
+		\label{thm:lupanov1958-circuitsizeupperbd}
+		\textbf{(Lupanov 1958).} Every $n$-ary Boolean function has circuit size $O(2^n/n)$
+	\end{theorem}
+	\begin{proof}
+		The key idea is to use $ALL_{n-k}$ in place of $\{f_{\vv{a}}: \vv{a} \in \{0,1\}^k\}$ in the analysis of function decomposition. Formally, we have 
+		\[\circuitsize(f) \leq \sum_{\vv{a} \in \{0,1\}^k}\circuitsize(f_{\vv{a}}) + 3(2^k - 1) \leq \circuitsize(ALL_{n-k}) + 3(2^k - 1) \leq O\left(2^{2^{n-k}}\right) + O(2^k)\]
+		where the last inequality follows from Claim \ref{claim:upperbdalln}. Observe that the two terms on the RHS are balanced when $k = n - \log(n - \log n)$ since
+		\begin{align*}
+			 O\left(2^{2^{n-k}}\right) + O\left(2^k\right) &= O\left(2^{2^{\log(n - \log n)}}\right) + O\left(2^{n - \log(n - \log n)}\right)\\
+			 &= O\left(2^{n - \log n}\right)\\
+			 &= O\left(2^n/n\right)
+		\end{align*}
+		It follows that the circuit complexity of all $n$-ary Boolean function is bounded above by $O(2^n/n)$.
+	\end{proof}
+	
+	\subsection{Lower Bound}
+	\label{ssec:circuitsizelowerbd}
+	Prior to Lupanov's result above, Shannon showed a matching lower bound. 
+	\begin{theorem}
+		\label{thm:shannon1949-circuitsizelowerbd}
+		\textbf{(Shannon 1949).} Almost all $n$-ary Boolean functions (as $n \rightarrow \infty$) have circuit size $O(2^n/n)$.
+	\end{theorem}
+	\begin{proof}
+		Use the counting argument. Recall the number of $n$-ary Boolean functions is $2^{2^{n}}$ and let $s = \frac{2^n}{n}$. We will show that the number of Boolean functions which can be computed by circuits of size $s$ is $\ll 2^{2^{n}}$. Let $A$ be the set of all $n$-ary circuits with $2n$ literals, $x_1, ..., x_n, \overline{x}_1, ..., \overline{x}_n$, and $s$ gates, denoted $g_1, ..., g_s$. We obtain an upper bound on the number of circuits in $A$ as follows. Each circuit can use any subset of the $s$ gates. Each $\land$/$\lor$ gate can pick two inputs from the $2n$ literals and $s-1$ other gates. If $n$ is sufficiently large (say $n \geq 100$), then $s + 2n < 3s$ so
+		\[|A| \leq 2^s(s + 2n)^{2s} \leq 18^ss^{2s}.\] 
+		Observe that every $n$-ary function with $\circuitsize(f) \leq s$ is computed by at least $s!$ distinct circuits in $A$ since we can permute the labels on the $s$ gates. Thus the total number of Boolean functions computed by circuits in $A$ is at most $\frac{|A|}{s!}$. Recall that $s! \geq \left(\frac{s}{e}\right)^s$. For $s = \frac{2^n}{n}$,
+		\begin{align*}
+			\frac{|A|}{s!} \leq \frac{18^ss^{2s}}{\left(s/e\right)^s} \leq 50^s s^{s} = 50^{2^n/n}\left(\frac{2^n}{n}\right)^{2^{n}/n} = \left(\frac{50}{n}\right)^{2^n/n}\left(2^{n}\right)^{2^{n}/n} \leq 2^{2^n-2^n/n}
+		\end{align*}
+		since $n \geq 100$. Thus at least $2^{s}$ Boolean formulas have circuit size greater than $s$.
+	\end{proof}

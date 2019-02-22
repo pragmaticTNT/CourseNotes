@@ -44,16 +44,28 @@
 \DeclareMathOperator*{\yes}{\mathsf{YES}}
 \DeclareMathOperator*{\no}{\mathsf{NO}}
 \newcommand{\ind}[1]{\mathbb{#1}}
+\DeclareMathOperator*{\trace}{trace}
+\DeclareMathOperator*{\comp}{\otimes}
+\DeclareMathOperator*{\size}{size}
+\newcommand\field{\mathbb{F}}
+\DeclareMathOperator*{\support}{supp}
 %% ---> Logic <---
 \DeclareMathOperator{\xor}{\oplus}
+\DeclareMathOperator{\XOR}{\bigoplus}
 \DeclareMathOperator*{\false}{\mathsf{FALSE}}
 \DeclareMathOperator*{\true}{\mathsf{TRUE}}
 %% ---> Complexity <---
 \newcommand\class[1]{\mathsf{#1}}
 \DeclareMathOperator*{\poly}{poly}	% As in running-time NOT complexity class
-\DeclareMathOperator*{\circuitsize}{\mathcal{C}}
-\DeclareMathOperator*{\leafsize}{\mathcal{L}}
+\newcommand{\circuitsize}{\mathcal{C}}
+\newcommand{\leafsize}{\mathcal{L}}
+\newcommand{\DTdepth}{\mathcal{DT}_{\mathrm{depth}}}
+\newcommand{\DNFwidth}{\mathrm{DNF}_{\mathrm{width}}}
+\newcommand{\CNFwidth}{\mathrm{CNF}_{\mathrm{width}}}
+\newcommand{\CDT}{\mathcal{CDT}}
+\newcommand{\sub}{\mathrm{sub}}
 \DeclareMathOperator*{\depth}{depth}
+\newcommand{\gate}{\mathsf{gate}}
 %% ---> Probability <---
 \DeclareMathOperator*{\expected}{\mathbb{E}}
 \DeclareMathOperator*{\var}{Var}
@@ -82,7 +94,7 @@
 }	
 % ---> usage: \makeheader{LECTURE-DATE}{LECTURE-NUM}{LECTURE-TITLE}{SCRIBE-NAME}
 \newcommand\makeheader[4]{
-	\fbox{\parbox{\textwidth}{CSC2429 / MAT1304: Circuit Complexity 
+	\fbox{\parbox{\textwidth}{CSC2429 / MAT1304
 			\hfill #1%
 			\begin{center}\LARGE 
 				Lecture #2: #3
