@@ -29,10 +29,10 @@
 	\begin{example}
 		The following are some examples of $n$-ary Boolean functions:
 		\begin{enumerate}
-			\item $PARITY(x_1, ..., x_n) = \sum_{i = 1}^{n} x_i \mod 2$.
-			\item $MOD_p(x_1, ..., x_n) = 1 \iff \sum_{i = 1}^{n} x_i \equiv 0 \mod p$.
-			\item $MAJORITY_n(x_1, ..., x_n) = 1 \iff \sum_{i=1}^{n} x_i \geq \ceil{n/2}$.
-			\item $k-CLIQUE: \{0,1\}^{\binom{n}{2}} \rightarrow \{0,1\}$. Think of each graph $G$ as an indicator vector $\ind{1}_G$ over its $\binom{n}{2}$ edges. Then $k-CLIQUE(\ind{1}_G) = 1$ if and only if $G$ has a $k$-clique.
+			\item $\ff{PARITY}(x_1, ..., x_n) = \sum_{i = 1}^{n} x_i \mod 2$.
+			\item $\ff{MOD}_p(x_1, ..., x_n) = 1 \iff \sum_{i = 1}^{n} x_i \equiv 0 \mod p$.
+			\item $\ff{MAJORITY}_n(x_1, ..., x_n) = 1 \iff \sum_{i=1}^{n} x_i \geq \ceil{n/2}$.
+			\item $k-\ff{CLIQUE}: \{0,1\}^{\binom{n}{2}} \rightarrow \{0,1\}$. Think of each graph $G$ as an indicator vector $\ind_G$ over its $\binom{n}{2}$ edges. Then $k-\ff{CLIQUE}(\ind_G) = 1$ if and only if $G$ has a $k$-clique.
 		\end{enumerate}
 	\end{example}
 	
@@ -363,10 +363,10 @@
 		\[\leafsize(f) \geq \frac{\left(\sum_{\vv{a} \in A}\sum_{\vv{b} \in B} \mm{M}_{a,b}\right)^2}{|A|\cdot|B|}\]
 	\end{corollary}
 	\begin{proof}
-		\footnote{:) I like this} The idea is to write $\lambda(\mm{M}^{\top}\mm{M})$ as a Rayleigh quotient and then substitute in $\ind{1}$ to get that lower bound.
+		\footnote{:) I like this} The idea is to write $\lambda(\mm{M}^{\top}\mm{M})$ as a Rayleigh quotient and then substitute in $\ind$ to get that lower bound.
 		\begin{align*}
 			\lambda\left(\mm{M}^{\top}\mm{M}\right) &= \max_{\vv{z} \in \RR^{B}\backslash \emptyset} \frac{\vv{z}^{\top}\mm{M}^{\top}\mm{M}\vv{z}}{\vv{z}^{\top}\vv{z}}\\
-			&\geq \frac{\ind{1}^{\top}\mm{M}^{\top}\mm{M}\ind{1}}{|B|}\\
+			&\geq \frac{\ind^{\top}\mm{M}^{\top}\mm{M}\ind}{|B|}\\
 			&=\frac{\sum_{a \in A}\left(\sum_{b \in B}\mm{M}_{a,b}\right)^2}{|B|}\\
 			&\geq \frac{\left(\sum_{a \in A} \sum_{b \in B} \mm{M}_{a,b}\right)^2}{|A|\cdot|B|}
 		\end{align*}
@@ -588,7 +588,7 @@
 	\begin{enumerate}
 		\item Suppose $F = \gate(G,H)$ for some $\gate: \{0,1\}^2 \rightarrow \{0,1\}$. Then 
 		\[\sub_V(F) \subseteq \{\gate(g, h): g \in \sub_V(G) \mbox{ and } h \in \sub_V(H)\}.\]
-		and $|\sub_V^*(F)| \leq |\sub_V^*(G)| \cdot |\sub_V^*(H)|$. This should be pretty obvious. Let $f_V$ be any function in $\sub_V(f)$. Then this function must be equivalent to the composition of the function computed by $\gate$ and some two functions $g \in \sub_V(G)$ and $h \in \sub_V(H)$.
+		and $|\sub_V^*(F)| \leq |\sub_V^*(G)| \cdot |\sub_V^*(H)|$. This should be pretty obvious; let $f_V$ be any function in $\sub_V(f)$. Then this function must be equivalent to the composition of the function computed by $\gate$ and some two functions $g \in \sub_V(G)$ and $h \in \sub_V(H)$.
 		\item Suppose that $F = \gate(G, H)$ and $\ell_V(H) = 0$. Then $\sub_V^*(F) \subseteq \sub_V^*(G)$. Note that $\ell_V(H)$ means that none of the leaves in $H$ are labelled with any indices from $V$. When considering the $V$-functions of $H$, these can only be the constant functions $\underline{0}$ and $\underline{1}$. When composing the function calculated by $\gate$ with some $g \in \sub_V(G)$ and a function in $\{\underline{0}, \underline{1}\}$ we can only get $\{g, 1-g, \underline{0}, \underline{1}\}$. Thus every function in $\sub_V^*(F)$ is also in $\sub_V^{*}(G)$.
 	\end{enumerate}
 	
@@ -626,8 +626,8 @@
 	\begin{definition}
 		\label{def:FUN-elementdistinctness}
 		For $k \in \NN$, let $n = 2^k \cdot 2k$. The \textbf{element distinctness} function $ED_n$ is
-		\[ED_n: \{0,1\}^{2^k \times 2k} \rightarrow \{0,1\}\] where
-		\[ED_n(X_1, ..., X_{2^k}) = \begin{cases}
+		\[\ff{ED}_n: \{0,1\}^{2^k \times 2k} \rightarrow \{0,1\}\] where
+		\[\ff{ED}_n(X_1, ..., X_{2^k}) = \begin{cases}
 		1 &\mbox{if $X_1, ..., X_{2k}$ are distinct elements of $\{0,1\}^{2k}$}\\
 		0 &\mbox{otherwise}
 		\end{cases}\]
@@ -636,10 +636,13 @@
 	
 	\begin{theorem}
 		\label{thm:L-B2FormulaQuadraticExplicit}
-		\[\leafsize_{B_2}(ED_n) = \Omega\left(\frac{n^2}{\log n}\right).\]
+		\[\leafsize_{B_2}(\ff{ED}_n) = \Omega\left(\frac{n^2}{\log n}\right).\]
 	\end{theorem}
 	\begin{proof}
-		Apply Nechiporuk's bound with $V_i$ as a block of length $2k$ corresponding to the coordinates of $X_i$. Remember $n = 2^k + 2k$.  
+		Apply Nechiporuk's bound with $2^k$ disjoints sets $V_i$ were each is a block of length $2k$ corresponding to the coordinates of $X_i$. Since these blocks are symmetric, we have
+		\[\leafsize_{B_2}(\ff{ED}_n) \geq \frac{1}{4}\sum_{i=1}^{2^k}\log |\sub_{V_i}(\ff{ED}_n)| = 2^{k-2}\log|\sub_{V_1}(\ff{ED}_n)|.\]
+		Thus it suffices to bound $|\sub_{V_1}(\ff{ED}_n)|$. To ensure that the restriction does not result in a constant function, the $2^k-1$ fixed $2k$-bit strings in the input to $\ff{ED}_n$ must all be distinct. There are $\binom{2^{2k}}{2^k-1}$ subsets of $2^k - 1$ distinct length $2k$ Boolean strings. Thus $|\sub_{V_1}(\ff{ED}_n)| \geq \binom{4^k}{2^k-1}$. Using the bound $\binom{2^{2k}}{2^k-1} \geq 2^{k(2^k - 1)}$ and recalling that $n = 2^k(2k)$, 
+		\[\leafsize_{B_2}(\ff{ED}_n) \geq 2^{k-2}\log|\sub_{V_1}(\ff{ED}_n)| \geq 2^{k-2}k2^k - O(1) \in \Omega(n^2/\log n).\]  
 	\end{proof}
 	Exercise: show that $\Omega(n^2/\log n)$ is the limit on the lower bound achievable by Nechiporuk's method.
 	
@@ -677,67 +680,182 @@
 	\end{proof}
 	
 	\section{Restricted Setting}
-	Welp, that is all the bounds that we could get out of the general case. Time to consider some restricted settings.
-	
 	\subsection{Monotone Circuits}
 	\begin{definition}
-		A \textbf{monotone circuit}
+		A \textbf{monotone function} is a $n$-ary Boolean function $f$ where $S' \subseteq S \subseteq [n]$ implies $f(\ind_{S'}) = 1$ if $f(\ind_{S}) = 1$. A \textbf{monotone circuit} is a circuit corresponding to a monotone function. 
 	\end{definition}
 	
 		\subsubsection{Upper Bound: Majority}
-		Observe that if $MAJ_n(\vv{x}) = 0$, then for some uniformly random bit $x_i$, $\Pr[x_i = 1] = \frac{1}{2} - \frac{1}{2n}$.
-		\begin{theorem}
-			\textbf{(Valiant 1984).} $MAJ_n$ has poly-sized monotone circuits\footnote{And monotone formulas apparently!}.
-		\end{theorem}
-		\begin{proof}
-			We are going to use the idea of amplification and projections. The idea is to compose $MAJ_3$ with itself $k$ times. 
-		\end{proof}
+		Recall that $\ff{MAJ}_n(\vv{x}) = 1$ if and only if $|\vv{x}| > \frac{n}{2}$. If $MAJ_n(\vv{x}) = 0$, then a random bit $x_i$ chosen uniformly among $\{x_1, ..., x_n\}$ satisfies $\Pr[x_i = 1] \leq \frac{1}{2} - \frac{1}{2n}$.
 		
 		\begin{definition}
-			For $f: \{0,1\}^m \rightarrow \{0,1\}$, let $\mu_f: [0,1] \rightarrow [0,1]$ be defined as
-			\[\mu_f(p) = \Pr_{y_1, ..., y_m \in Bern(p)}\Pr[f(y_1, ..., y_m) = 1].\]
+			\label{def:NOTE-RandomProjection}
+			Let $m > n$. Then $\pi$ is a \textbf{random projection} from $(y_1, ..., y_m) \rightarrow \{x_1, ..., x_n\}^{m}$ if $\pi(y_i)$ is mapped independently and uniformly among all $\{x_1, ..., x_n\}$.
+			
+			For monotone formula $F(\vv{y})$, let $F_{\pi}(\vv{x})$ be the monotone formula obtained from $F$ by replacing each variable $y_i$ with $\pi(y_i)$.
 		\end{definition}
-		$\mu$ is particularly nice for monotone, non-constant functions $f$. 
 		
-		\begin{example}
-			$MAJ_3(p) = p^3 + 3p^2(1-p)$.
-		\end{example}
-		Observe that $\mu_{f \comp g}(p) = \mu_f(\mu_g(p))$. To see this, you should draw out the little tree. 
+		We will use random projections to construct a poly-sized monotone formula for $\ff{MAJ}_n(\vv{x})$. The formula consists of a perfect tree of $\ff{MAJ}_3$ gate. At the bottom of this tree we sample i.i.d from the elements of $\vv{x}$. Intuitively this works by amplifying the difference between the number of zeros and ones in $\vv{x}$. If there are more ones in $\vv{x}$, then you would expect $\Pr[\ff{MAJ}_3(\pi(y_1), \pi(y_2), \pi(y_3)) = 1] > \frac{1}{2}$ and similarly when there are more zeros. This increased likelihood is then propagated up the tree so that the output at the root matches the output of $\ff{MAJ}_n$ in expectation. Using standard probabilistic methods, there exists a projection which exactly matches the output of $\ff{MAJ}_n$. To formalize this intuition, we need a couple of definitions.
+		
+		\begin{definition}
+			\label{def:FUN-OutputProb}
+			For $f: \{0,1\}^m \rightarrow \{0,1\}$, the \textbf{output probability} $\mu_f: [0,1] \rightarrow [0,1]$ is the probability that $f(\vv{y}) = 1$ given that each $y_i \sim \bern(p)$ i.e.
+			\[\mu_{f}(p) = \Pr_{\vv{y} \sim \bern(p)^{m}}[f(\vv{y}) = 1].\]
+			
+			For example, $\mu_{MAJ_3}(p) = p^3 + 3p(1-p)$.
+		\end{definition}
+	
+		When $f$ is a non-constant, monotone function, then $\mu_{f}$ is increasing with $\mu_f(0) = 0$ and $\mu_f(1) = 1$.
 		
 		\begin{lemma}
-			There is a constant $c < 3$ such that $\mu_{MAJ_3}^{c\log n}\left(\frac{1}{2} - \frac{1}{2n}\right)$
-		\end{lemma}
+			 $\mu_{f \comp g}(p) = \mu_f(\mu_g(p))$.
+		\end{lemma}	
+		\begin{proof}
+			Let $f$ and $g$ be a $k$ and $m$-ary Boolean functions respectively. The inputs of $f \comp g$ is a matrix $\mm{X} \in \{0,1\}^{k \times m}$ where you apply $g$ to the rows $\vv{x}_i$ of $\mm{X}$ and then apply $f$ to the resulting column vector. All $km$ bits of $\mm{X}$ are distributed like $\bern(p)$. From the perspective of $g$, each bit is independently set to one with probability $p$ so $\mu_g(p) = \Pr[g(\vv{x}_i) = 1]$ for $i \in [k]$. From the perspective of $f$, each bit is independently set to one with probability $\mu_g(p)$ so $\mu_f(\mu_g(p)) = \Pr[f(g(\vv{x}_1), ..., g(\vv{x}_k)) = 1] = \mu_{f \comp g}(p)$.   
+		\end{proof}
+		\begin{corollary}
+			$\mu_{f^{\comp k}}(p) = \mu^{(k)}_{f}(p)$.
+		\end{corollary}
 		
-		A striking consequence of this result.
-		\begin{definition}
-			$f: \{0,1\}^n \rightarrow \{0,1\}$ is a \textbf{Slice functions} if there exists $k \in \{0, ..., n\}$ such that $f(x) = 0$ if $|x| < k$ and $f(x) = 1$ if $|x| > k$.
-		\end{definition}
+		\begin{lemma}
+			\label{lem:MAJ3Bd-Outputprobability}
+			There is a constant $c < 3$ such that $\mu_{\ff{MAJ}_3}^{(c\log n)}(p) < \frac{1}{2^n}$ for $0 \leq p < \left(\frac{1}{2} - \frac{1}{2n}\right)$ and $\mu_{\ff{MAJ}_3}^{(c\log n)}(p) > 1 -  \frac{1}{2^n}$ for $\frac{1}{2} + \frac{1}{2n} \leq p \leq 1$.
+		\end{lemma}
+		\begin{proof}
+			Keep in mind is the graph of $\mu_{\ff{MAJ}_3}$ shown in Figure \ref{fig:outputprobability}. The second derivative is positive when $p < \frac{1}{2}$ and negative when $p > \frac{1}{2}$. For positive integer $k$, $\lim_{k \rightarrow \infty} \mu_{\ff{MAJ}_3}^{(k)}(p) = 0$ in the former and $\lim_{k \rightarrow \infty}\mu_{\ff{MAJ}_3}^{(k)}(p) = 1$ in the latter case.
+ 
+			\fig{outputprobability}{7}{A graph of $\mu_{\ff{MAJ}_3}$. Pay attention to the interval between $[0,1]$.}
+			
+			We evaluate the rate at which the composed function approaches its limit in two phases: (1) $\frac{1}{2} > p \geq \frac{1}{4}$ and (2) $\frac{1}{4} > p > \frac{1}{2^n}$. 
+			\begin{enumerate}
+				\item Write $p = \frac{1}{2} - \delta$ where $\delta < \frac{1}{4}$. We want to find a $c_1 > 1$ such that $\mu_{\ff{MAJ}_3}(p) = \frac{1}{2} - c_1\delta$. Then $\mu^{(k_1)}_{\ff{MAJ}_3}(p) \leq \frac{1}{2} - c^{k_1}_1\delta$. Take $k_1 \in O(\log n)$ in order for the RHS to be less than $\frac{1}{4}$. To find $c_1$
+				\begin{align*}
+				\left(\frac{1}{2} - \delta\right)^3 + 3\left(\frac{1}{2} - \delta\right)^2\left(\frac{1}{2} + \delta\right) &= \frac{1}{2} - \frac{3\delta}{2} + 2\delta^3\\
+				&\leq \frac{1}{2} - \left(\frac{3}{2} - \frac{2}{16}\right) \delta \\
+				&\leq \frac{1}{2} - \frac{5}{4} \delta.
+				\end{align*}
+				Thus we can choose $c_1 = 5/4$. 
+				\item Here $p < \frac{1}{4}$ so again we want to find a constant $c_2 < 1$ such that $\mu_{\ff{MAJ}_3}(p) \leq c_2 p$. Then $\mu^{(k_2)}_{\ff{MAJ}_3}(p) \leq c^{k_2}_2p$. Take $k_2 \in O(\log n)$ in order for the RHS to be less than $\frac{1}{2^n}$. To find $c_2$
+				\begin{align*}
+					p^3 + 3p^2(1-p) &= 3p^2 - 2p^3\\
+									&\leq 3p^2 \leq \frac{3}{4}p.
+				\end{align*}
+				Thus we can choose $c_2 = 3/4$.
+			\end{enumerate}
+		Since $\mu_{\ff{MAJ}_3}(p)$ is rotationally symmetric about $p = \frac{1}{2}$, the claim also holds for $p \geq \frac{1}{2} + \frac{1}{2n}$. 
+		\end{proof}
 		
 		\begin{theorem}
-			\textbf{(Berkowitz 1982).} If $f$ is a slice function then...
+			\label{thm:U-DmMonoFormula-Valiant1984}
+			\textbf{(Valiant 1984).} $\ff{MAJ}_n$ has poly-sized monotone circuits\footnote{And monotone formulas apparently!}.
 		\end{theorem}
+		\begin{proof}
+			We are going to combine the above ideas of amplification and projection. Let $k = c\log n$, where $c$ is the constant from Lemma \ref{lem:MAJ3Bd-Outputprobability}. Build a depth $k$ tree $T$ out of $\ff{MAJ}_3$ formulas of minimum size. Since there exists a formula of size five for $\ff{MAJ}_3$, see Figure \ref{fig:Maj3Formula}, $T$ will have at most $5^{k}$ leaves. 
+			
+			\begin{figure}[ht]
+				\centering
+				\begin{tikzpicture}[->, >=stealth', shorten >= 1pt, auto, node distance=2em, baseline=(current bounding box.center)]
+				\node[state]	(or1) 				{$\lor$};
+				\node[state]	(and1)	[below left=of or1]{$\land$};			
+				\node[state]	(and2)	[below right=of or1]{$\land$};
+				\node[state]	(x21)	[below=of and1]{$x_2$};
+				\node[state]	(x11)	[left=of x21]{$x_1$};
+				\node[state]	(x3)	[below=of and2]{$x_3$};	
+				\node[state]	(or2)	[right=of x3]{$\lor$};		
+				\node[state]	(x12)	[below left=of or2]{$x_1$};	
+				\node[state]	(x22)	[below right=of or2]{$x_2$};	
+				\path 	
+				(and1)	edge	node{} 	(or1)
+				(and2)	edge	node{}	(or1)
+				(x11)	edge	node{} 	(and1)
+				(x21)	edge	node{}	(and1)
+				(x3)	edge	node{}	(and2)
+				(or2)	edge	node{}	(and2)
+				(x12)	edge	node{}	(or2)
+				(x22)	edge	node{}	(or2);
+				\end{tikzpicture}
+				\caption{$\ff{MAJ}_3$ formula with leafsize five.}
+				\label{fig:Maj3Formula}
+			\end{figure}
+			
+			Let $F(\vv{y})$ be the function computed by $T$. For a random projection $\pi$, $\Pr[F_{\pi}(\vv{x}) \neq \ff{MAJ}_n(\vv{x})] < \frac{1}{2^n}$ so there exists a projection $\pi^{*}$ such that $F_{\pi^*}(\vv{x}) = \ff{MAJ}_n(\vv{x})$ on all inputs $\vv{x}$. Hard-wire $\pi^*$ into $T$ to get a formula which exactly computes $\ff{MAJ}_n$. Thus $\leafsize(\ff{MAJ}_n) \leq 5^k = n^{c\log 5} \in O(n^7)$.
+		\end{proof}
+		
+		\subsubsection{Slice Functions}
+		The following is a striking consequence of Theorem \ref{thm:U-DmMonoFormula-Valiant1984}.
+		\begin{definition}
+			\label{def:FUN-slice}
+			$f: \{0,1\}^n \rightarrow \{0,1\}$ is a \textbf{Slice functions} if there exists $k \in \{0, ..., n\}$ such that $f(x) = 0$ if $|x| < k$ and $f(x) = 1$ if $|x| > k$.
+		\end{definition}
+	
+		A particular type of slice functions is the threshold function.
+		\begin{definition}
+			\label{def:FUN-threshold}
+			A \textbf{threshold function} is a function $\ff{THR}_{k,n}: \{0,1\}^n \rightarrow \{0,1\}$ such that $\ff{THR}_{k,n} = 1$ if and only if $|\vv{x}| \geq k$. This generalizes $\ff{MAJ}_n$.
+		\end{definition}
+	
+		\begin{theorem}
+			\textbf{(Berkowitz 1982).} If $f$ is a slice function then $\leafsize_{mon}(f) \leq \leafsize(f) \cdot \poly(n)$ and $\circuitsize_{mon}(f) \leq \circuitsize(f) + \poly(n)$.
+		\end{theorem}
+		\begin{proof}
+			We will describe the procedure for turning the monotone poly-size formula for $\ff{MAJ}_n$ into a monotone formula for any slice function. First observe that you can construct a monotone formula for $\ff{THR}_{k,n}$ by padding $\ff{MAJ}$ with an appropriate number of $0$s or $1$s\footnote{If $2k > n$ then you want to add $2k-n$ zeros to $\ff{MAJ}_n$. Similarly for when $2k < n$.}.
+			
+			Let $F$ be a DeMorgan formula computing $k$-slice function $f$. Write $F$ in negation normal form. Let $F'$ be $F$ with each $\bar{x}_i$ replace with $\ff{THR}_{k,n}(x_1, ..., x_{i-1}, 0, x_{i+1}, ..., x_n)$. Then observe that $\ff{THR}_{k,n} \land F'$ is a monotone formula with leafsize $\leafsize{f}\cdot \poly(n)$ which computes $f$. 
+			
+			If fewer than $k$ variables are true, then $\ff{THR}_{k,n}(\vv{x}) = 0$. If more than $k$ variables are true, then each of $\ff{THR}_{k,n}(x_1, ..., x_{i-1}, 0, x_{i+1}, ..., x_n) = 1$ and $F'(\vv{x}) = 1$ since all its inputs are true. Finally, if exactly $k$ variables are true, then $\ff{THR}_{k,n}(\vv{x}) = 1$ and $\ff{THR}_{k,n}(x_1, ..., x_{i-1}, 0, x_{i+1}, ..., x_n) = \bar{x}_i$ and $F'(\vv{x}) = F(\vv{x})$.
+		\end{proof}
+		Observe that for all monotone functions $f$, $\circuitsize(f) \leq \circuitsize_{mon}(f)$ and $\leafsize(f) \leq \circuitsize_{mon}(f)$ so for monotone circuits a tight bound is known for its leaf and circuit-sizes.
 	
 	\subsection{Bounded Depth Circuits: \texorpdfstring{$\class{AC}^0$}{AC0}}
 	
 	\begin{definition}
-		$\class{AC}^0$
+		\label{def:classac0}
+		An \textbf{$\class{AC}^0$ circuit} is one consisting of unbounded fan-in $\land$ and $\lor$ gates. 
+		
+		The \textbf{depth} of an $\class{AC}^0$ circuit is the length of its longest root to leaf path.
+		
+		Every $\class{AC}^0$ circuit can be composed of alternating layers of $\land$ and $\lor$-gates since two adjacent levels with the same gate type can be merged.
+		
+		Let $\circuitsize_{d}(f)$ ($\leafsize_{d}(f)$) be the minimum circuit (resp. leaf)-size of a depth $d$ $\class{AC}^0$ circuit (resp. formula) for $f$. 
 	\end{definition}
+	$\class{AC}^0$ circuits correspond to algorithms which are very efficient to parallelize. In particular, constant-time on polynomially many processors.
 	
-	\textbf{Challenge.} Let $\leafsize_{d}(f)$ be the leaf size of an $n$-ary Boolean function $f$ in $\class{AC}^0$ with depth at most $d$. Observe that $\leafsize_2(PARITY_n) \leq n2^n$ as you can take an ``or'' of $2^n$ ``and'' gates with fan-in $n$ each specifying a setting of the $n$ input variables.
+	\begin{example}
+		Consider the function $+_{n}$, addition of two $n$ bit numbers. Let the inputs to $+_{n}$ be $\vv{x} = (x_0, ..., x_{n-1})$ and $\vv{y} = (y_0, ..., y_{n-1})$ with values $x = \sum_{i = 0}^{n-1}2^{i}x_i$ and $y = \sum_{j = 0}^{n-1}2^{j}y_j$ respectively. We want to output $n+1$ bits $z_0, ..., z_{n}$ such that $\sum_{k = 0}^{n} 2^{k}z_k = x + y$. 
+		
+		Though this might not seem possible in constant depth since the carry bit is defined recursively, it can be seen in another way. Suppose $x_{n} = y_{n} = 0$, then
+		\begin{align*}
+			z_k &= x_k \xor y_k \xor c_k\\
+			c_k &= \bigvee_{i = 0}^{k-1} (x_i \land y_i) \bigwedge_{j = i+1}^{k}(x_j \lor y_j)
+		\end{align*}
+		The way to think about the carry bit $c_k$ at index $k$ is as the result of some $x_i \land y_i$ and for all indices $j \in \{i+1, ..., k\}$, the carry is kept alive by $x_j \lor y_j$.
+	\end{example}
+	Some common functions which are not in $\class{AC}^0$ include: multiplication of two $n$-bit integers and the $n$-bit parity function $\ff{XOR}_n$.
 	
-	Further note that for $k$ and $n_1, ..., n_k$ where $\sum_{i = 1}^{k} n_i = n$, 
-	\begin{equation}
-	\label{eq:U-AC0recurrence}
-	\leafsize_{d+1}(PARITY_n) \leq 2^{k-1}\sum_{i = 1}^{k}\leafsize_{d}(XOR_{n_i}).
-	\end{equation}
+	Since $\class{AC}^0$ circuits can be arranged with alternating levels of $\land$ and $\lor$-gates, define $\Pi_d$ and $\Sigma_d$ to be the subclasses of $\class{AC}^0$ who root consists of a $\land$-gate and a $\lor$-gate respectively. For functions $f$, denote the size of the  minimal circuits of $f$ in $\Pi_d$ and $\Sigma_d$ by $\circuitsize_{\pi_d}(f)$ and $\circuitsize_{\sigma_d}(f)$. 
 	
-	(I still need to work out the details of this proof). Using $\leafsize_2(PARITY_n) \leq n2^n$ for the base case and the recurrence shown in Equation (\ref{eq:U-AC0recurrence}), we can show 
-	\[\leafsize_{d+1}(PARITY_n) \leq n2^{dn^{1/d}}\]
-	for any $n$ and $d \geq 2$. However, when $n$ is a power of $2$, we can get a slightly tighter bound of 
-	\[\leafsize_{d+1}(PARITY_n) \leq n2^{d\left(n^{1/d} - 1\right)}.\]
+	For the parity function $\ff{XOR}_n$, $\circuitsize_{\pi_d}(\ff{XOR}_n) = \circuitsize_{\sigma_d}(\ff{XOR}_n)$. To see this, note that $\circuitsize_{\pi_d}(f) = \circuitsize_{\sigma_d}(1 - f)$ for any function and that $\circuitsize_{\pi_d}(\ff{XOR}_n) = \circuitsize_{\pi_d}(\overline{\ff{XOR}}_n)$ by negating the first input of $\ff{XOR}_n$. The same relationship holds with regards to leafsize.
 	
-	Ben suspects that the above inequality holds for all $n$, not just powers of two, since for $d = \ceil{\log n}$ it is know that $n^{1/d} - 1 = 2^{\log n/ \log n} - 1 = 1$ in the exponent of $2$ is sufficient i.e. it is known that
-	\[\leafsize_{\ceil{\log n}}(PARITY_n) \in O(n^2).\]
+	\textbf{Challenge.} Let us consider the leaf size of an $n$-ary Boolean function $f$ in $\class{AC}^0$ with depth at most $d$. Naively, we have that $\leafsize_2(\ff{XOR}_n) \leq n2^n$ as you can take an ``or'' of $2^n$ ``and'' gates with fan-in $n$ each specifying a setting of the $n$ input variables\footnote{It is also easy to see that $\circuitsize_2(f) \leq 2^n$ and $\leafsize_2(f) \leq n2^n$ for an arbitrary function $f$ by writing $f$ as a DNF $F$.}.
+	
+	\begin{lemma}
+		\label{lem:U-AC0recurrence}
+		For $k$ and $n_1, ..., n_k$ where $\sum_{i = 1}^{k} n_i = n$ and $d \geq 2$, 
+		\[\leafsize_{d+1}(\ff{XOR}_n) \leq 2^{k-1}\sum_{i = 1}^{k}\leafsize_{d}(\ff{XOR}_{n_i}) \mbox{ and } \circuitsize_{d+1}(\ff{XOR}_n) \leq 2^{k-1} + 2\sum_{i = 1}^{k}\circuitsize_d(\ff{XOR}_{n_i}).\]
+	\end{lemma}
+	\begin{proof}
+		Decompose $\ff{XOR}_n$ into $\ff{XOR}_{n_1}, ..., \ff{XOR}_{n_k}$ and then take an $\ff{XOR}$ of these results. Each $\ff{XOR}_{n_i}$ has leafsize $\leafsize(\ff{XOR}_{n_i})$. Further there exists a formula for the top level $\ff{XOR}$ with leafsize $k2^{k-1}$ and depth $2$, using the trivial construction. By collapsing adjacent levels with the same gate type, $\leafsize_{d+1}(\ff{XOR}_n)$ is bounded as required. The circuit-size bound can be similarly constructed. 
+	\end{proof}
+	
+	Using $\leafsize_2(\ff{XOR}_n) \leq n2^n$ for the base case and the recurrence shown in Lemma (\ref{lem:U-AC0recurrence}), we can show 
+	\[\leafsize_{d+1}(\ff{XOR}_n) \leq n2^{dn^{1/d}}\]
+	for any $n$ and $d \geq 2$. Simply choose $n_i = \ceil{n^{(d-1)/d}}$ for all $i \in [k]$ and $k = \ceil{n^{1/d}}$ to obtain 
+	\[\leafsize_{d+1}(\ff{XOR}_n) \leq 2^{\ceil{n^{1/d}} - 1}\ceil{n^{1/d}}\cdot\leafsize_{d}(\ff{XOR}_{n_i}) \leq 2^{\ceil{n^{1/d}} - 1}\ceil{n^{1/d}}\cdot\ceil{n^{(d-1)/d}}2^{(d-1)n^{1/d}} \leq n2^{dn^{1/d}}\]	
+	However, when $n$ is a power of $2$, we can get a slightly tighter bound of 
+	\[\leafsize_{d+1}(\ff{XOR}_n) \leq n2^{d\left(n^{1/d} - 1\right)}.\]
+	
+	Ben suspects that the above inequality holds for all $n$, not just powers of two, since for $d = \ceil{\log n}$ it is know that $n^{1/d} - 1 = 2^{\log n/ \log n} - 1 = 1$ and the exponent of $2$ is sufficient i.e. it is known that
+	\[\leafsize_{\ceil{\log n}}(\ff{XOR}_n) \in O(n^2).\]
 	Further, Ben believes that it is sufficient to achieve this tighter bound by analyzing the recurrence relation more carefully. 
 	
 	\section{H\aa stad's Switching Lemma}
@@ -745,7 +863,7 @@
 		\label{def:decisiontrees}
 		A \textbf{decision tree} (DT) is a rooted binary tree whose leaves are labelled by $\{0,1\}$ and whose internal nodes are labelled by variables. The \textbf{depth} of a decision tree is the length of the longest root-to-leaf path. For $f: \{0,1\}^n \rightarrow \{0,1\}$, let $\DTdepth(f)$ denote depth of the minimum depth DT that computes $f$. 
 				
-		It is useful to consider formulas as a DNF or CNF. The \textbf{width} of a DNF(CNF) formula is the maximum number of literals in any clause. 
+		It is useful to consider a function as a DNF or CNF. The \textbf{width} of a DNF/CNF formula is the maximum number of literals in any clause. 
 	\end{definition}
 	
 	\begin{definition}
@@ -794,16 +912,14 @@
 		\end{figure}
 	\end{example}
 	
-	Observe that every depth $d$ decision tree (DT) is equivalent to a $d$-DNF ($d$-CNF) by tracing every root-to-leaf path in the tree which end in a one (resp. end in a zero then apply DeMorgan's rule). It follows that an $\lor$ of depth $d$ $DT$s is a $d$-DNF. Further, if $f$ is equivalent to both a $k$-DNF and $l$-CNF, then $\DTdepth(f)\leq k \cdot l$. Do you see why this is?
-	
-	Let $f$ be equivalent to the $k$-DNF $F = A_1 \lor \cdots \lor A_s$ and $\bar{f}$ be equivalent to the $l$-DNF $\bar{F} = B_1 \lor \cdots \lor B_t$. Notice that every pair $(A_i, B_j)$ must share a common variable of opposite sign or else there will be a setting of the variable which simultaneously satisfies $F$ and $\bar{F}$. The proof is by induction on the number of variables. When there is only one variable the claim is true. Suppose $f$ has $n$ variables. Build a decision tree of width $A_1$ which considers all variables in the clause $A_1$. Consider a restriction $\rho$ corresponding to a root-to-leaf path in the DT we have just created. The DNF-width of $F \upharpoonright \rho$ is at most $k$. The DNF-width of $\bar{F}$ is \emph{less than} $l$ since at least one variable of each clause was knocked out. Further, by the induction hypothesis, we have
-	\[\DTdepth(f \upharpoonright \rho) \leq \DNFwidth(F \upharpoonright \rho) \cdot \DNFwidth(\bar{F} \upharpoonright \rho).\]
-	By appending the restricted decision tree to every leaf of the depth $k$ DT that we created for the variables in $A_1$, we have that
-	\[\DTdepth(f) \leq k + \DNFwidth(F \upharpoonright \rho) \cdot \DNFwidth(\bar{F} \upharpoonright \rho) \leq k + k(l-1) = kl.\]
+	Observe that every depth $d$ decision tree (DT) is equivalent to a $d$-DNF ($d$-CNF) by tracing every root-to-leaf path in the tree which end in a one (resp. end in a zero then apply DeMorgan's rule). It follows that an $\lor$ of depth $d$ $DT$s is a $d$-DNF. Further, if $f$ is equivalent to both a $k$-DNF and $l$-CNF, then $\DTdepth(f)\leq k \cdot l$. Do you see why this is\footnote{Let $f$ be equivalent to the $k$-DNF $F = A_1 \lor \cdots \lor A_s$ and $\bar{f}$ be equivalent to the $l$-DNF $\bar{F} = B_1 \lor \cdots \lor B_t$. Notice that every pair $(A_i, B_j)$ must share a common variable of opposite sign or else there will be a setting of the variable which simultaneously satisfies $F$ and $\bar{F}$. The proof is by induction on the number of variables. When there is only one variable the claim is true. Suppose $f$ has $n$ variables. Build a decision tree of width $A_1$ which considers all variables in the clause $A_1$. Consider a restriction $\rho$ corresponding to a root-to-leaf path in the DT we have just created. The DNF-width of $F \upharpoonright \rho$ is at most $k$. The DNF-width of $\bar{F}$ is \emph{less than} $l$ since at least one variable of each clause was knocked out. Further, by the induction hypothesis, we have
+		\[\DTdepth(f \upharpoonright \rho) \leq \DNFwidth(F \upharpoonright \rho) \cdot \DNFwidth(\bar{F} \upharpoonright \rho).\]
+		By appending the restricted decision tree to every leaf of the depth $k$ DT that we created for the variables in $A_1$, we have that
+		\[\DTdepth(f) \leq k + \DNFwidth(F \upharpoonright \rho) \cdot \DNFwidth(\bar{F} \upharpoonright \rho) \leq k + k(l-1) = kl.\]}?
 	
 	Before looking at the proof of the Switching Lemma, let us consider a simple warm-up pertaining to the depth of a decision tree hit by a random restriction. 
 	\begin{theorem}
-		If $\DTdepth(f) = k$, then 
+		If $\DTdepth(f) = k$, then for any $t$
 		\[\Pr\left[\DTdepth(f \upharpoonright R_p) \geq t\right] \leq (2p)^t \binom{k}{t}.\]
 	\end{theorem}
 	\begin{proof}
@@ -818,7 +934,7 @@
 			&\leq (2p)^{t}\left(\binom{d-1}{t} + \binom{d-1}{t-1}\right)\\
 			&= (2p)^{t}\binom{d}{t}
 		\end{align*}
-		where the second inequality follows from a union bound.
+		where the second inequality follows from a union bound and the equality on the last line is an identity\footnote{Remember the binomial coefficients are terms in Pascal's triangle. There we are adding two adjacent terms row $d-1$ to get a term in row $d$}.
 	\end{proof}
 	
 	\begin{theorem}
@@ -827,11 +943,11 @@
 		\[\Pr[\DTdepth(F \upharpoonright R_p) \geq t] \leq (5pk)^t.\]
 	\end{theorem}
 	\begin{proof}
-		This proof due to Razborov as explained in the exposition by Beame. Let\footnote{In many proofs the set $B_t$ is actually called $BAD_t$. This is illustrative of how you want to think about $B_t$. It is the set of all \emph{bad} restrictions which cannot be converted to a depth $t$ decision tree.} 
+		This proof due to Razborov as explained in the exposition by Beame. Let\footnote{In many proofs the set $B_t$ is actually called $BAD_t$. This is illustrative of how you want to think about $B_t$. It is the set of all \emph{bad} restrictions which cannot be converted into a depth $t$ decision tree.} 
 		\[B_t \coloneqq \{\rho: \DTdepth(\CDT(F, \rho)) = t\}.\]
 		We will show that the probability a random restriction $R_p \in B_t$ is bounded by $O(pk)^t$. Let $n$ be the number of variables and $m$ the number of clauses in $F$.
 		
-		For each $\rho$ in $BAD_t$ we want to construct a pair $(\rho^*, \textsc{code})$. $\rho^*$ is a fixed restriction setting a further $t$ variables. $\textsc{code}$ is some information needed to uniquely identify $\rho$. Note that $\textsc{code} = \left(\vv{s}, \vv{\pi}, \vv{n}\right)$ where $\vv{s} \in [k]^t$ indicates the location of variables within a clause, $\vv{\pi} \in \{0,1\}^t$ is the appropriate setting of the variable, and $\vv{n} \in \{0,1\}^t$ indicates if we move onto the \textbf{n}ext clause. Then, with the pair $(\rho^*, \textsc{code})$ and $F$ in-hand, we can reconstruct $\rho$.
+		For each $\rho$ in $B_t$ we want to construct a pair $(\rho^*, \textsc{code})$. $\rho^*$ is a fixed restriction setting a further $t$ variables. $\textsc{code}$ is some information needed to uniquely identify $\rho$. Note that $\textsc{code} = \left(\vv{s}, \vv{\pi}, \vv{n}\right)$ where $\vv{s} \in [k]^t$ indicates the location of variables within a clause, $\vv{\pi} \in \{0,1\}^t$ is the appropriate setting of the variable, and $\vv{n} \in \{0,1\}^t$ indicates if we move onto the \textbf{n}ext clause. Then, with the pair $(\rho^*, \textsc{code})$ and $F$ in-hand, we can reconstruct $\rho$.
 		
 		In the encoding step we are given the $k$-DNF $F$ and the restriction $\rho \in B_t$. We will build $\rho^* = \rho\sigma_1\cdots\sigma_j$ and $\textsc{code} = \gamma_1\cdots\gamma_j$ incrementally.
 		\begin{enumerate}
@@ -868,11 +984,11 @@
 		\[\Pr[\DTdepth(C \upharpoonright R_p) \geq \ell] \leq \frac{1}{2^\ell} + \frac{1}{S}.\] 
 	\end{theorem}
 	\begin{proof}
-		The key idea\footnote{Actually I am still missing something here... but I would be hard-pressed to say what it is...} is to repeatedly apply Theorem \ref{thm:haastadswitchinglemma} being careful to choose appropriate values of $k$, $t$ and $p$. Consider the bottom level of $C$ (closest to the literals) and w.l.o.g assume that this is a conjunction ($\land$-gate). Since the fan-in consists of literals, you can think of them as width one clauses. Apply the theorem with $k = 1$, $t = 2\log S$, $p_1 = \frac{1}{10}$. According to the switching lemma, we fail\footnote{That is to say: this node cannot be converted to a short DT under $R_p$.} at each $\land$-node with probability at most $2^{-2\log S} = S^{-2}$. Taking a union bound over at most $S$ $\land$-gates, we fail at this level with probability at most $S^{-1}$. Let $E_1$ be the event that we successfully completed the switch from $1$-CNF to $2\log S$-DNF. Suppose $E_1$ occurs. Then we can collapse this layer of $\lor$-gates with the $\lor$-gates of the level above. 
+		The key idea is to repeatedly apply Theorem \ref{thm:haastadswitchinglemma} being careful to choose appropriate values of $k$, $t$ and $p$. Consider the bottom level of $C$ (closest to the literals) and w.l.o.g assume that this is a conjunction ($\land$-gate). Since the fan-in consists of literals, you can think of them as width one clauses. Apply the theorem with $k = 1$, $t = 2\log S$, $p_1 = \frac{1}{10}$. According to the switching lemma, we fail\footnote{That is to say: this node cannot be converted to a short DT under $R_p$.} at each $\land$-node with probability at most $2^{-2\log S} = S^{-2}$. Let $E_1$ be the event that we successfully completed the switch from $1$-CNF to $2\log S$-DNF. Conditioning on $E_1$, we can collapse this layer of $\lor$-gates with the $\lor$-gates of the level above. 
 		
-		Apply the switching lemma a further $d-1$ iterations. At step $i$ set $k = 2\log S$, $t = 2\log S$, and $p_{i} = \frac{p_{i-1}}{20\log S}$ each time conditioning on the success of the previous iterations. Observe that at the probability of failure at any iteration is at most $S^{-1}$.
+		Apply the switching lemma a further $d-1$ iterations. At step $i$ set $k = 2\log S$, $t = 2\log S$, and $p_{i} = \frac{p_{i-1}}{20\log S}$ each time conditioning on the success of the previous iterations. At the end of these $d$ iterations, take a union bound over the at most $S$ gates we have considered. Since we fail on each level with probability at most $S^{-2}$, we fail to reach the top-most level with probability at most $S^{-1}$. 
 		
-		Consider our final iteration. We assumed that $d$ iterations have succeeded so we have w.l.o.g. a $\lor$-gate sitting on top of depth $2\log S$ decisions (i.e. width $2\log S$-CNF clauses). For the final application of the switching lemma we will set $k = 2\log S$, $t = \ell$, and $p_{d+1} = \frac{p_d}{20\log S}$. Thus this iteration fail with probability at most $2^{-\ell}$.
+		Consider our final iteration. W.l.o.g. the root consists of a $\lor$-gate sitting on top of depth $2\log S$ decision trees (i.e. width $2\log S$-CNF clauses). For the final application of the switching lemma, set $k = 2\log S$, $t = \ell$, and $p_{d+1} = \frac{p_d}{20\log S}$. Thus this iteration fail with probability at most $2^{-\ell}$. In total, this procedure fails with probability $2^{-\ell} + S^{-1}$.
 	\end{proof}
 	
 	\begin{corollary}
@@ -883,61 +999,437 @@
 	\subsection{Switching Lemma for Formulas}
 	The lower bound\footnote{A result of Ben's!} of $\Omega(dn^{1/d})$ matches the existing upper bound. 
 	
-\section{Bounded Depth: \texorpdfstring{$\class{AC}^0[p]$}{AC0[p]}}
-	Goal: want an upper bound on the approximate degree of $AND$, $OR$, and $MOD_p$ functions.
+\section{LB: \texorpdfstring{$\class{AC}^0[p]$}{AC0[p]} by the Polynomial Method}
+	\textbf{Goal}: want an upper bound on the approximate degree of $\ff{AND}$, $\ff{OR}$, and $\ff{MOD}_p$ functions.
 	\begin{definition}
+		\label{def:EpsApprox}
 		Let $\vv{x} = (x_1,..., x_n)$ then $MOD_p(\vv{x}) = 1$ if and only if $\sum_{i = 1}^{n} x_i \equiv 0 \mod p$. 
 	
-		Let $A \in \field_p[x_1, ..., x_n]$ be a \textbf{random polynomial} over $\field_p$. The \textbf{degree} of $A$ is the maximum degree of a polynomial in the support for $A$ (think of $A$ as a random variable in a distribution over some polynomials). 
+		Let $A \in \field_p[x_1, ..., x_n]$ be a \textbf{random polynomial} over $\field_p$. The \textbf{degree} of $A$ is the maximum degree of a polynomial in the support\footnote{Imagine that you have a subset $\family{F} \subset \field_p[\vv{x}]$ and that $A$ as a random variable in a distribution over $\family{F}$. Then $\family{F} = \support(A)$.} for $A$. 
 		
 		Let $f: \{0,1\}^n \rightarrow \{0,1\}$. $A$ is an $\epsilon$-approximating for $f$ if
 		\[\Pr_A[A(x) \neq f(x)] \leq \epsilon \]
 		for every $x \in \{0,1\}^n$. 
+		
+		The \textbf{$\epsilon$-approximate degree of $f$}, denoted $\deg_{\epsilon}(f)$, is the minimum degree of an $\epsilon$-approximating random polynomial of $f$. Note that this value is invariant under negation of the inputs and outputs\footnote{Please understand why.}.
 	\end{definition}
 	
 	\begin{lemma}
+		\label{lem:EpsApprox-ExistWellApproxSupport}
 		If $A$ is an $\epsilon$-approximating random polynomial for $f$, then $\exists \alpha \in \support(A)$ such that
 		\[\Pr_{\vv{x} \in \{0,1\}^{n}}[\alpha(x) \neq f(x)] \leq \epsilon\]
 	\end{lemma}
 	\begin{proof}
-		Markov inequality then probabilistic method. 
+		Let $A$ be an $\epsilon$-approximating polynomial for $f$. Consider the probability for a randomly selected $n$ bit string $\vv{x}$ that $A(\vv{x}) \neq \vv{x}$.
+		\[\Pr_{\alpha \in \support(A)}\left[\Pr_{\vv{x} \in \{0,1\}^n}[A(\vv{x}) \neq f(\vv{x})] > \epsilon\right] < \frac{\expected_{\alpha \in \support(A)}\left[\Pr_{\vv{x} \in \{0,1\}^n}[\alpha(\vv{x}) \neq f(\vv{x})]\right]}{\epsilon}\]
+		by Markov's inequality. Since the RHS is equal to one as $A$ is $\epsilon$-approximating, by the probabilistic method some polynomial $\alpha \in \support(A)$ must satisfy the above $\leq$ with $\geq$. 
 	\end{proof}
-	
-	\begin{definition}
-		The \textbf{$\epsilon$-approximate degree of $f$}, denoted $\deg_{\epsilon}(f)$, is the minimum degree of an $\epsilon$-approximating random polynomial of $f$. 
-		
-		Note that this value is invariant under negation of the inputs and outputs (please understand why).
-	\end{definition}
 		
 	\begin{lemma}
-		\label{lem:epsapproxdegofcompfunction}
+		\label{lem:EpsApprox-degofcompfunction}
 		Suppose $f(x) = g(h_1(x), ..., h_m(x))$. Then for any $\delta, \epsilon_1, ..., \epsilon_m$, 
 		\[\deg_{\delta + \epsilon_1 + \cdots + \epsilon_m}(f) \leq \deg_{\delta}(g)\max_{i}\deg_{\epsilon_i}(h_i)\]
 	\end{lemma}
 	\begin{proof}
-		Just think through this carefully. I think you can get it.
+		Let $G$ and $H_i$ be $\delta$ and $\epsilon_i$-approximating polynomials for $g$ and $h_i$ respectively. We will show that $F' \coloneqq G(H_1, ..., H_m)$ is a $\delta + \epsilon_1 + \cdots \epsilon_m$ approximating polynomial for $f$. Note that 
+		\[\Pr_{\vv{x} \in \{0,1\}^n}[f(\vv{x}) \neq F'(\vv{x})] = \Pr_{\vv{x} \in \{0,1\}^n}\left[F'(\vv{x}) \neq g(H_1(\vv{x}), ..., H_m(\vv{x})) \lor \bigvee_{i = 1}^{m} H_i(\vv{x}) \neq h_i(\vv{x})\right]\leq \delta + \sum_{i = 1}^{m}\epsilon_i\]
+		where the inequality follows from a union bound. 
 	\end{proof}
 	
-	Assume that these are all $n$-ary Boolean functions.
-	\begin{enumerate}
-		\item[$MOD_p$:]
-		\begin{lemma}
-			For any $\epsilon > 0$ and $n$,
-			\[\deg_{\epsilon}(MOD_p) \leq \deg_{0}(MOD_p) \leq p-1\]
-		\end{lemma}
-		\begin{proof}
-			Give me a degree $p-1$ polynomial which exactly computes $MOD_p$ (for an $n$ bit input vector). \emph{Hint: Fermat's Little Theorem}.
-		\end{proof}
-		\item[$OR$:] Now we need some random polynomials
-		\begin{lemma}
-			$\deg_{\epsilon}(OR) \leq p\left(\log_p\left(\frac{1}{\epsilon}\right) + 1\right)$. One should note that this upper bound is independent of $n$.
-		\end{lemma}
-		\begin{proof}
-			So you want to calculate the probability that $OR(x_1, ..., x_n) \neq (\lambda_1x_1 + \cdots + \lambda_nx_n)$ when $\vv{x} = \vv{0}$ and when $\vv{x} \neq \vv{0}$ (\emph{Hint: $0$ for the former case and $\frac{1}{p}$ in the latter.}). This is not good enough so just boost
-		\end{proof}
-		\item[$AND$:] This is identical to the argument for the $OR$ gate. 
-	\end{enumerate}
+	Assume that the following are all $n$-ary Boolean functions.
+	\begin{lemma}
+		\label{lem:DegEpsApprox-modp}
+		\textbf{($\ff{MOD}_p$ Function).} For any $\epsilon > 0$ and $n$,
+		\[\deg_{\epsilon}(\ff{MOD}_p) \leq \deg_{0}(\ff{MOD}_p) \leq p-1\]
+	\end{lemma}
+	\begin{proof}
+		Observe that $\ff{MOD}_{p,n} = 1 - (x_1 + \cdots + x_n)^{p-1}$ by Fermat's Little Theorem. Since the RHS is a degree $p-1$ polynomial the inequality holds as required.
+	\end{proof}
+
+	\begin{lemma}
+		\label{lem:DegEpsApprox-or}
+		\textbf{($\ff{OR}$ Function).} $\deg_{\epsilon}(\ff{OR}) \leq p\left(\log_p\left(\frac{1}{\epsilon}\right) + 1\right)$. One should note that this upper bound is independent of $n$.
+	\end{lemma}
+	\begin{proof}
+		Consider the polynomial $(\lambda_1x_1 + \cdots + \lambda_nx_n)^{p-1}$ where $\Lambda = (\lambda_1, ..., \lambda_n)$ is chosen uniformly at random from among $\field^n_p$. Note that we take the inner product to the power $p-1$ to obtain a value in $\{0,1\}$, again by Fermat's Little Theorem. Observe that
+		\[\Pr_{\vv{x} \in \{0,1\}^n}\left[\ff{OR}(\vv{x}) \neq \left(\Lambda^{\top}\vv{x}\right)^{p-1}\right] = 
+			\begin{cases}
+				0 &\mbox{if } \vv{x} = \vv{0}\\
+				\frac{1}{p} &\mbox{if } \vv{x} \neq \vv{0} 
+			\end{cases}\]
+		In order to ensure that we have an $\epsilon$-approximate polynomial, we can sample several $\Lambda$s and take their product. Let $\Lambda_1, ..., \Lambda_t \in \field^n_p$ and let $F(\vv{x}) = 1 - \prod_{i = 1}^{t}\left(1 - \left(\Lambda_i^{\top}\vv{x}\right)^{p-1}\right)$. Then
+		\[\Pr_{\vv{x} \in \{0,1\}^n}\left[\ff{OR}(\vv{x}) \neq F(\vv{x})\right] \leq \frac{1}{p^t}\]
+		since $F(\vv{x}) = 0 \iff (\Lambda_i^{\top}\vv{x})^{p-1} = 0$ for every $i\in [t]$. For $t \geq  \left(\log_p\left(\frac{1}{\epsilon}\right) + 1\right)$, $p^{-t} \leq \epsilon^{-1}$. 
+	\end{proof}
+
+	\begin{corollary}
+		\label{cor:DegEpsApprox-and}
+		\textbf{($\ff{AND}$ Function).} $\deg_{\epsilon}(\ff{AND}) \leq p\left(\log_p\left(\frac{1}{\epsilon}\right) + 1\right)$.
+	\end{corollary}
+	This follows from the results of $\ff{OR}$ by applying DeMorgan's rule. 
 	
-\section{Project Idea}
-	Shrinkage exponent of monotone formulas. 
+	\begin{lemma}
+		\label{lem:UB-ApproxDegAc0pFormula1}
+		Any $\class{AC}^0[p]$ formula $F$, of size $S$ and depth $d$, can be $\epsilon$-approximated by a degree $O(\log_{p} S/\epsilon)^d$ i.e. $\deg_{\epsilon}(F) \in O(\log_{p} S/\epsilon)^d$. 
+	\end{lemma}
+	\begin{proof}
+		Let the output gate of $F$ be $g \in \{\ff{MOD}_p, \ff{AND}, \ff{OR}\}$. By Lemma \ref{lem:DegEpsApprox-modp}, Lemma \ref{lem:DegEpsApprox-or}, and Corollary \ref{cor:DegEpsApprox-and}, we know that $\deg_{1/8}(g) \in O(p)$.
+	\end{proof}
+
+	\begin{corollary}
+		\label{cor:UB-ApproxDegaFourthAc0p}
+		Every $\class{AC}^0$ function $F$ of depth $d$ and size $S$ satisfies $\deg_{1/4}(F) \in O(\log_p S)^d$.
+	\end{corollary}
+	
+	\subsection{LB: Parity in  \texorpdfstring{$\class{AC}^0[p]$}{AC0[p]}}
+	In order to show the upper bound we need a lemma, an inequality, and an improved version of Corollary	\ref{cor:UB-ApproxDegaFourthAc0p}. These are as follows.
+	
+	\begin{lemma}
+		\label{lem:B-EpsilonApproxDegree}
+		\textbf{(Kopparty-Srinivasan).} For formula $f$, $\deg_{\epsilon}(f) \leq \deg_{1/4}(f)\log 1/\epsilon$.
+	\end{lemma}
+	\begin{proof}
+		We will construct an $\epsilon$-approximating polynomial of $f$ by composing several ($\log 1/\epsilon$ to be precise) $1/4$-approximating polynomials for $f$ using the majority function.
+		
+		Let $A$ be a $1/4$-approximating polynomial for $f$, $t$ be a positive integer, and $M(\vv{y}) \coloneqq \ff{MAJ}_t(\vv{y})$ for $\vv{y} \in \{0,1\}^t$. Observe\footnote{It turns out that there is a bijection between $t$-ary Boolean functions $f$ and polynomials in $\FF_p[x_1, ..., x_t]$ of degree at most $t$. It is simplistic to see this in $\FF_2[x_1, ..., x_t]$. Take every $\vv{x} \in \{0,1\}^t$ such that $f(\vv{x}) = 1$ and turn it into a monomial, $\prod_{i = 1}^{t} b_i$ where $b_i = x_i$ if $x_i = 1$ and $b_i = 1 - x_i$ otherwise. For general prime $p$, simply map $\{0,1\}^t \rightarrow \{-1,1\}^t$ and then map the output $\{-1,1\}\rightarrow \{0,1\}$.} that there exists a polynomial for $M$ of degree $t$. For $t$ independent copies of $A$, denoted $A_1, ..., A_t$, the polynomial $M'(\vv{x}) \coloneqq M(A_1(\vv{x}), ..., A_{t}(\vv{x}))$ has degree $t \cdot \deg_{1/4}(f)$. 
+		
+		Define indicator vectors $X_i$ to denote $A_i(\vv{x}) = f(\vv{x})$. For $X = \sum X_i$, $X$ is a binomial r.v. with probability of success $1/4$ and $n = t$. Thus 
+		\[\Pr_{\vv{x} \in \{0,1\}^n} [X \geq t/2] \leq \exp(-t/12).\] 
+		When $t \in O(\log (1/\epsilon))$ we have that $\Pr[M'(\vv{x}) \neq f(\vv{x})] \leq \epsilon$. 
+	\end{proof}
+
+	\begin{claim}
+		\label{claim:INEQ-ApproxDegAc0pFormula2Helper}
+		For $d \geq 2$, and arbitrary $a$ and $b$,
+		\[\left(\frac{a}{d-1} + 1\right)^{d-1}(b+1) \leq \left(\frac{a+b}{d} + 1\right)^{d}.\]
+	\end{claim}
+	\begin{proof}
+		Let $\phi(a,b)$ be the polynomial
+		\[\phi(a, b) = \left(\frac{a+b}{d} + 1\right)^{d} -  \left(\frac{a}{d-1} + 1\right)^{d-1}(b+1).\]
+		We will show that $\phi(a,b) \geq 0$ for all $a$ and $b$. First find the extremum of $\phi$ by taking the derivative with respect to $b$,
+		\[\frac{\partial}{\partial b} \left(\left(\frac{a+b}{d} + 1\right)^{d} -  \left(\frac{a}{d-1} + 1\right)^{d-1}(b+1)\right) = \left(\frac{a+b}{d} + 1\right)^{d-1} - \left(\frac{a}{d-1} + 1\right)^{d-1}.\]
+		Thus the extremum occurs when $b = a/d-1$ with $\phi(a, a/(d-1)) = 0$. Taking the second derivative with respect to $b$, we see that $\phi(a, a/(d-1))$ is a minimum of the function. 
+	\end{proof}
+
+	Now for the improved version of Corollary	\ref{cor:UB-ApproxDegaFourthAc0p}. At first blush, it might not look like that much of an improvement since $d$ and $p$ are constants, but this is exactly the form that we require for the parity bound. 
+	\begin{lemma}
+		\label{lem:UB-ApproxDegaFourthAc0p2}
+		For formula $F$ in $\class{AC}^0[p]$ of depth $d$ and size $S$, $\deg_{1/4}(F) \leq O(p\log_p(S)/d)^d$. 
+	\end{lemma}
+	\begin{proof}
+		By induction on $d$. Let the output gate of $F$ be $g \in \{\ff{MOD}_p, \ff{OR}, \ff{AND}\}$ with inputs $F_1, ..., F_m$ of sizes $S_1, ..., S_m$ respectively. Then by Lemma \ref{lem:EpsApprox-degofcompfunction}, 
+		\[\deg_{1/4}(F) \leq \deg_{1/8}(g) \cdot \max_{i \in [m]}\deg_{S_i/(8S)}(F_i).\]
+		By Lemma \ref{lem:UB-ApproxDegAc0pFormula1}, we have that $\deg_{1/8}(g) \in O(p)$. By Lemma \ref{lem:B-EpsilonApproxDegree}, we have that 
+		\begin{align*}
+			\deg_{S_i/(8S)}(F_i) &\leq \deg_{1/4}(F_i)\log\left(\frac{8S}{S_i}\right)\\
+			 &\leq \log\left(\frac{8S}{S_i}\right)\\
+		\end{align*}
+		where the second inequality follows from the induction hypothesis. Finally, it is time to use Claim \ref{claim:INEQ-ApproxDegAc0pFormula2Helper}. Don't panic. Just set $a = \log_{p}(S_i/p^{d-1})$ and $b = \log_{p}(S/pS_i)$ to get the inequality
+		\[p^{d-1} \left(\frac{\log_{p}(S_i)}{d-1}\right)^{d-1}\leq p^{d-1}\left(\frac{\log_{p}S}{d}\right)^d.\]
+		Altogether we have 
+		\[\deg_{1/4}(F) \leq \deg_{1/8}(g) \cdot \max_{i \in [m]}\deg_{S_i/(8S)}(F_i) \leq p\left(p^{d-1}\left(\frac{\log_{p}S}{d}\right)^d\right) = \left(\frac{p\log_{p} S}{d}\right)^d\]
+		for sufficiently large $n$. 
+	\end{proof}
+
+	\begin{theorem}
+		\label{thm:UB-BoundPrRandPolyEqParity}
+		For prime $p \geq 3$. If $A \in \field_p[x_1, ..., x_n]$ with $\deg(A) = \Delta$, then 
+		\[\Pr_{\vv{x} \in \{0,1\}^n}[A(\vv{x}) = \ff{XOR}_n(\vv{x})] \leq \frac{1}{2} + O\left(\frac{\Delta}{\sqrt{n}}\right).\]
+	\end{theorem}
+	\begin{proof}
+		Probably the most involved proof in this section. Uses a couple of clever tricks and something known as a \emph{dimension argument}.
+		
+		First let $\lambda: \{0,1\} \rightarrow \{1,-1\}$ be the $\lambda(x) = 1 - 2x$. We want to be able to reduce the degree of a polynomial. To this end, it is helpful to have variable from $y_i \in \{-1,1\}$ since $y_i^2 = 1$. Observe that 
+		\[\lambda(x_1 \xor \cdots \xor x_n) = \prod_{i = 1}^{n} (-1)^{x_i} = \prod_{i = 1}^{n}\lambda(x_i).\]
+		Thus, by substituting $\lambda^{-1}(y_i) = x_i$, 
+		\[\lambda\left(\ff{XOR}(\vv{x})\right) = \lambda\left(\ff{XOR}(\lambda^{-1}(\vv{y}))\right)= \prod_{i = 1}^{n}y_i.\]
+		
+		Let $\tilde{A}(\vv{y}) = \lambda(\ff{XOR}(\lambda^{-1}(\vv{y})))$ and notice that $\deg(\tilde{A}) = \Delta$. It suffices to show that 
+		\[\Pr_{\vv{x} \in \{0,1\}^n}\left[\tilde{A}(\vv{y}) = \prod_{i = 1}^{n}y_i\right] \leq \frac{1}{2} + \frac{O(\Delta)}{\sqrt{n}}.\]
+		
+		Consider the set of vectors $S = \{\vv{y} \in \{0,1\}^n: \tilde{A}(\vv{y}) = \prod_{i \in [n]} y_i\}$. Observe that the probability above is equal to $|S|/2^n$. Thus it suffices to find $|S|$. Consider $\family{F}$, the set of all functions $f: S \rightarrow \FF_p$. Since each $S$ can be any of $|\FF_p| = p$ different values, $|\family{F}| = p^{|S|}$ and $|S| = \log_p |\family{F}|$.
+		
+		Let us think about the aforementioned function $f$. We claim that $f$ is equivalent to a degree $(n + \Delta)/2$ polynomial over $\FF_p[y_1, ..., y_n]$. To see this, take any polynomial $B$ which matches $f$ over $S$. Since $y_i^2 = 1$ as $y_i \in \{1, -1\}$, multi-linearize $B$. Next take each monomial $\prod_{i \in I}y_i$ with $|I| \geq (n + \Delta)/2$ and substitute 
+		\[\tilde{A}(y) \cdot \prod_{j \in [n]\backslash I}y_j.\]
+		Notice that this monomial is identical to the original since
+		\[\tilde{A}(y) \cdot \prod_{j \in [n]\backslash I}y_j = \left(\prod_{i \in [n]} y_i\right) \cdot \left(\prod_{j \in [n]\backslash I}y_j\right) = \left(\prod_{i \in I}y_i\right)\cdot \left(\prod_{j \in [n]\backslash I}y_j^2\right) = \prod_{i \in I}y_i\]
+		and has degree
+		\[\deg(A) + (n - |I|) \leq \Delta + n - \frac{(n + \Delta)}{2} = \frac{n + \Delta}{2}.\] 
+		Thus we can bound $|S|$ as follows:
+		\begin{align*}
+			|S| &= \log_{p}|\family{F}|\\
+				&\leq \log_{p}\left|\mbox{monomials of degree at most }\frac{n + \Delta}{2}\right|\\
+				&= \underbrace{\binom{n}{0} + \binom{n}{1} + \cdots + \binom{n}{n/2}}_{2^{n-1}} + \underbrace{\binom{n}{n/2 + 1} + \cdots + \binom{n}{\frac{n + \Delta}{2}}}_{< \frac{\Delta 2^{n}}{\sqrt{n}}} 
+		\end{align*}
+		and the probability as follows:
+		\[\Pr_{\vv{x} \in \{0,1\}^n}\left[\tilde{A}(\vv{y}) = \prod_{i = 1}^{n}y_i\right] = \frac{|S|}{2^n} \leq \frac{1}{2} + \frac{O(\Delta)}{\sqrt{n}}.\]
+	\end{proof}
+
+	\begin{theorem}
+		\label{thm:UB-ParityinAc0p}
+		An $\ff{XOR}_n$ formula of depth $d$ in $\class{AC}^0[p]$ require size $2^{\Omega(d(n^{1/2d} - 1))}$. 
+	\end{theorem}
+	\begin{proof}
+		By Lemma \ref{lem:UB-ApproxDegaFourthAc0p2}, there exists a random polynomial $A$ of degree $\left(\frac{p\log_p S}{d}\right)^d$ which $1/4$-approximates $\ff{XOR}_n$. This means, for all $\vv{x} \in \{0,1\}^n$, 
+		\[\Pr_{A}[A(\vv{x}) = \ff{XOR}_n(\vv{x})] \geq \frac{3}{4}.\]
+		Thus there exists an polynomial $A$ which matches $\ff{XOR}_n$ on more than $3/4$ of all vectors $\vv{x}$. However, by Theorem \ref{thm:UB-BoundPrRandPolyEqParity}, we know that 
+		\[\Pr_{\vv{x} \in \{0,1\}^n}[A(\vv{x}) = \ff{XOR}_n(\vv{x})] \leq \frac{1}{2} + O\left(\left(\frac{p\log_p S}{d}\right)^d\frac{1}{\sqrt{n}}\right).\]
+		It follows that the RHS must be greater or equal to $3/4$. Rearranging this inequality in-terms of $S$, we have that $S = 2^{\Omega(d(n^{1/2d} - 1))}$.	
+	\end{proof}
+
+	\subsection{Real Approximating Polynomials in Other Norms}
+	Instead of approximating Boolean functions by polynomials over finite fields, we can try to approximate them with polynomials $A \in \RR[x_1, ..., x_n]$. The three primary norms we will consider are $\ell_{0}$, $\ell_{\infty}$, and $\ell_{2}$. For finite fields, only $\ell_{0}$ makes sense.
+	
+	\subsubsection{\texorpdfstring{$\ell_{0}$}{l0}-Approximation}
+	We can find a low-degree $\epsilon$-approximating for $\ff{OR}_n$ in $\ell_0$-norm using what is known as the Valiant Vazirani Isolation Lemma. This lemma seems quite useful in other contexts as well.
+	\begin{lemma}
+		\label{lem:ValVazIsolationLemma}
+		Let $S_0 = [n]$ and $j \in [\log n + 1]$, $S_j$ be a uniformly random subset of $S_{j-1}$. Then for every nonempty subset $X \subseteq [n]$,
+		\[\Pr[\exists j: |X \cap S_j| = 1] \geq \frac{1}{6}.\]
+	\end{lemma} 
+	\begin{proof}
+		The key thing to realize is that $[n] = S_0 \supseteq X$ so $|S_0 \cap X| \geq 1$. The only time when the event $E \coloneqq \exists j: |X \cap S_j| = 1$ does not occur is when every set intersects with $X$ too much, or there is some $S_j$ whose intersection with $X$ differs greatly from $S_{j-1} \cap X$. Formally, this means 
+		\[\Pr[\forall j: |X \cap S_j| \geq 1] \leq \Pr[|X\cap S_{\log(n) + 1}| \geq 2] + \Pr[\exists j: |X \cap S_{j-1}| \geq 2 \mbox{ and } |X\cap S_j| = 0].\]
+		As always, if we can upper bound the two terms on the RHS, then we can upper bound the complement of $E$ and thus lower bound the probability of $E$. 
+		
+		To bound $\Pr[|X \cap S_{\log(n) + 1}| \geq 2]$ consider the probability that any $x_i \in S_{\log(n) + 1}$:
+		\[\Pr[x_i \in S_{\log(n) + 1}] = \Pr[x_i \in S_{\log(n) + 1}|x_i \in S_{\log n}]\cdots\Pr[x_i \in S_1| x_i \in S_0]\Pr[x_i \in S_0] = 2^{-\log(n) - 1}.\]
+		Thus $\Pr[|X \cap S_{\log(n) + 1}| \geq 2] \leq |X|2^{-\log(n) - 1} \leq n2^{-\log(n) - 1} = 2^{-1}$.
+		
+		To bound $\Pr[\exists j: |X \cap S_{j-1}| \geq 2 \mbox{ and } |X\cap S_j| = 0]$ consider all possible values of $|X \cap S_{j-1}|$
+		\begin{align*}
+			\Pr[\exists j: |X\cap S_j| \geq \mbox{ and } |X\cap S_{j-1}| = 0] &\leq \frac{1}{3}
+		\end{align*}
+	
+		Together we have 
+		\[\Pr[\exists j: |X \cap S_j| = 1] \geq 1 - \left(\frac{1}{2} + \frac{1}{3}\right) = \frac{1}{6}\]
+		as required.
+	\end{proof}
+
+	\begin{lemma}
+		\label{lem:UB-DegreeRealApproxPoly-Aspenes}
+		(Aspenes et. al. 1993) There exists a random polynomial $A \in \RR[x_1, ..., x_n]$ of degree $O(\log(1/\epsilon)\cdot \log(n))$ such that, for every $\vv{x} \in \{0,1\}^n$
+		\[\Pr_{A}[A(\vv{x}) \neq \ff{OR}_n(\vv{x})] \leq \epsilon.\]
+	\end{lemma}
+	\begin{proof}
+		Choose random sets $S_0,..., S_{\log(n) + 1}$ as defined in Lemma \ref{lem:ValVazIsolationLemma}. For $0 \leq j \leq \log(n) + 1$ define the \emph{degree one polynomial}\footnote{Note! This is the \emph{sum} of the terms in $S_j$ and \emph{NOT} the product even though a monomial might seem more natural.} $B_j(\vv{x}) = \sum_{i \in S_j}x_i$. Let 
+		\[B(\vv{x}) = 1 - \prod_{i = 1}^{\log(n) + 1}\left(1 - B_j(\vv{x})\right).\]
+		Observe that $B(\vv{x})$ is a degree $O(\log n)$ polynomial and $\Pr[B(\vv{x}) \neq \ff{OR}_n(\vv{x})] \leq 1/6$. To see that the latter statement is true consider $\vv{x}$ such that $\ff{OR}_n(\vv{x}) = 0$ and $1$ respectively. 
+		
+		If $\ff{OR}_n(\vv{x}) = 0$ then $\vv{x} = \vv{0}$. It follows that $B_j(\vv{x}) = 0$ and $B(\vv{x}) = 0$.  If $\ff{OR}_n(\vv{x}) = 1$ then
+		\begin{align*}
+			\Pr[B(\vv{x}) = \ff{OR}_{n}] 
+				&= \Pr[B(\vv{x}) = 1]\\
+				&= \Pr[\exists j: B_j(\vv{x}) = 1]\\
+				&= \Pr[\exists j: |S_{j} \cap \{x_j: x_j = 1\}| = 1]\\
+				&\geq \frac{1}{6}
+		\end{align*}
+		
+		We will take $t$ independent copies of $B$, denoted $B^{(1)}, ..., B^{(t)}$ and combine them together to form
+		\[A(\vv{x}) = 1 - \prod_{i = 1}^{t}\left(1 - B^{(i)}(\vv{x})\right)\]
+		a degree $O(t\log n)$ real polynomial. Take $t = \log_{5/6}(\epsilon^{-1})$ to be $\epsilon$-approximating\footnote{Notice that this is slightly different from Lemma \ref{lem:B-EpsilonApproxDegree}. Instead of a binomial r.v., you have $t$ independent Bernoulli r.v.s with probability of success $1/6$ and you just need one of them to be successful}. 
+	\end{proof}
+	
+	\subsubsection{\texorpdfstring{$\ell_{\infty}$}{l_infty}-Approximation}
+	Let $f$ be a $n$-ary Boolean function. The $\ell_{\infty}$-approximating degree of $f$, denoted $\tilde{\deg}(f)$, is the minimum degree of a real polynomial $\tilde{f} \in \RR[x_1, ..., x_n]$ such that $|f(\vv{x}) - \tilde{f}(\vv{x})| \leq 1/3$ for all $\vv{x} \in \{0,1\}^n$. It is an open problem if there exists an $\class{AC}^0$ function $f: \{0,1\}^n \rightarrow \{0,1\}$ with $\tilde{\deg}(f) = \Omega(n)$.  A bound for depth-$d$ functions, is due to Bun and Thaler with degree $n^{1 - 1/2^{O(d)}}$. Apparently Sherstov has some work on this question as well.
+	
+	\subsubsection{\texorpdfstring{$\ell_{2}$}{2}-Approximation}
+	This is apparently the most natural and well-studied of all polynomial approximations. From what I understand, most of it can be categorized under Fourier analysis. 
+	
+	\section{LB: Monotone for \texorpdfstring{$k$}{k}-Clique}
+	\subsection{Problem Definition}
+	Let $G = (V, E)$ be a simple graph with no isolated vertex. For a growing parameter $n$, let $\family{G}$ be the set of all graphs $G$ with $|V_G| \subseteq [n]$. Since graphs with no isolated vertices are determined by their edge sets, identify each graph $G \in \family{G}$ by a vector in $\{0,1\}^{\binom{n}{2}}$. In the following, all functions $f$, $g$, and $h$ will be monotone $\family{G} \rightarrow \{0,1\}$ Boolean functions. 
+	
+	A graph $X \in \family{G}$ is a \textbf{minterm} of $f$ if $f(X) = 1$ and $f(X') = 0$ for all proper subsets $X' \subsetneq X$. Let $\minterms(f)$ be the set of minterms of $f$.
+	
+	For $X \in \family{G}$, let $\indf_{X}: \family{G} \rightarrow \{0,1\}$ be the $X$-subgraph indicator r.v. where for graph $G$,
+	\[\indf_{X}(G) = 1 \iff X \subseteq G.\]
+	Note that every $f$ monotone, is equivalent to the disjunction of all its subgraph indicators over its minterms i.e.
+	\[f(G) = \bigvee_{X \in \minterms(g)}\indf_{X}(G).\]
+	
+	For a fixed graph $H$, with $|V_H| \leq k$, let $\family{G}_H$ be the subset of graphs in $\family{G}$ which are isomorphic to $H$. Define the function $\subf_{H}(G): \family{G} \rightarrow \NN$ such that 
+	\[\subf_{H}(G) \coloneqq \sum_{X \in \family{G}_H} \indf_X(G)\]
+	so $\subf_{H}(G)$ counts the number of subgraphs of $G$ isomorphic to $H$, in the loosest sense. Let $\minterms_H(f) = \minterms(f) \cap \family{G}_H$. 
+	
+	For $k \geq 3$, $k-\ff{CLIQUE}: \family{G} \rightarrow \{0,1\}$ is the monotone function defined by $\minterms(k-\ff{CLIQUE}) = \family{G}_{K_k}$. 
+	
+	Let $\mathcal{Y}$ be a uniform random graph in $\family{G}_{K_k}$. This is our ``Yes''-instance. Let $\mathcal{N}$ be the Erd\"{o}s-Renyi random graph with probability $p = n^{-2/(k-1)}$. Given this particular choice of $p$, is it is unlikely that $\mathcal{N}$ will contain a $k$-clique. This will be our ``No'' instance.
+	
+	\begin{lemma}
+		\label{lem:UB-NoInstanceContainsKClique}
+		\[\Pr[\mathcal{N} \mbox{ contains a $k$-clique}] \leq \frac{3}{4}.\]
+	\end{lemma}
+	\begin{proof}
+		This is just a one-liner if you remember the upper bound for the binomial coefficient.
+		\[\Pr[\mathcal{N} \mbox{ contains a $k$-clique}] \leq \binom{n}{k}p^{\binom{k}{2}} \leq \left(\frac{en}{k}\right)^k \left(n^{2/(k-1)}\right)^{\binom{n}{2}} = \left(\frac{en}{k}\right)^kn^{-k} = \left(\frac{e}{k}\right)^k \leq \left(\frac{e}{3}\right)^3\leq \frac{3}{4}\]
+		where the inequalities are by union bound, upper bound for binomial coefficients, and $k \geq 3$ respectively.
+	\end{proof}
+
+	\begin{corollary}
+		\label{cor:LB-YesNoInstancesValid}
+		\[\Pr[k-\ff{CLIQUE}(\mathcal{Y}) = 1] + \Pr[k-\ff{CLIQUE}(\mathcal{N}) = 0] \geq \frac{5}{4}\]
+	\end{corollary}
+
+	We only require the following theorem:
+	\begin{theorem}
+		\label{thm:UB-YesNoInstancesValid}
+		Every monotone circuit $C$ satisfies
+		\[\Pr[C(\mathcal{Y}) = 1] + \Pr[C(\mathcal{N}) = 0] \leq 1 + o(1) + \frac{\circuitsize(C)}{\Omega(n^{k/4})}.\]
+	\end{theorem}
+	
+	By combining Lemma \ref{cor:LB-YesNoInstancesValid} and Theorem \ref{thm:UB-YesNoInstancesValid} we can obtain a lower bound on $\circuitsize(C)$. 
+	 
+	Be warned. The proof of Theorem \ref{thm:UB-YesNoInstancesValid} is a dozy. It requires a slew of new definitions and pretty subtle reasoning throughout, so get ready. 
+	 
+	\subsection{More Definitions}
+	A graph $H$ is \textbf{small} if $|V(H)| < k/2$ and \textbf{medium} if $|V(H)| \geq k/2$ and there exists small graphs $H_1$ and $H_2$ such that $H = H_1 \cup H_2 = H$. \emph{Notice: the union of two small graphs is a small or a medium graph.}
+	 
+	Let $\epsilon \coloneqq n^{-3k}$. A monotone function $f: \family{G} \rightarrow \{0,1\}$ is \textbf{closed} if, for every small-or-medium graph $X \in \family{G}$, 
+	\[\Pr[f(\mathcal{N} \cup X) = 1] \geq 1 - \epsilon \implies f(X) = 1.\]
+	\emph{If $f$ and $g$ are closed then so is $f \land g$.} Every monotone function $f$ has a unique \textbf{closure}, denoted $\cl(f)$ which is the minimum closed function such that $f \leq \cl(f)$. 
+	 
+	A monotone function $f: \family{G} \rightarrow \{0,1\}$ is \textbf{trimmed} if every minterm of $f$ is small. For any $f$, let $\trim(f): \family{G} \rightarrow \{0,1\}$ be the monotone function
+	 \[\trim(f)(G) = 1 \iff \exists X \subseteq G: \mbox{$X$ is small and $f(X) = 1$}.\]
+	Note that $\trim(f) \leq f$, with equality if and only if $f$ is trimmed \footnote{The name actually makes a lot of sense since, $\trim(f)$ is basically just $f$ with the medium graphs ``trimmed'' off.}. 
+	 
+	Let $\family{A} \coloneqq\{\trim(\cl(h)): h \mbox{ monotone}\}$. Every function $h \in \family{A}$ is an \textbf{approximator}. Define operations: $\sqcup, \sqcap: \family{A} \times \family{A} \rightarrow \family{A}$ as follows. For approximators $f, g \in \family{A}$,
+	\[f\sqcup g\coloneqq \trim(\cl(f \lor g)) \mbox{ and } f \sqcap g\coloneqq \trim(\cl(f\land g)).\]
+	Note that every edge indicator function $\indf_e$ is an approximator since $\indf_e = \trim(\cl(\indf_e))$. 
+	 
+	If $C$ is a monotone $\{\land, \lor\}$-circuit with inputs labeled by edge-indicators $\indf_e$, then the \textbf{approximator circuit} $C^{\family{A}}$ is the corresponding 
+	 
+	\subsection{Proof Outline}
+	Again, our main objective is to prove Theorem \ref{thm:UB-YesNoInstancesValid}. That is, we want to come up with an upper bound on probability that the circuit $C$ behaves as expected on $\mathcal{Y}$ and $\mathcal{N}$. Instead of doing this directly, we will apply total probability to an approximate version of $C$, denoted $C^{\mathcal{A}}$. In particular we will upper bound the sum as follows
+	\begin{align*}
+		\Pr[C(\mathcal{Y}) = 1] + \Pr[C(\mathcal{N}) = 0] &\leq \Pr[C(\mathcal{Y}) = 1 \land C^{\mathcal{A}}(\mathcal{Y}) = 1] + \Pr[C(\mathcal{Y}) = 1 \land C^{\mathcal{A}}(\mathcal{Y}) = 0] \\
+		&\qquad + \Pr[C(\mathcal{N}) = 0 \land C^{\mathcal{A}}(\mathcal{N}) = 1] + \Pr[C(\mathcal{N}) = 0 \land C^{\mathcal{A}}(\mathcal{N}) = 0]\\
+		&\leq \Pr[C^{\mathcal{A}}(\mathcal{Y}) = 1] + \Pr[C(\mathcal{Y}) = 1 \land C^{\mathcal{A}}(\mathcal{Y}) = 0] \\
+		&\qquad+ \Pr[C(\mathcal{N}) = 0 \land C^{\mathcal{A}}(\mathcal{N}) = 1] + \Pr[C^{\mathcal{A}}(\mathcal{N}) = 0]\\
+		&\leq 1 + o(1) + \frac{\circuitsize(C)}{\Omega(n^{k/4})}.
+	\end{align*}
+	Further we will divide the last inequality into two
+	\[\Pr[C^{\mathcal{A}}(\mathcal{Y}) = 1] + \Pr[C^{\mathcal{A}}(\mathcal{N}) = 0] \leq 1 + o(1)\]
+	and 
+	\[\Pr[C(\mathcal{Y}) = 1 \land C^{\mathcal{A}}(\mathcal{Y}) = 0] + \Pr[C(\mathcal{N}) = 0 \land C^{\mathcal{A}}(\mathcal{N}) = 1] \leq \frac{\circuitsize(C)}{\Omega(n^{k/4})}.\]
+	It remains to prove these two inequalities. The bulk of the setup is used for the second one. There you will really need to understand the definition of trims and closures and be able to reason about them confidently. The first inequality is actually just a consequence of a simple lemma. 
+	  
+	\subsection{Proof Proper}
+	Recall that $\mathcal{N}$ is an Erd\"{o}s-Renyi graph with $p = n^{-2/(k-1)}$. 
+	\begin{lemma}
+		\label{lem:E-NumSubgraphsInNIsomorphicToH}
+		For any $H \subseteq K_k$,
+		\[\expected[\subf_{H}(\mathcal{N})] = \Theta\left(n^{|V_H|} - 2|E_H|/(k-1)\right) \in \Omega(n^{k/4}).\]
+	\end{lemma}
+	\begin{proof}
+		\[\expected[\subf_{H}(\mathcal{N})] = |\family{G}_{H}| \cdot p^{|E_H|} = \frac{|V_H|!\binom{n}{|V_H|}}{\auto(H)}p^{|E_H|} = O\left(n^{|V_H| - 2|E_H|/(k-1)}\right).\]
+		The equalities are as follows. Apply linearity of expectation to sum over the expectation of each graph isomorphic to $H$. Each element of $\family{G}_H$ consists of choosing a permutation of $|V_H|$ vertices and removing their duplicates. The number of automorphisms of $H$ divides $|V_H|$, so $|\auto(H)| \leq |V_H|!$ and $|\family{G}_H| \in \Theta(n^{|V_H|})$.   
+	\end{proof}
+	Suppose $|V_H| = \lambda k$ for some $\lambda \in [0,1]$. Then we have 
+	\[|V_H| - 2|E_H|/(k-1) \geq \lambda k - \frac{\lambda k(\lambda k - 1)}{k-1} = \frac{k^2\lambda (1 - \lambda)}{k-1} \geq k\lambda(1 - \lambda).\]
+	When $\lambda$ is close to $1/2$, $\expected[\subf_{H}(\mathcal{N})] \geq n^{k/4}$. For medium graphs, the lower bound is $\Omega(n^{k/4} + \Omega(1/k))$. 
+	
+	\begin{lemma}
+	 	\label{lem:UB-MintermsIsomorphicH}
+	 	If $f$ is closed and $H \subseteq K_k$ is small-or-medium, then
+	 	\[|\minterms_H(f)| \leq \frac{n^{o(1)}}{p^{|E(H)|}}.\]
+	\end{lemma}
+	\begin{proof}
+		Let $\family{M} = \minterms_H(f)$ and $t = |E(H)|$. We will show a weaker version of this lemma using the Erd\"{o}s-Rado Sunflower\footnote{To get the inequality as shown above, you need to used the ``Approximate Sunflower Lemma" shown in Ben's notes.}. By the lemma, if $|\family{M}| \geq t!s^t$, then there exists a sunflower of size $s$ i.e. $X_1, ..., X_s \in \family{M}$ such that $X_1\backslash Z, X_s\backslash Z$ disjoint where $Z \coloneqq X_1 \cap \cdots \cap X_s$. Since we want a lower bound on $|\family{M}|$ we will assume for a contradiction that the above inequality holds. 
+		
+		Let $s = \ln(1/\epsilon)/p^{t}$. Then there exists a sunflower $X_1, ..., X_s \in \family{M}$ with core $Z$. Since $Z$ is a proper subset of the minterms of $f$, $f(Z) = 0$. But we can show that $f$ is not closed as
+		\begin{align*}
+			\Pr[f(\mathcal{N}\cup Z) = 0] &= \Pr\left[\bigwedge_{i = 1}^{s}(X_i\backslash Z) \not\subseteq \mathcal{N}\right]\\
+			 &= \prod_{i = 1}^{s}\Pr[(X_i\backslash Z) \not\subseteq \mathcal{N}]\\
+			 &= \left(1 - p^{|X_i \backslash Z|}\right)^s\\
+			 &\leq \left(1 - p^{t}\right)^s \leq \exp(-ts) < \epsilon. 
+		\end{align*}
+		The equality in the first line might be the most difficult to see, but if $X_i \backslash Z \subseteq \mathcal{N}$ for some $i$ then $f(\mathcal{N} \cup Z) = 1$. 
+	\end{proof}
+ 	
+ 	Take $\epsilon = n^{-3k}$. 
+ 	\begin{lemma}
+ 		\label{lem:UB-ProbFunctionDiffersFromClosure}
+ 		For every monotone function $f: \family{G} \rightarrow\{0,1\}$,
+ 		\[\Pr[f(\mathcal{N}) \land \cl(f)(\mathcal{N}) = 1] \leq O(n^{-2k}).\]
+ 	\end{lemma}
+ 	\begin{proof}
+ 		Since $f(\mathcal{N}) \neq \cl(f)(\mathcal{N})$, we know that $f$ is not closed. Thus we can construct an increasing sequence of monotone functions $f = f_0 < f_1 < \cdots < f_t = \cl(f)$. For each $i \in [t-1]$, there exists a graph $X_i \subset K_k$ such that 
+ 		\[\Pr[f_{i-1}(\mathcal{N} \cup X_i) = 1] \in [1 - \epsilon, 1).\]
+ 		Let $f_i = f_{i-1} \lor \indf_{X_i}$ where $\indf_{X_i}$ is the indicator of $X_i$. Since every $X_i$ can be added at most once, $t < \infty$. Upper bound the probability as follows
+ 		\begin{align*}
+ 			\Pr[f(\mathcal{N}) = 0 \mbox{ and } \cl(f)(\mathcal{N}) = 1] &= \Pr[f_0(\mathcal{N}) = 0 \mbox{ and } f_t(\mathcal{N}) = 1]\\
+ 			&= \sum_{i = 0}^{t-1}\Pr[f_i(\mathcal{N} = 0) \mbox{ and } f_{i+1}(\mathcal{N}) = 1]\\
+ 			&= \sum_{i = 0}^{t-1}\Pr[f_i(\mathcal{N} = 0) \mbox{ and } X_{i+1} \in \mathcal{N}]\\
+ 			&\leq \sum_{i = 0}^{t-1} \Pr[f_{i}(\mathcal{N} \cup X_i) 0]\\
+ 			&\leq t\epsilon = O(\epsilon n^{k}) = O(n^{-2k})
+ 		\end{align*}
+ 		where the inequality on the last line is due to the probability assumption above. 
+ 	\end{proof}
+ 	
+ 	\begin{lemma}
+ 		\label{lem:BD-SizeMintermsOfTrimmedClosures}
+ 		If $f$ and $g$ are trimmed monotone functions, then all minterms of $\cl(f \land g)$ and $\cl(f \lor g)$ are small or medium.
+ 	\end{lemma}
+ 	\begin{proof}
+ 		This proof is more involved than I originally thought. First you should observe that a minterm of $f \land g$ is the union of a minterm of $f$ and one of $g$. Since both $f$ and $g$ are trimmed, the union of their minterms is a small or medium graph. Finally we can write $\cl(f \land g) = (f\land g) \lor X_1 \lor \cdots \lor X_t$ for graphs $X_1, ..., X_t \in \cup_{H \subset K_k} \family{G}_{H}$ which incrementally extend $f\land g$ to its closure (similar to the above lemma). Thus the minterms of $\cl(f\land g)$ are small or medium. A similar argument can be made for $\cl(f\lor g)$.
+ 	\end{proof}
+ 	
+ 	\begin{lemma}
+	\label{lem:UB-ProbFunctionDiffersFromTrim}
+	Suppose $f$ is closed and every minterm of $f$ is small ormedium. Then 
+	\[\Pr[f(\mathcal{Y}) = 1 \land \trim(f)(\mathcal{Y}) = 0] \leq \frac{1}{\Omega(n^{k/4})}.\]
+ 	\end{lemma}
+ 	\begin{proof}
+ 		Reason about the probability as follows\footnote{I have a pretty big issue with this proof. What is $g$ in the following equation?}. If $f(\mathcal{Y}) = 1$ and $\trim(f)(\mathcal{Y}) = 0$, then there exists a medium minterm of $f$ which is a subgraph in $\mathcal{Y}$ i.e. all graphs with a $k$-clique and \emph{nothing else}. 
+ 		\begin{align*}
+ 			\Pr[f(\mathcal{Y}) = 0 \land \trim(f)(\mathcal{Y}) = 0] &\leq \Pr\left[\bigvee_{\mbox{medium graphs }H} \bigvee_{X \in \minterms_H(f \land g)}(X \in \mathcal{Y})\right]\\
+ 			&\leq \sum_{\mbox{medium graphs }H} \sum_{X \in \minterms_H(f \land g)}\Pr\left[X \in \mathcal{Y}\right] &\mbox{(Union Bound)}\\
+ 			&= \sum_{\mbox{medium graphs }H \subseteq K_k} \sum_{X \in \minterms_H(f \land g)}\frac{\binom{n-|V_H|}{k - |V_H|}}{\binom{n}{k}} &\mbox{($|\mathcal{Y}| = \binom{n}{k}$)}\\
+ 			&\leq \sum_{\mbox{medium graphs }H \subseteq K_k} |\minterms_H(f \land g)|\cdot \frac{1}{\Omega(n^{|V_H|})}\\
+ 			&\leq \sum_{\mbox{medium graphs }H \subseteq K_k} \frac{n^{o(1)}}{p^{|E_H|}} \cdot \frac{1}{\Omega(n^{|V_H|})} &\mbox{(Lemma \ref{lem:UB-MintermsIsomorphicH})}\\
+ 			&= \sum_{\mbox{medium graphs }H \subseteq K_k} \frac{n^{o(1)}}{\Omega(\expected[\subf_H(\mathcal{N})])}\\
+ 			&\leq \sum_{\mbox{medium graphs }H \subseteq K_k} \frac{n^{o(1)}}{\Omega(n^{k/4} + \Omega(1/k))} &\mbox{(Lemma \ref{lem:E-NumSubgraphsInNIsomorphicToH})}
+ 		\end{align*}
+ 		Since there are at most $2^{\binom{k}{2}} = O(1)$ medium graphs up to isomorphism with at most $k$ vertices, we can bound this above by $\Omega(n^{-k/4})$. 
+ 	\end{proof}
+ 
+ 	\begin{lemma}
+ 		\label{lem:UB-ApproxCircuitInequality}
+ 		\[\Pr[C(\mathcal{Y}) = 1 \land C^{\mathcal{A}}(\mathcal{Y}) = 0] + \Pr[C(\mathcal{N}) = 0 \land C^{\mathcal{A}}(\mathcal{N}) = 1] \leq \frac{\circuitsize(C)}{\Omega(n^{k/4})}.\]
+ 	\end{lemma}
+ 	\begin{proof}
+ 		This is the crux of the proof right here. We want to show that $C^{\mathcal{A}}$ closely approximates $C$ on both distributions $\mathcal{Y}$ and $\mathcal{N}$. 
+ 		
+ 		For error on $\mathcal{Y}$, 
+ 		\begin{align*}
+ 			\Pr[(f\land g)(\mathcal{Y}) = 1 \land (f\sqcap g)(\mathcal{Y}) = 0] &= \Pr[(f \land g)(\mathcal{Y}) = 1 \land \trim(\cl(f\land g))(\mathcal{Y}) = 0]\\
+ 			&\leq \Pr[\cl(f \land g)(\mathcal{Y}) = 1 \land \trim(\cl(f\land g))(\mathcal{Y}) = 0] &\mbox{($f\land g \leq \cl(f\land g))$}\\
+ 			&\leq \frac{1}{\Omega(n^{k/4})} &\mbox{(Lemma \ref{lem:BD-SizeMintermsOfTrimmedClosures} and  \ref{lem:UB-ProbFunctionDiffersFromTrim})}
+ 		\end{align*}
+ 		It follows that
+ 		\[\Pr[\circuitsize(\mathcal{Y}) \land \circuitsize^{\mathcal{A}}(\mathcal{Y}) = 0] \leq \frac{\circuitsize(C)}{\Omega(n^{k/4})}.\]
+ 		
+ 		For error on $\mathcal{N}$,
+ 		\begin{align*}
+ 			\Pr[(f\land g)(\mathcal{N}) = 0 \land (f\sqcap g)(\mathcal{N}) = 1] &= \Pr[(f \land g)(\mathcal{Y}) = 1 \land \trim(\cl(f\land g))(\mathcal{Y}) = 0]\\
+ 			&\leq \Pr[(f \land g)(\mathcal{Y}) = 1 \land \cl(f\land g)(\mathcal{Y}) = 0] &\mbox{($\trim(\cl(f\land g)) \leq \cl(f \land g)$)}\\
+ 			&\leq \frac{1}{\Omega(n^{2k})} &\mbox{(Lemma \ref{lem:UB-ProbFunctionDiffersFromClosure})}
+ 		\end{align*}
+ 		It follows that 
+ 		\[\Pr[\circuitsize(\mathcal{N}) = 0 \land \circuitsize^{\mathcal{A}}(\mathcal{N}) = 1] \leq \frac{\circuitsize(C)}{\Omega(n^{2k})}.\]
+ 	\end{proof}
+ 
+ 	\begin{lemma}
+ 		\label{lem:UB-FunctionValues}
+ 		For every approximator $f \in \mathcal{A}$, we have
+ 		\[\Pr[f(\mathcal{Y}) = 1] + \Pr[f(\mathcal{N}) = 0] \leq 1 + o(1).\]
+ 	\end{lemma}
+ 	\begin{proof}
+ 		It suffices to show that $\Pr[f(\mathcal{Y}) = 1] \in o(1)$. The proof is remarkably similar to that of Lemma \ref{lem:UB-ProbFunctionDiffersFromTrim}. Since $f$ is an approximator, either $f \equiv 1$ or there exists a monotone function $h$ such that $f = \trim(h)$. In the former case we are done so assume the latter holds. Then
+ 		\[f = \trim(h) = \bigvee_{\mbox{nonemty small graphs} H}\bigvee_{X \in \minterms_H(h)} \indf_X(\mathcal{Y}).\]
+ 		Therefore
+ 		\[\Pr[f(\mathcal{Y} = 1)] \leq \sum_{\mbox{nonemty small graphs} H}\sum_{X \in \minterms_H(h)} \Pr[X\in\mathcal{Y}] \in o(1).\]
+ 	\end{proof}
+%\section{Project}
+%	Shrinkage exponent of monotone formulas. 
 \end{document}

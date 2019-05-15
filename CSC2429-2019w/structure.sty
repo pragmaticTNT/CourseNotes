@@ -43,12 +43,16 @@
 \DeclareMathOperator*{\round}{rd}
 \DeclareMathOperator*{\yes}{\mathsf{YES}}
 \DeclareMathOperator*{\no}{\mathsf{NO}}
-\newcommand{\ind}[1]{\mathbb{#1}}
+\newcommand{\ind}{\mathbb{1}}
 \DeclareMathOperator*{\trace}{trace}
 \DeclareMathOperator*{\comp}{\otimes}
 \DeclareMathOperator*{\size}{size}
 \newcommand\field{\mathbb{F}}
 \DeclareMathOperator*{\support}{supp}
+\newcommand\ff[1]{\mathrm{#1}}
+\newcommand\mm[1]{\mathbf{#1}}	% Bolded capitals are MATRICES
+\newcommand\vv[1]{\mathbf{#1}}	% Bolded lowercases are VECTORS
+\newcommand\family[1]{\mathcal{#1}}	% Cursive uppercases are FAMILIES of sets
 %% ---> Logic <---
 \DeclareMathOperator{\xor}{\oplus}
 \DeclareMathOperator{\XOR}{\bigoplus}
@@ -66,12 +70,17 @@
 \newcommand{\sub}{\mathrm{sub}}
 \DeclareMathOperator*{\depth}{depth}
 \newcommand{\gate}{\mathsf{gate}}
+\newcommand{\minterms}{\mathrm{Minterms}}
+\newcommand{\indf}{\mathrm{Ind}}
+\newcommand{\subf}{\mathrm{Sub}}
+\newcommand{\cl}{\mathrm{cl}}
+\newcommand{\trim}{\mathrm{trim}}
+\newcommand{\auto}{\mathrm{auto}}
 %% ---> Probability <---
-\DeclareMathOperator*{\expected}{\mathbb{E}}
+\DeclareMathOperator{\expected}{\mathbb{E}}
 \DeclareMathOperator*{\var}{Var}
+\DeclareMathOperator*{\bern}{\mathrm{Bern}}
 \newcommand\distrib[1]{\mathcal{#1}}
-\newcommand\mm[1]{\mathbf{#1}}	% Bolded capitals are MATRICES
-\newcommand\vv[1]{\mathbf{#1}}	% Bolded lowercases are VECTORS
 %% ===> End Math Operators <===
 
 %% ===> Macros <===
@@ -80,6 +89,7 @@
 \newcommand\QQ{\mathbb{Q}}
 \newcommand\RR{\mathbb{R}}
 \newcommand\CC{\mathbb{C}}
+\newcommand\FF{\mathbb{F}}
 %% ===> END Macros <===
 
 % ===> Command Definitions <===

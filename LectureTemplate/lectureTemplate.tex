@@ -17,11 +17,10 @@
 % ADD PACKAGES here:
 %
 
-\usepackage{amsmath,amsfonts,amssymb, graphicx}
-\usepackage{algpseudocode}
-\usepackage{color}
-\usepackage{comment}
-\usepackage{mathtools}
+\usepackage{amssymb}	% Already loads amsfonts
+\usepackage{graphicx}
+\usepackage{mathtools}	% Already loads amsmath
+\usepackage{hyperref}
 
 %
 % The following commands set up the lecnum (lecture number)
@@ -48,8 +47,8 @@
    \begin{center}
    \framebox{
       \vbox{\vspace{2mm}
-    \hbox to 6.28in { {\bf Introduction to Geometric Discrepancy
-	\hfill Fall 2017} }
+    \hbox to 6.28in { {\bf Course Name
+	\hfill Section} }
        \vspace{4mm}
        \hbox to 6.28in { {\Large \hfill Section #1: #2  \hfill} }
        \vspace{2mm}
@@ -77,26 +76,29 @@
 % Use these for theorems, lemmas, proofs, etc.
 \newtheorem{theorem}{Theorem}[lecnum]
 \newtheorem{lemma}[theorem]{Lemma}
-\newtheorem{proposition}[theorem]{Proposition}
 \newtheorem{claim}[theorem]{Claim}
 \newtheorem{corollary}[theorem]{Corollary}
 \newtheorem{definition}[theorem]{Definition}
 \newtheorem{example}[theorem]{Example}
-\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+\newenvironment{proof}{{\bf \textit{Proof.}}}{\hfill\rule{2mm}{2mm}}
 
 % **** IF YOU WANT TO DEFINE ADDITIONAL MACROS FOR YOURSELF, PUT THEM HERE:
 
-\newcommand\vol{\mathsf{vol}}
-\newcommand\R{\mathcal{R}}
-\newcommand\disc{\mathsf{disc}}
-\newcommand\A{\mathcal{A}}
-\newcommand\SSet{\mathcal{S}}
+\renewcommand\Pr{\mathbb{P}}
+\newcommand\Ex{\mathbb{E}}
+
+\newcommand\NN{\mathbb{N}}
+\newcommand\ZZ{\mathbb{Z}}
+\newcommand\QQ{\mathbb{Q}}
+\newcommand\RR{\mathbb{R}}
+\newcommand\CC{\mathbb{C}}
+\newcommand\FF{\mathbb{F}}
 
 \DeclarePairedDelimiter\ceil{\lceil}{\rceil}
 \DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
 \DeclarePairedDelimiter\anglebrac{\langle}{\rangle}
 
 \begin{document}
-\lecture{1}{Introduction}{Jiri Matousek}{Lily Li}
+\lecture{0}{Title}{L}{S}
 
 \end{document}
