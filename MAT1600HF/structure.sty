@@ -1,0 +1,89 @@
+\usepackage[english]{babel}
+\usepackage{amsfonts, amsmath, amssymb, amsthm}
+\usepackage{bbold}
+\usepackage{color}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+	\geometry{margin=1in}
+\usepackage{graphicx}
+\usepackage{epstopdf}
+	\epstopdfsetup{update}
+\usepackage{comment}
+\usepackage{fullpage}
+\usepackage{hyperref}
+\usepackage{mathtools}
+\usepackage{thmtools}
+\usepackage{tikz}
+\usetikzlibrary{arrows, automata, fit, positioning}
+
+%% ===> Page Settings <===
+\setlength{\parindent}{0em}
+\setlength{\parskip}{0.5em}
+%% ===> End Page Settings <===
+
+%% ===> Theorem Type Definitions <===
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{conjecture}[theorem]{Conjecture}
+%% ===> END Theorem Type Definitions <===
+
+%% ===> Deliminaters <===
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+\DeclarePairedDelimiter\anglebrac{\langle}{\rangle}
+\DeclarePairedDelimiter\norm{\lVert}{\rVert}
+%% ===> END Deliminaters <===
+
+%% ===> Math Operators <===
+%% ---> General <---
+\DeclareMathOperator*{\round}{rd}
+\newcommand\ff[1]{\mathrm{#1}}
+\newcommand\mm[1]{\mathbf{#1}}	% Bolded capitals are MATRICES
+\newcommand\vv[1]{\mathbf{#1}}	% Bolded lowercases are VECTORS
+\newcommand\family[1]{\mathcal{#1}}	% Cursive uppercases are FAMILIES of sets
+%% ---> Probability <---
+\newcommand\algebra{\mathcal{A}}
+\newcommand\measure{\mathbb{P}}
+\DeclareMathOperator{\expected}{\mathbb{E}}
+\DeclareMathOperator*{\var}{Var}
+\DeclareMathOperator*{\bern}{\mathrm{Bern}}
+\newcommand\distrib[1]{\mathcal{#1}}
+%% ===> End Math Operators <===
+
+%% ===> Macros <===
+\newcommand\BB{\mathbb{B}}
+\newcommand\NN{\mathbb{N}}
+\newcommand\ZZ{\mathbb{Z}}
+\newcommand\QQ{\mathbb{Q}}
+\newcommand\RR{\mathbb{R}}
+\newcommand\CC{\mathbb{C}}
+\newcommand\FF{\mathbb{F}}
+%% ===> END Macros <===
+
+% ===> Command Definitions <===
+% ---> usage: \fig{NAME}{SCALE}{CAPTION}
+\newcommand\fig[3]{
+	\begin{figure}[ht]
+		\centering
+		\includegraphics[scale=#2]{Figures/#1}
+		\caption{#3}
+		\label{fig:#1}
+	\end{figure}
+}	
+% ---> usage: \makeheader{LECTURE-DATE}{LECTURE-NUM}{LECTURE-TITLE}{SCRIBE-NAME}
+\newcommand\makeheader[4]{
+	\fbox{\parbox{\textwidth}{MAT1600
+			\hfill #1%
+			\begin{center}\LARGE 
+				Lecture #2: #3
+			\end{center}
+			{\em Instructor: Dmitriy Panchenko
+				\hfill
+				Scribe: #4}
+		}}	
+}
+%% ===> END Command Definitions <===

@@ -1,0 +1,53 @@
+\documentclass[11pt]{article}
+\usepackage{structure}
+
+\begin{document}
+	\tableofcontents
+	\newpage
+	
+	\makeheader{\today}{1}{Introductions}{Lily Li}
+	\begin{definition}
+		A \emph{probability space} is a triple $(\Omega, \algebra, \measure)$ where $\Omega$ is the \emph{sample space}, $\algebra$ is an algebra, defined below, and $\measure: \algebra \rightarrow [0,1]$ is a \emph{probability measure}, or \emph{measure}. We call a subset of $\Omega$, an event. 
+		
+		A collection of events of $\Omega$, $\algebra$, is an \emph{algebra} if
+		\begin{enumerate}
+			\item $\Omega \in \algebra$: we can talk about the probability of the entire sample space. 
+			\item if $C, B \in \algebra$, then $C \cup B, C \cap B \in \algebra$: we can talk about the union and intersection of events.
+			\item if $C \in \algebra$, then $\Omega \backslash C = C^{c} \in \algebra$: we can talk about the complement of an event. 
+		\end{enumerate}
+		A $\sigma$-algebra is an algebra which further satisfies: $C_i \in \mathcal{A}$ for countably many $C_i$, then $\bigcup_{i=1}^{\infty} C_i \in \mathcal{A}$. This means that we are allowed to take the union of countably many events.
+		
+		By themselves, the pair $(\Omega, \algebra)$ is a \emph{measurable space} if $\algebra$ is a $\sigma$-algebra of subsets of $\Omega$. 
+		
+		\emph{Measure} means \emph{something}... he went too fast and I couldn't follow. 
+		
+		The \emph{probability measure} $\measure$ satisfies: 
+		\begin{enumerate}
+			\item $\measure(\Omega) = 1$,
+			\item $\measure(A) \geq 0$,
+			\item $\measure$ is \emph{countably additive} i.e. $A_i \in \algebra$, $A_i \cap A_j \neq \emptyset$ if $i \neq j$, then $\measure(\cup^{\infty}_{i = 1}A_i) = \sum_{i=1}^{\infty} \measure(A_i)$; or alternatively,
+			\item $\measure$ is \emph{finitely additive} and \emph{continuous} i.e. for any decreasing sequence $B_n \supseteq B_{n+1} \in \algebra$, if $B = \bigcap^{\infty}_{i=1}B_n$ then $\measure\left(B\right) = \lim_{n\rightarrow \infty} \measure(B_n)$.
+		\end{enumerate}
+	\end{definition}
+	
+	\begin{claim}
+		A measure $\measure$ is \emph{countably additive} if and only if it is \emph{finitely additive} and \emph{continuous}. 
+	\end{claim}
+	\begin{proof}
+		Suppose that $\measure$ satisfies (3) above, then we show that it satisfies (4). Let $C_i$ be the following sequence of disjoint sets: $C_i = B_i \backslash B_{i+1}$. Then $\measure(B_n) = \measure\left(B \cup (\cup_{i \geq n}C_i)\right)$. Since the $C_i$s and $B$ are clearly disjoint, we have $\measure(B_n) = \measure(B) + \sum_{i\geq n}\measure(C_i)$. Taking the limit of both sides,
+		\[\lim_{n\rightarrow\infty}\measure(B_n) = \lim_{n\rightarrow\infty}\left(\measure(B) + \sum_{i \geq n}\measure(C_i)\right) = \lim_{n\rightarrow\infty}\measure(B) = \measure\left(B\right)\]
+		since the tail of a convergent series, $\{C_i\}$, approaches zero in the limit.  
+		
+		Conversely if $\measure$ satisfies (4) above, then it must satisfy (3). Let $B = \cap_{i=1}^{\infty}A_i$ and $B_{n} = \cup_{i\geq n+1} A_{i}$. Then 
+		\[\measure\left(\cup_{i=1}^{\infty}A_i\right) = \sum_{i=1}^{n}\measure(A_i) + \measure(B_{n}).\]
+		Taking the limit of both sides
+		\[\measure\left(\cup_{i=1}^{\infty}A_i\right) = \lim_{n\rightarrow \infty}\left(\sum_{i=1}^{n}\measure(A_i) + \measure(B_{n})\right) = \sum_{i=1}^{\infty}\measure(A_i)\]
+		since $\lim_{n\rightarrow\infty}\measure(B_n) = 0$. 
+	\end{proof}
+	
+	\begin{example}
+		Consider the following probability space: $\left([0,1], \BB[0,1], \lambda\right)$ where $\BB[0,1]$ denotes the Borel $\sigma$-algebra over $[0,1]$ and $\lambda$ is the Lebesgue measure. Here the Borel $\sigma$-algebra, also Borel Set, is the smallest $\sigma$-algebra containing all open sets.  
+		
+		Think about why the power set of $[0,1]$ is not an algebra. 
+	\end{example}
+\end{document}

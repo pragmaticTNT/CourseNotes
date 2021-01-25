@@ -327,6 +327,33 @@
 	\end{proof}
 	
 \section{Lower Bounds for Explicit Functions}
+	\subsection{(General) Gate Elimination: \texorpdfstring{$\circuitsize(PARITY_n) \in \Omega(n)$}{C(PARITYn) in Omega(n)}}
+	\begin{definition}
+		For $i \in [n]$ and $b \in \{0,1\}$ the \textbf{1-bit restriction}, $x_i \leftarrow b$ is the $n$-ary function $f^{(x_i \leftarrow b)}$. The substitution can be done \emph{syntactically} for circuits $C$, namely, $C^{(x_i \leftarrow b)}$. The technique is to substitute $x_i \leftarrow b$ and $\overline{x}_i \leftarrow 1 - b$ and performing the relevant simplifications.
+	\end{definition}
+	
+	There are a couple of observations to note. (1) If $C$ computes $f$, then $C^{(x_i \leftarrow b)}$ computes $f^{(x_i \leftarrow b)}$. (2) If $x_i$ appears below a gate in $C$ then for both settings of $b \in \{0,1\}$, $\size\left(C^{(x_i \leftarrow b)}\right) \leq \size(C) - 1$ i.e. any setting of $b$ will knock out one gate in $C$. (2) There exists a setting of $b$ for each gate, such that $\size\left(C^{(x_i \leftarrow b)}\right) \leq \size(C) - 2$ i.e. the setting of $b$ knocks out two gates in $C$.
+	
+	\begin{theorem}
+		\label{thm:schnorr1979-XORlb}
+		\textbf{(Schnorr 1979).} $\circuitsize(PARITY_n) \geq 3(n-1)$.
+	\end{theorem}
+	\begin{proof}
+		By induction. The base case where $n = 1$ is trivial. The crucial observation is as follows. If a literal is below $k$ $\land/\lor$ gates (of the same type), then there is a setting of the literal such that you can knock out at least $k$ gates. Just think about the different settings of the literal.
+		
+		Consider any circuit $C$ which calculates the $PARITY_n$ function. Identify three gates in $C$:
+		\begin{enumerate}
+			\item A gate whose inputs are two literals. Let these be $x_i$ and $x_j$. 
+			\item Pick a literal of the previous gate, say $x_i$. Find another gate with $x_i$ as an input. Suppose such a gate does not exist. Then, by setting $x_j$ appropriately, we could knock out the gate in step $1$ and the output would not depend on $x_i$. This would not calculate the $PARITY_n$ function.
+			\item The gate above the one in step 2. Such a gate exists if the gate from step $2$ is not the output of the circuit. Suppose for a contradiction that it was. Then a setting of $x_i$ would fix the output. This would also not calculate the $PARITY_n$ function.
+		\end{enumerate}  
+		By setting $x_i$ appropriately, we can kills all three gates above. See Figure \ref{fig:schnorr1979}.
+		
+		\fig{schnorr1979}{0.7}{The three gates that get eliminated when we restrict $x_i$. The actual setting of $x_i$ depends on the gate type.}
+		
+		By the induction hypothesis, $C^{(x_i \leftarrow b)}$ has at least $3(n - 2)$ gates. Since we were able to eliminate three gates by setting $x_i$, we know that $C$ has to have $3(n-1)$ gates.  
+	\end{proof}
+	More sophisticated versions of gate elimination allow for slightly better lower bounds. The current record is $5n - o(n)$ for DeMorgan circuits and $\left(3 + \frac{1}{86}\right)n$ for circuits in the full binary basis. 
 	\subsection{(DeMorgan) Linear Algebra Method: \texorpdfstring{$\leafsize(PARITY_n) \in \Omega(n^2)$}{L(PARITYn) in Omega(n2)}}
 	Let us define $PARITY_n$ as $\XOR_n$ and $1 - PARITY_n$ as $\overline{\XOR}_n$. Recall\footnote{Construct a circuit with $n-1$ $\xor$-gates and substituting three DeMorgan gates $(x \land \lnot y) \lor (\lnot x \land y)$ for each $x \xor y$.} that $\circuitsize(\XOR_n) \leq 3(n-1)$ and $\leafsize(\XOR_n) \leq 2^{2\ceil{\log n}}$. We will show that these bounds are tight. 
 	
@@ -376,34 +403,6 @@
 	We use the above Corollary \ref{cor:khrapchenko1071-quadraticlb} to show that $\leafsize(\XOR_n) \geq n^2$. Take $A$ and $B$ to be the set of even and odd strings\footnote{Here the parity of the string $s$ corresponds to the parity of the sum of ones in $s$.} in $\{0,1\}^n$ respectively. Then, by the above,
 	\[\leafsize(f) \geq \frac{\left(\sum_{a \in A}\sum_{b \in B} \mm{M}_{a,b}\right)^2}{|A|\cdot|B|} = \frac{\left(n2^{n-1}\right)^2}{2^{n-1}\cdot 2^{n-1}} = n^2.\]
 	This technique can achieve gaps of at most $n^2$. Exercise: (1)\footnote{Hint: Take $A = \{s \in \{0,1\}^n:s\mbox{ has exactly $\ceil{n/2}-1$ ones}\}$ and $B = \{t \in \{0,1\}^n:t\mbox{ has exactly $\ceil{n/2}$ ones}\}$.} prove lower-bound $\leafsize(MAJ_n) \geq \Omega(n^2)$ and (2) can you devise an upper bound of $\leafsize(MAJ_n) \leq n^{O(1)}$.
-	
-	\subsection{(General) Gate Elimination: \texorpdfstring{$\circuitsize(PARITY_n) \in \Omega(n)$}{C(PARITYn) in Omega(n)}}
-	\begin{definition}
-		For $i \in [n]$ and $b \in \{0,1\}$ the \textbf{1-bit restriction}, $x_i \leftarrow b$ is the $n$-ary function $f^{(x_i \leftarrow b)}$. The substitution can be done \emph{syntactically} for circuits $C$, namely, $C^{(x_i \leftarrow b)}$. The technique is to substitute $x_i \leftarrow b$ and $\overline{x}_i \leftarrow 1 - b$ and performing the relevant simplifications.
-	\end{definition}
-	
-	There are a couple of observations to note. (1) If $C$ computes $f$, then $C^{(x_i \leftarrow b)}$ computes $f^{(x_i \leftarrow b)}$. (2) If $x_i$ appears below a gate in $C$ then for both settings of $b \in \{0,1\}$, $\size\left(C^{(x_i \leftarrow b)}\right) \leq \size(C) - 1$ i.e. any setting of $b$ will knock out one gate in $C$. (2) There exists a setting of $b$ for each gate, such that $\size\left(C^{(x_i \leftarrow b)}\right) \leq \size(C) - 2$ i.e. the setting of $b$ knocks out two gates in $C$.
-	
-	\begin{theorem}
-		\label{thm:schnorr1979-XORlb}
-		\textbf{(Schnorr 1979).} $\circuitsize(PARITY_n) \geq 3(n-1)$.
-	\end{theorem}
-	\begin{proof}
-		By induction. The base case where $n = 1$ is trivial. The crucial observation is as follows. If a literal is below $k$ $\land/\lor$ gates (of the same type), then there is a setting of the literal such that you can knock out at least $k$ gates. Just think about the different settings of the literal.
-		
-		Consider any circuit $C$ which calculates the $PARITY_n$ function. Identify three gates in $C$:
-		\begin{enumerate}
-			\item A gate whose inputs are two literals. Let these be $x_i$ and $x_j$. 
-			\item Pick a literal of the previous gate, say $x_i$. Find another gate with $x_i$ as an input. Suppose such a gate does not exist. Then, by setting $x_j$ appropriately, we could knock out the gate in step $1$ and the output would not depend on $x_i$. This would not calculate the $PARITY_n$ function.
-			\item The gate above the one in step 2. Such a gate exists if the gate from step $2$ is not the output of the circuit. Suppose for a contradiction that it was. Then a setting of $x_i$ would fix the output. This would also not calculate the $PARITY_n$ function.
-		\end{enumerate}  
-		By setting $x_i$ appropriately, we can kills all three gates above. See Figure \ref{fig:schnorr1979}.
-		
-		\fig{schnorr1979}{0.7}{The three gates that get eliminated when we restrict $x_i$. The actual setting of $x_i$ depends on the gate type.}
-		
-		By the induction hypothesis, $C^{(x_i \leftarrow b)}$ has at least $3(n - 2)$ gates. Since we were able to eliminate three gates by setting $x_i$, we know that $C$ has to have $3(n-1)$ gates.  
-	\end{proof}
-	More sophisticated versions of gate elimination allow for slightly better lower bounds. The current record is $5n - o(n)$ for DeMorgan circuits and $\left(3 + \frac{1}{86}\right)n$ for circuits in the full binary basis. 
 
 	\subsection{(DeMorgan) Random Restriction: \texorpdfstring{$\leafsize(ANDREEV_{k,m}) \in \Omega(n^3)$}{L(ANDREEVkm) in Omega(n3)}}
 	\subsubsection{Subbotovskaya's Method} 
@@ -977,7 +976,7 @@
 	\end{corollary}
 	This corollary follows from Theorem \ref{thm:haastadswitchinglemma} since every depth-$t$ DT is a $t$-CNF ($t$-DNF).   
 	
-	\subsection{(LB) Parity Circuit-size}
+	\subsection{LB Parity Circuit-size}
 	\begin{theorem}
 		\label{thm:dtdepthunderrandomrestriction}
 		Let $C$ be an $\class{AC}^0$ circuit of depth $d + 1$ and size $S$. Let $p = 10^{-d - 1}(2\log S)^{-d}$.
@@ -1426,10 +1425,84 @@
  	\end{lemma}
  	\begin{proof}
  		It suffices to show that $\Pr[f(\mathcal{Y}) = 1] \in o(1)$. The proof is remarkably similar to that of Lemma \ref{lem:UB-ProbFunctionDiffersFromTrim}. Since $f$ is an approximator, either $f \equiv 1$ or there exists a monotone function $h$ such that $f = \trim(h)$. In the former case we are done so assume the latter holds. Then
- 		\[f = \trim(h) = \bigvee_{\mbox{nonemty small graphs} H}\bigvee_{X \in \minterms_H(h)} \indf_X(\mathcal{Y}).\]
+ 		\[f = \trim(h) = \bigvee_{\mbox{non-empty small graphs} H}\bigvee_{X \in \minterms_H(h)} \indf_X(\mathcal{Y}).\]
  		Therefore
  		\[\Pr[f(\mathcal{Y} = 1)] \leq \sum_{\mbox{nonemty small graphs} H}\sum_{X \in \minterms_H(h)} \Pr[X\in\mathcal{Y}] \in o(1).\]
  	\end{proof}
-%\section{Project}
-%	Shrinkage exponent of monotone formulas. 
+ 
+ 	\section{Depth-3 Sub-exponential Size Circuits}
+ 	\subsection{Motivation}
+ 	It is difficult to find an explicit function with circuit $\sizedepth(n, \log n)$. Valiant shows that such functions have sub-exponential depth-three circuits i.e. $\sizedepth(n, \log n) \subseteq \sizedepth(2^{n/\log \log n}, 3) = \sizedepth(2^{o(n)}, 3)$. Thus an explicit function $f \in \sizedepth(2^{\Omega(n)}, 3)$ breaks the above ``linear-size log-depth'' barrier.
+ 	
+ 	The proof structure is as follows. Start with a circuit $C \in \sizedepth(n, \log n)$. Remove a large fraction of the edges so that the disconnected pieces have low-depth. These low-depth pieces can only depend on a few inputs. Construct a brute-force depth-two $\land$-$\lor$ circuit for each piece. The evaluation of $C$ is equivalent to a $\lor$ of $\land$s over the $\land$-$\lor$ sub-functions. Collapsing the two $\land$ layers yields a depth-three circuit of sub-exponential size.
+ 	
+ 	Before we can proceed with the proof in detail, we need two crucial observations. Let the $G = (V, E)$ be a forest\footnote{Note that the size of formulas is an upper bound on the size of circuits here since the circuit is of bounded degree.}. Define $\depth(G)$ to be the maximum depth of any tree in $G$ which in-turn is the length of the longest path in the tree. Let a \emph{depth function} $\delta_k: V \rightarrow \{0,2^{k}-1\}$ be such that if $uv \in E$ then $\delta_k(u) < \delta_k(v)$. Observe that there exists a depth function $\delta_k$ if and only if the $\depth(G) \leq 2^{k}$. 
+ 	
+ 	Suppose $|E| = m$, and $\depth(G) = 2^{k}$. By removing $\frac{m}{k}$ edges we can reduce the depth of $G$ to at most $2^{k-1}$. For every edge $uv$, let $\sigma(uv)$ be the index of the most significant bit in which $\delta_k(u)$ and $\delta_k(v)$ differ. Let $E_i = \{uv \in E: \sigma(uv) = i\}$. Notice that $E_1, ..., E_k$ partition the set of all edges. Since there are $k$ sets and $m$ edges, there exists some set $i$ with at most $\frac{m}{k}$ edges (pigeon hole principle). Remove all edges in $E_i$. We claim that the remaining forest has depth at most $2^{k-1}$. To see this consider the depth function $\delta_{k-1}$ which is just $\delta_k$ with index $i$ omitted. Notice that $\delta_{k-1}$ satisfies the depth function property on all remaining edges; first $\sigma(uv) \neq i$ since all edges in $E_i$ were removed. For edges $uv$, with $\sigma(uv) < i$, a low order bit was removed so $\delta_{k-1}(u) < \delta_{k-1}(v)$. Finally for $\sigma(uv) > i$, we must have the $i$\textsuperscript{th} bit of $\delta_k(u) = \delta_{k}(v)$ so removing it still satisfies $\delta_{k-1}(u) < \delta_{k-1}(v)$. 
+ 	
+ 	Suppose our original graph had size $cn$ and depth $c\log n = 2^{\ell}$ for some constant $c$. We will apply the above depth reduction technique $\log 2c$ times. The resulting circuit will have depth $2^{\ell}/2^{\log 2c} = \log n/ 2$. And we would have removed at most 
+ 	\[cn\left(\frac{1}{\ell} + \frac{1}{\ell - 1} + \cdots + \frac{1}{\ell - \log 2c + 1}\right) \leq cn \left(\frac{\log 2c}{\ell - \log 2c + 1}\right) \in O\left(\frac{n}{\log \log n}\right) \mbox{ edges.}\] 
+ 	
+ 	It remains to put together all these disconnected functions to calculate the value of $C(\vv{x})$ on input $\vv{x} \in \{0,1\}^n$. Let the value on edge $uv$ be the output of gate $u$. Let $f^{e}_h$ be the function which checks if the output of $u$ on assignment $h$, matches that of the guess. Since the sub-tree rooted at $u$ has depth at most $\log n/ 2$, $f^{e}_h$ can depend on at most $\sqrt{n}$ inputs. Let $\vv{x}|_e$ be these inputs. Then $f^{e}_h(\vv{x}|_{e})$ can be computed by a depth-two $\land$-$\lor$ circuit of size $O(\sqrt{n} 2^{\sqrt{n}})$. 
+ 	
+ 	Note that $C(\vv{x}) = 1$ if and only if there exists a setting $h$ of $\vv{x}$ such that, the output at the root is one, and all removed edges have values matching their setting by $h$. This translates into the following circuit: take a $\lor$ over all $O(2^{n/\log\log n})$ settings of the removed edges. For each setting, take an $\land$ over the $\frac{n}{\log\log n}$ functions $f^e_h(\vv{x}|_{e})$ for checking that the guesses for the removed edges $e$ matches their actual value. Each function $f^{e}_h$ is then expressed by a $\land$-$\lor$ circuit of size at most $\sqrt{n}2^{\sqrt{n}}$. By collapsing the two consecutive $\land$-gates, we have a depth-three circuit of size $O\left(n\sqrt{n}2^{\sqrt{n} + n/\log\log n}\right) \in O\left(2^{n/\log\log n}\right)$. 
+ 	
+ 	\subsection{Method of Finite Limits}
+ 	\begin{definition}
+ 		\label{def:finitelimit}
+ 		A vector $\vv{y} \in \{0,1\}^n$ is a \textbf{$k$-limit} of a set $B \subset \{0,1\}^n$ if for every subset $S \subseteq [n]$, there exists a $\vv{b} \in B$ such that $\vv{y} \neq \vv{b}$ but $\vv{y}$ and $\vv{b}$ look indistinguishable on the $S$-indexed bits i.e. $\vv{y}^{S} = \vv{b}^{S}$.
+ 		
+ 		Further, we say that $\vv{y}$ is a \textbf{lower $k$-limit} if, in addition, $\vv{y} \leq \vv{b}$, where the inequality is taken entry-wise.  
+ 	\end{definition}
+ 
+ 	A circuit has \textbf{bottom neg-fan-in $k$} if the gates at the bottom, next to the inputs, have at most $k$ negated literals\footnote{This is not with the other definitions since it is pretty peculiar to this technique.}. Further, a circuit $C$ \textbf{separates} a pair $A, B \subseteq \{0,1\}^n$, with $A$, $B$ disjoint if $C(\vv{x}) = 1$ for all $\vv{x} \in A$ and $C(\vv{x}) = 0$ for all $\vv{x} \in B$.
+ 	
+ 	In order to use this method, we require a useful lemma.
+ 	\begin{lemma}
+ 		\label{lem:FiniteLimitLemma}
+ 		If every $\frac{1}{\ell}$ fraction of vectors in $B$ has a lower $k$-limit in $A$, then every $\Pi_3$ circuit of bottom neg-fan-in $k$ separating $(A, B)$ must have top fan-in larger than $\ell$. 
+ 	\end{lemma} 
+ 	\begin{proof}
+ 		The top $\land$-gate is connected to various $\lor$ gates. Each $\vv{b} \in B$ must evaluate to $0$ on some $\lor$-gate. By PHP, there exists a $\lor$-gate $g$ which separates $A$ and $B'$, for some $B' \subseteq B$ of size at least $|B|\ell^{-1}$ i.e. $g(\vv{a}) = 1$ for every $\vv{a} \in A$ and $g(\vv{b}) = 0$ for every $\vv{b} \in B'$. Fix a lower $k$-limit $\vv{a} \in A$ of $B'$. Consider an $\land$-gate $h$ feeding into $g$. Let
+ 		\[h(\vv{x}) = \bigwedge_{i \in S} \overline{x}_i \land \bigwedge_{j \in T} x_j.\] 
+ 		Since $\vv{a}$ is a lower $k$-limit of $B'$, there exists an element $\vv{b} \in B'$ such that $\vv{a}^{S} = \vv{b}^{S}$ and $\vv{a} \leq \vv{b}$. Recall that $g$ rejects $\vv{b}$, thus $h(\vv{b}) = 0$. Either $\wedge_{i \in S} \overline{b}_i = 0$ or $\wedge_{j \in T} b_j = 0$. In the former case $\wedge_{i \in S} \overline{a}_i = 0$. In the later case, since $\vv{a} \leq \vv{b}$, for any $b_j = 0$ where $j \in T$, $a_j = 0$ as well. Thus $\wedge_{j \in T} a_j = 0$. Since $\vv{a}$ evaluates to zero on every $\land$-gate input to $g$, $g(\vv{a}) = 0$ contradicting the assumption. 
+ 		 
+ 	\end{proof}
+ 
+ 	Apply the method as follows. To show that a circuit has size at least $\ell$:
+ 	\begin{enumerate}
+ 		\item Suppose $f$ can be computed with a circuit of size $< \ell$.
+ 		\item Set a bunch of inputs to constants so that the fan-in of the bottom gates is at most $k$. This will ensure that we meet the \emph{bottom neg-fan-in $k$} condition. 
+ 		\item Find sets $A \subset f^{-1}(1)$ and $B \subset f^{-1}(0)$ s.t. every $\frac{1}{\ell}$ fraction of vectors in $B$ has a $k$-limit in $A$.
+ 		\item Use Lemma \ref{lem:FiniteLimitLemma} to show that the top fan-in is larger than $\ell$.
+ 	\end{enumerate} 
+ 	
+ 	In order to find the appropriate inputs to set constant, use the following lemma.
+ 	\begin{lemma}
+ 		\label{lem:FindingOverlappingSet}
+ 		Let $\family{F}$ be a family of subsets of $[n]$, each with cardinality at least $k$. If 
+ 		\[|\family{F}| \leq \left(\frac{n}{m}\right)^{k/2},\]
+ 		then some subset $T \subseteq [n]$ of size $n-m$ intersects every member of $\family{F}$. 
+ 	\end{lemma}
+ 	\begin{proof}
+ 		Build the set $T$ constructively using PHP. Initially there exists an element $t_1$ which is in at least $k$ sets of $\family{F} = \family{F}_0$. Add $t_1$ to $t$ and let $\family{F}_1 = \family{F}_{0} - \{S \in \family{F}_{0}: t_1 \in S\}$. Now there exists an element $t_2$ contained in at least $k-1$ sets of $\family{F}_{1}$. Again, add $t_2$ to $T$ and let $\family{F}_{2} = \family{F}_1 - \{S \in \family{F}_1: t_2 \in S\}$. Generally, at the $i$\textsuperscript{th} iteration, there exists an element $t_i$ which is contained in at least $k-i+1$ sets of $\family{F}_{i-1}$. Add $t_i$ to $T$ and let $\family{F}_{i} = \family{F}_{i-1} - \{S \in \family{F}_{i-1}: t_i \in S\}$. After $n-m$ iterations, the 
+ 		\[|\family{F}_{n-m}| \leq \left(\right)\]
+ 	\end{proof}
+ 
+  	\begin{lemma}{(Limit Lemma for Threshold Functions.)}
+ 	\label{lem:LimitLemForThreshold} 
+ 	If $B \subset\{0,1\}^{n}$ is a set of vectors where each entry has exactly $r$ ones, then $B$ has a lower $k$-limit with fewer than $r$ ones if $|B| > k^r$. 
+ 	\end{lemma}
+ 	\begin{proof}
+ 		
+ 	\end{proof}
+ 
+ 	\subsubsection{Application: \texorpdfstring{$Maj_n \in \sizedepth\left(\Omega\left(2^{\sqrt{n}}\right), 3\right)$}{Majn in SizeDepth(Omega(2^(sqrt(n)))))}}
+
+	Just a couple of notes after the meeting with Ben: so he is mostly interested in the nitty-gritty of the switching lemma. That has given him some intuition about various functions and their hardness. The sensitivity of $n$-ary boolean function $f$ on input $\vv{x}$, denoted $S_{\vv{x}}(f)$, is the number of indices $i$ such that toggling $x_i$ changes the function value i.e. $S_{\vv{x}}(f) = |\{i: f(\vv{x}) \neq f(\vv{x}^{\overline{i}})\}|$ where $\vv{x}^{\overline{i}} = \vv{x}$ except $x_i^{\overline{i}} = 1 - x_i$. The sensitivity of $f$ is then
+	\[S(f) = \max_{\vv{x} \in \{0,1\}} S_{\vv{x}}(f).\]
+	It also helps to consider the sensitivity of a uniformly randomly chosen string. For parity, for example, a random string $\vv{x}$ the sensitivity is $S_{\vv{x}}(PARITY_n) = n$. On average the sensitivity is also $n$. For the majority function however, $S_{\vv{x}}(MAJORITY_n)$ depends on the Hamming weight of $\vv{x}$. Let $MAJORITY_n(\vv{x}) = \norm{\vv{x}} > \frac{n}{2}$. Then on strings with hamming distance exactly $\frac{n}{2}$, the sensitivity is $\frac{n}{2}$ while on all other strings the sensitivity is $0$. It turns out that this constitutes $1/\sqrt{n}$ of all strings\footnote{This needs to be checked}.    
+	
+	Switching argument type proofs work the best for functions like parity which have high sensitivity. Essentially a random restriction is like a function on a subset of the inputs. If you can preserve the complexity of this sub-function then the lower bound arguments work better. However Ben feels that functions such as Clique might have exponential size lower bound. 
+	  
 \end{document}
